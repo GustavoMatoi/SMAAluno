@@ -119,11 +119,9 @@ export default ({ navigation, route }) => {
     
   }
   const handleEvolucao = () => {
-    if (!conexao) {
-      navigation.navigate('Modal sem conexão');
-    } else {
-      navigation.navigate('Evolução do treino');
-    }
+
+      navigation.navigate('Evolução do treino', {aluno: aluno});
+    
   }
 
 

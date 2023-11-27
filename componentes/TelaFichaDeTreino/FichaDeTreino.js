@@ -14,8 +14,6 @@ export default ({navigation, route}) => {
     const [ultimaFicha, setUltimaFicha] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
     const {diario, ficha, aluno} = route.params
-    console.log("ALUNOOOOOOOOOOOOOOOOOOOOOOOOOOOO ", aluno)
-    console.log('diario na ficha', ficha)
     
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener(state => {

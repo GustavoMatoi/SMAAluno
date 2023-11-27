@@ -191,6 +191,7 @@ export default function App() {
       '19. Extremamente difícil',
       '20. Esforço máximo'
     ]}
+    
       />}</Stack.Screen>
       <Stack.Screen name="PSE Omni">{props => 
       <PSEOMNI tipoPSE='PSE Omni' 

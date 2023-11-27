@@ -10,10 +10,10 @@ import { Entypo } from '@expo/vector-icons';
 import Spinner from "react-native-loading-spinner-overlay"
 import NetInfo from '@react-native-community/netinfo';
 import BotaoSelect from "../BotaoSelect"
-import { alunoLogado } from "../Home"
 import moment from 'moment';
 
-export default props => {
+export default ({route}) => {
+  const {aluno} = route.params
     const [arrayPse, setArrayPse] = useState([]);
     const [carregandoDados, setCarregandoDados] = useState(true);
     const [conexao, setConexao] = useState(true)
@@ -29,7 +29,7 @@ export default props => {
     }, [])
     const getPse = async () => {
         const db = getFirestore();
-        const diariosRef = collection(db, "Academias", alunoLogado.getAcademia(), "Professores", alunoLogado.getProfessor(),"alunos", `Aluno ${alunoLogado.getEmail()}`, 'Diarios');
+        const diariosRef = collection(db, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel ,"alunos", `Aluno ${aluno.email}`, 'Diarios');
         const querySnapshot = await getDocs(diariosRef);
 
         const newArrayPse = []
@@ -44,18 +44,13 @@ export default props => {
         getPse();
     }, []);
 
-    const arrayPseNoGrafico =  arrayPse.map((element, i)=> {
-        return {x: +i+1, y: element}
-        
-    })
+
 
     const[opcao, setOpcao] = useState(0)
 
     let vetorContador = []
 
-    const valorPse = vetorContador.map((i) => {
-        return `Valor ${i}`
-    })
+
 
 
     //Semanal 
@@ -68,11 +63,11 @@ export default props => {
         const diariosRef = collection(
           db,
           "Academias",
-          alunoLogado.getAcademia(),
+          aluno.Academia,
           "Professores",
-          alunoLogado.getProfessor(),
+          aluno.professorResponsavel,
           "alunos",
-          `Aluno ${alunoLogado.getEmail()}`,
+          `Aluno ${aluno.email}`,
           "Diarios"
         );
         const querySnapshot = await getDocs(diariosRef);

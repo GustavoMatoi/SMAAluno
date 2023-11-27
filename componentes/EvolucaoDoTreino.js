@@ -3,42 +3,43 @@ import {View, StyleSheet, SafeAreaView, TouchableOpacity, Text} from 'react-nati
 import estilo from "./estilo"
 import BotoesEvolucaoDoTreino from "./BotoesEvolucaoDoTreino"
 
-export default ({navigation}) => {
+export default ({navigation, route}) => {
+    const {aluno} = route.params
     return (
         <SafeAreaView style={[style.container, estilo.corLightMenos1]}>
             <View style={[style.areaBotoes]}>
-                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO CORPORAL')}>
+                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO CORPORAL', {aluno: aluno})}>
                     <Text style={[estilo.tituloH619px, estilo.textoCorLight]}>EVOLUÇÃO DADOS ANTOPOMÉTRICOS</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO DOS TESTES')}>
+                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO DOS TESTES', {aluno: aluno})}>
                     <Text style={[estilo.tituloH619px, estilo.textoCorLight]}>EVOLUÇÃO DOS TESTES</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('SELECIONAR EXERCÍCIO')}>
+                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('SELECIONAR EXERCÍCIO', {aluno: aluno})}>
                     <Text style={[estilo.tituloH619px, estilo.textoCorLight]}>EVOLUÇÃO DOS EXERCÍCIOS</Text>
                 </TouchableOpacity>
 
 
-                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO PSE')}>
+                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO PSE', {aluno: aluno})}>
                     <Text style={[estilo.tituloH619px, estilo.textoCorLight]}>EVOLUÇÃO PSE</Text>
                 </TouchableOpacity>
 
 
-                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO QTR')}>
+                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO QTR', {aluno: aluno})}>
                     <Text style={[estilo.tituloH619px, estilo.textoCorLight]}>EVOLUÇÃO QTR</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO CIT')}>
+                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO CIT', {aluno: aluno})}>
                     <Text style={[estilo.tituloH619px, estilo.textoCorLight]}>EVOLUÇÃO CIT</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO STRAIN')}>
+                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO STRAIN', {aluno: aluno})}>
                     <Text style={[estilo.tituloH619px, estilo.textoCorLight]}>EVOLUÇÃO STRAIN</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO MONOTONIA')}>
+                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO MONOTONIA', {aluno: aluno})}>
                     <Text style={[estilo.tituloH619px, estilo.textoCorLight]}>EVOLUÇÃO MONOTONIA</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO PSE DO EXERCÍCIO')}>
+                <TouchableOpacity style={[estilo.botao, estilo.corPrimaria]} onPress={()=>navigation.navigate('EVOLUÇÃO PSE DO EXERCÍCIO', {aluno: aluno})}>
                     <Text style={[estilo.tituloH619px, estilo.textoCorLight]}>EVOLUÇÃO PSE DO EXERCÍCIO</Text>
                 </TouchableOpacity>
 

@@ -3,17 +3,15 @@ import {Text, View, SafeAreaView, ScrollView, StyleSheet } from 'react-native'
 import estilo from "../estilo"
 import RadioBotao from "../RadioBotao"
 import {VictoryChart, VictoryLine, VictoryTheme, VictoryVoronoiContainer, VictoryLabel, VictoryAxis} from "victory-native"
-import {useFonts} from 'expo-font'
 import { doc, setDoc, collection,getDocs, query,where ,addDoc, getFirestore, getDoc } from "firebase/firestore"; 
-import { firebase, firebaseBD } from "../configuracoes/firebaseconfig/config"
 import { Entypo } from '@expo/vector-icons'; 
 import Spinner from "react-native-loading-spinner-overlay"
 import NetInfo from '@react-native-community/netinfo';
 import BotaoSelect from "../BotaoSelect"
-import { alunoLogado } from "../Home"
 import moment from 'moment';
 
-export default props => {
+export default ({route}) => {
+    const {aluno} = route.params
     const [arrayPse, setArrayPse] = useState([]);
     const [carregandoDados, setCarregandoDados] = useState(true);
     const [conexao, setConexao] = useState(true)
@@ -49,7 +47,7 @@ export default props => {
 
     const getPse = async () => {
         const db = getFirestore();
-        const diariosRef = collection(db, "Academias", alunoLogado.getAcademia(), "Professores", alunoLogado.getProfessor(),"alunos", `Aluno ${alunoLogado.getEmail()}`, 'Diarios');
+        const diariosRef = collection(db, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel,"alunos", `Aluno ${aluno.email}`, 'Diarios');
         const querySnapshot = await getDocs(diariosRef);
 
         const newArrayPse = []
@@ -93,11 +91,11 @@ export default props => {
         const diariosRef = collection(
           db,
           "Academias",
-          alunoLogado.getAcademia(),
+          aluno.Academia,
           "Professores",
-          alunoLogado.getProfessor(),
+          aluno.professorResponsavel,
           "alunos",
-          `Aluno ${alunoLogado.getEmail()}`,
+          `Aluno ${aluno.email}`,
           "Diarios"
         );
         const querySnapshot = await getDocs(diariosRef);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Text, StyleSheet, View, SafeAreaView, ScrollView, Dimensions, TouchableOpacity, BackHandler, Alert } from 'react-native'
+import { Text, Button, StyleSheet, View, SafeAreaView, ScrollView, Dimensions, TouchableOpacity, BackHandler, Alert } from 'react-native'
 import estilo from '../estilo'
 import FichaDeTreino from '../Ficha/FichaDeTreino'
 import BotaoDetalhamento from './BotaoDetalhamento'
@@ -22,13 +22,10 @@ import { AntDesign } from '@expo/vector-icons';
 const largura = Dimensions.get('window').width
 
 export default ({ navigation, route }) => {
-  const {dadosIniciaisDoDiario, ficha, aluno} = route.params
-  const [diario, setDiario] = useState(dadosIniciaisDoDiario); // Substitua dadosIniciaisDoDiario pelos valores iniciais apropriados
+  const {dadosIniciaisDoDiario, ficha, aluno, detalhamento, diario} = route.params
   const [verificador, setVerificador] = useState(false)
   const [conexao, setConexao] = useState(true);
   const [backPressedCount, setBackPressedCount] = useState(0);
-  console.log('ficha ', ficha)
-
   const data = new Date()
   let dia = data.getDate()
   let mes = data.getMonth() + 1
@@ -41,7 +38,7 @@ export default ({ navigation, route }) => {
     mes = `0${mes}`
   }
   const exercicios = [...ficha.Exercicios]
-  function handleBackPress() {
+  const handleBackPress = () => {
     setBackPressedCount(backPressedCount + 1);
 
     if (backPressedCount === 1) {
@@ -52,7 +49,8 @@ export default ({ navigation, route }) => {
       }, 3000);
       return true;
     } else if (backPressedCount === 2) {
-    
+      navigation.navigate('Home');
+
       setBackPressedCount(0);
       return true;
     }
@@ -65,26 +63,6 @@ export default ({ navigation, route }) => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
     return () => backHandler.remove();
   }, [backPressedCount]);
-
-  function handleBackPress() {
-    setBackPressedCount(backPressedCount + 1);
-
-    if (backPressedCount === 1) {
-      Alert.alert('Atenção',
-        'Ao pressionar o botão de voltar novamente todos os dados que foram cadastrados serão perdidos. Se deseja continuar, aperte para voltar novamente.');
-
-      setTimeout(() => {
-        setBackPressedCount(0);
-      }, 3000);
-      return true;
-    } else if (backPressedCount === 2) {
-        navigation.navigate('Home');
-      setBackPressedCount(0);
-      return true;
-    }
-
-    return false;
-  }
 
 
 
@@ -110,68 +88,29 @@ export default ({ navigation, route }) => {
     }
   }, [])
 
-  const checkWifiConnection = () => {
-    NetInfo.fetch().then((state) => {
-      if (state.type === 'wifi' || state.type === 'cellular') {
-        console.log('Conectado ao Wi-Fi');
-        setConexao(true)
-      } else {
-        console.log('Não conectado ao Wi-Fi');
-        setConexao(false)
-      }
-    });
-  };
-  useEffect(() => {
-    checkWifiConnection();
-  }, []);
-
   const handleNavegacaoForca = (exercicioNaFicha) => {
-    if (!conexao) {
-      navigation.navigate('Modal sem conexão diario');
-    } else {
       contador++
       confereDetalhamento()
-      navigation.navigate('Detalhamento', { numeroDeSeries: exercicioNaFicha.series, repeticoes: exercicioNaFicha.repeticoes, descanso: exercicioNaFicha.descanso, tipoExercicio: 'força', nomeExercicio: exercicioNaFicha.exercicio.nome.exercicio  });
+      navigation.navigate('Detalhamento', { numeroDeSeries: exercicioNaFicha.series, repeticoes: exercicioNaFicha.repeticoes, descanso: exercicioNaFicha.descanso, tipoExercicio: 'força', nomeExercicio: exercicioNaFicha.Nome.exercicio, diario: diario, index: contador, detalhamento});
     }
-  }
   const handleNavegacaoAerobico = (exercicioNaFicha) => {
     if (!conexao) {
       navigation.navigate('Modal sem conexão diario');
     } else {
       contador++
       confereDetalhamento()
-      navigation.navigate('Detalhamento', { numeroDeSeries: exercicioNaFicha.series, tipoExercicio: 'cardio', nomeExercicio: exercicioNaFicha.exercicio.nome.exercicio })
+      navigation.navigate('Detalhamento', { numeroDeSeries: exercicioNaFicha.series, tipoExercicio: 'cardio', nomeExercicio: exercicioNaFicha.Nome.exercicio, diario: diario, index: contador, detalhamento })
     }
   }
   const handleNavegacaoAlongamento = (exercicioNaFicha) => {
       contador++
-      diario.Exercicio = []
       confereDetalhamento()
-      navigation.navigate('Detalhamento', { series: exercicioNaFicha.series, tipoExercicio: 'alongamento', nomeExercicio: exercicioNaFicha.exercicio.nome, duracao: exercicioNaFicha.duracao, diario: diario, index: contador });
+
+      navigation.navigate('Detalhamento', { series: exercicioNaFicha.series, tipoExercicio: 'alongamento', nomeExercicio: exercicioNaFicha.Nome, duracao: exercicioNaFicha.duracao, diario: diario, index: contador, detalhamento});
   }
   const handleNavegacaoPse = () => {
-
       confereDetalhamento()
-      navigation.navigate('PSE', {diario: diario})
-  }
-
-
-
-
-  const criarDiario = () => {
-    const db = getFirestore()
-    setDoc(doc(db, "Academias", `${alunoLogado.getAcademia()}`, "Professores", `${alunoLogado.getProfessor()}`, "alunos", `Aluno ${alunoLogado.getEmail()}`, "Diarios", `Diario${ano}|${mes}|${dia}`), {
-    }).then(() => {
-      console.log('Novo documento criado com sucesso!');
-    })
-      .catch((erro) => {
-        console.error('ZZZZ:', erro);
-      });
-    i = i + 1;
-  }
-  if (i = 0) {
-    criarDiario()
-
+      navigation.navigate('PSE', {diario: diario, aluno: aluno, detalhamento: detalhamento})
   }
 
   let contador = 0
@@ -182,7 +121,6 @@ export default ({ navigation, route }) => {
     }
   }
 
-  console.log('Diario no diario', diario)
 
   return (
     <ScrollView style={[style.container, estilo.corLightMenos1]}>
@@ -198,6 +136,7 @@ export default ({ navigation, route }) => {
           <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
         </TouchableOpacity>
         : null}
+
         <Text style={[estilo.textoCorLight, estilo.tituloH148px]}>DIÁRIO</Text>
       </View>
       <SafeAreaView style={[style.caixa]}>
@@ -215,6 +154,7 @@ export default ({ navigation, route }) => {
                     series={exercicioNaFicha.series}
                     repeticoes={exercicioNaFicha.repeticoes}
                     descanso={exercicioNaFicha.descanso}
+                    cadencia={exercicioNaFicha.cadencia}
                   />
                 </View>
                 <BotaoDetalhamento onPress={() => { handleNavegacaoForca(exercicioNaFicha) }} />

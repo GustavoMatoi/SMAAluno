@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from "react"
-import { Text, Button, Modal, BackHandler, View, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Dimensions, ScrollView } from 'react-native'
+import { Text, BackHandler, View, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Dimensions, ScrollView } from 'react-native'
 import estilo from "../estilo"
 import { useFonts } from 'expo-font'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Botao from "../Botao";
-import PSE from "../PSE";
-import { doc, setDoc, collection, addDoc, updateDoc } from "firebase/firestore";
-import { firebase, firebaseBD } from "../configuracoes/firebaseconfig/config"
-import { Diario } from "../../classes/Diario";
+
+import { firebaseBD } from "../configuracoes/firebaseconfig/config"
 import { DetalhamentoExercicioAerobico, DetalhamentoExercicioForca, DetalhamentoExercicioAlongamento } from "../../classes/DetalhamentoDoExercicio";
 import { alunoLogado } from "../Home";
-import { diarioDoDia } from "../Diario"
-import { qtrDoDia } from "../Qtr"
-import { detalhamento, pseDoDiario } from "../PSE/PSEOMNI";
+
 
 
 let detalhamentoAerobicoDia = new DetalhamentoExercicioAerobico('')
@@ -22,7 +17,7 @@ let contadorPSE = 0
 const windowHeight = Dimensions.get('window').height;
 
 export default ({ route, navigation }) => {
-    const { numeroDeSeries, tipoExercicio, nomeExercicio, series, diario, index } = route.params
+    const { numeroDeSeries, tipoExercicio, nomeExercicio, series, diario, index, detalhamento } = route.params
 
     const { repeticoes } = route.params
     const [fontsLoaded] = useFonts({
@@ -30,7 +25,7 @@ export default ({ route, navigation }) => {
     })
 
     const indexo = index
-    console.log("Diario no Detalhamento ", diario)
+    console.log("detalhamento no Detalhamento ", detalhamento)
     const nome = nomeExercicio
 
     console.log('index ', index)
@@ -44,8 +39,6 @@ export default ({ route, navigation }) => {
 
     const [contadorPse, setContadorPse] = useState(0)
     const [contadorPse2, setContadorPse2] = useState(1)
-
-    const [detalhamento, setDetalhamento] = useState({})
 
     useEffect(() => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -85,7 +78,7 @@ export default ({ route, navigation }) => {
 
         setNumeroRepeticoes(newInputValues);
 
-        
+
     }
     const handleDuracao = (index, value) => {
         const newInputValues = [...duracao];
@@ -125,35 +118,11 @@ export default ({ route, navigation }) => {
 
     const updateDocumento = () => {
         if (tipoExercicio == 'força') {
-            updateDoc(doc(firebaseBD, "Academias", `${alunoLogado.getAcademia()}`, `Professores`, `${alunoLogado.getProfessor()}`, `alunos`, `Aluno ${alunoLogado.getEmail()}`, `Diarios`, `Diario${ano}|${mes}|${dia}`, `Exercicio`, `${nomeExercicio}`), {
-                Nome: nomeExercicio,
-                pesoLevantado: pesoLevantado,
-                repeticoes: numeroRepeticoes,
-                descanso: descanso
-
-            }
-            ).then(() => {
-                console.log('Novo documento criado com sucesso!');
-            })
-                .catch((erro) => {
-                    console.error('Erro ao criar novo documento:', erro);
-                });
+            atualizaOsValores()
         } else if (tipoExercicio == 'alongamento') {
             atualizaOsValores()
         } else {
-            updateDoc(doc(firebaseBD, "Academias", `${alunoLogado.getAcademia()}`, `Professores`, `${alunoLogado.getProfessor()}`, `alunos`, `Aluno ${alunoLogado.getEmail()}`, `Diarios`, `Diario${ano}|${mes}|${dia}`, `Exercicio`, `${nomeExercicio}`), {
-                Nome: nomeExercicio,
-                intensidade: pesoLevantado,
-                duracao: numeroRepeticoes,
-                descanso: descanso,
-                intensidadeDoRepouso: intensidadeDoRepouso
-            }
-            ).then(() => {
-                console.log('Novo documento criado com sucesso!');
-            })
-                .catch((erro) => {
-                    console.error('Erro ao criar novo documento:', erro);
-                });
+            atualizaOsValores()
         }
     }
 
@@ -191,20 +160,8 @@ export default ({ route, navigation }) => {
             handlePesoLevantado(index, value);
         }
         if (tipoExercicio === 'alongamento') {
-            setDetalhamento(
-                {
-                    nome: nomeExercicio,
-                    duracao: [...pesoLevantado],
-                    descanso: [...numeroRepeticoes],
 
-                }
-
-            )
-                console.log(numeroRepeticoes)
-            diario.Exercicio[indexo - 1] = detalhamento
-            console.log('Updated values:', pesoLevantado, numeroRepeticoes, detalhamento);
-        
-    }
+        }
     };
     const [inputValuesRepeticoes, setInputValuesRepeticoes] = useState({});
 
@@ -213,21 +170,7 @@ export default ({ route, navigation }) => {
             setInputValuesRepeticoes({ ...inputValuesRepeticoes, [index]: value });
             handleRepeticoes(index, value);
 
-            if (tipoExercicio === 'alongamento') {
-                setDetalhamento(
-                    {
-                        nome: nomeExercicio,
-                        duracao: [...pesoLevantado],
-                        descanso: [...numeroRepeticoes],
-    
-                    }
-    
-                )
-                    console.log(numeroRepeticoes)
-                diario.Exercicio[indexo - 1] = detalhamento
-                console.log('Updated values:', pesoLevantado, numeroRepeticoes, detalhamento);
-            
-        }        }
+        }
     };
     const [inputValuesDescanso, setInputValuesDescanso] = useState({});
 
@@ -250,20 +193,69 @@ export default ({ route, navigation }) => {
 
     const atualizaOsValores = () => {
         if (tipoExercicio === 'alongamento') {
-                setDetalhamento(
-                    {
-                        nome: nomeExercicio,
-                        duracao: pesoLevantado,
-                        descanso: numeroRepeticoes,
-    
-                    }
-    
-                )
-                    console.log(numeroRepeticoes)
-                diario.Exercicio[indexo - 1] = detalhamento
-                console.log('Updated values:', pesoLevantado, numeroRepeticoes, detalhamento);
-            
+
+            console.log("CONSOLE 1 ")
+            if (!detalhamento.Exercicios[index - 1].Nome) detalhamento.Exercicios[index - 1].Nome = ''
+            if (!detalhamento.Exercicios[index - 1].duracao) detalhamento.Exercicios[index - 1].duracao = []
+            if (!detalhamento.Exercicios[index - 1].descanso) detalhamento.Exercicios[index - 1].descanso = []
+
+
+            detalhamento.Exercicios[index - 1].Nome = nomeExercicio
+            detalhamento.Exercicios[index - 1].duracao = pesoLevantado
+            detalhamento.Exercicios[index - 1].descanso = numeroRepeticoes
+
+            console.log("CONSOLE 2 ")
+
+
+            console.log("CONSOLE 3")
+            console.log('Updated values:', pesoLevantado, numeroRepeticoes, detalhamento);
         }
+
+        /*
+peso levantado : pesoLevantado
+repeticoes: numeroRepeticoes
+descanso: descanso
+ 
+*/
+        if (tipoExercicio === 'força') {
+
+            console.log("CONSOLE 1 ")
+            if (!detalhamento.Exercicios[index - 1].Nome) detalhamento.Exercicios[index - 1].Nome = ''
+            if (!detalhamento.Exercicios[index - 1].descanso) detalhamento.Exercicios[index - 1].descanso = []
+            if (!detalhamento.Exercicios[index - 1].pesoLevantado) detalhamento.Exercicios[index - 1].pesoLevantado = []
+
+
+            detalhamento.Exercicios[index - 1].Nome = nomeExercicio
+            detalhamento.Exercicios[index - 1].descanso = descanso
+            detalhamento.Exercicios[index - 1].pesoLevantado = pesoLevantado
+            detalhamento.Exercicios[index - 1].repeticoes = numeroRepeticoes
+
+
+
+        } 
+        if(tipoExercicio == 'cardio'){
+            if (!detalhamento.Exercicios[index - 1].Nome) detalhamento.Exercicios[index - 1].Nome = ''
+            if (!detalhamento.Exercicios[index - 1].intensidade) detalhamento.Exercicios[index - 1].intensidade = []
+            if (!detalhamento.Exercicios[index - 1].duracao) detalhamento.Exercicios[index - 1].duracao = []
+            if (!detalhamento.Exercicios[index - 1].descanso) detalhamento.Exercicios[index - 1].descanso = []
+            if (!detalhamento.Exercicios[index - 1].intensidadeDoRepouso) detalhamento.Exercicios[index - 1].intensidadeDoRepouso = []
+
+
+            detalhamento.Exercicios[index - 1].Nome = nomeExercicio
+            detalhamento.Exercicios[index - 1].intensidade = pesoLevantado
+            detalhamento.Exercicios[index - 1].duracao = numeroRepeticoes
+            detalhamento.Exercicios[index - 1].descanso = descanso
+            detalhamento.Exercicios[index - 1].intensidadeDoRepouso = intensidadeDoRepouso
+
+        }
+                    /*
+            Nome: nomeExercicio,
+            itensidade: pesoLevantado
+            duracao: numeroRepeticoes,
+            descaso: descanso,
+            intensidadeDoRepouso: intensidadeDoRepouso
+            */
+
     }
 
     return (
@@ -273,6 +265,7 @@ export default ({ route, navigation }) => {
 
                     <Text style={[estilo.tituloH427px]}>Detalhes do exercício: {nomeExercicio}</Text>
                     {tipoExercicio == 'força' || tipoExercicio == 'cardio' ?
+
                         <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Série</Text> :
                         tipoExercicio == 'alongamento' ?
                             <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Série (número inteiro)</Text> :
@@ -465,7 +458,7 @@ export default ({ route, navigation }) => {
                                     <TouchableOpacity
                                         style={desabilitarPSES ? [style.quadrado, estilo.corDisabled, { borderRadius: 15 }] : contadorPse >= i ? [style.quadrado, estilo.corSuccess, { borderRadius: 15 }] : [style.quadrado, estilo.corPrimaria, { borderRadius: 15 }]}
                                         disabled={desabilitarPSES}
-                                        onPress={() => { setContadorPse(i++); setContadorPse2(contadorPse); navigation.navigate('PSE Omni', { nomeExercicio: nome, serie: i - 1 });; verificaCampos(tipoExercicio, i - 1) }}>
+                                        onPress={() => { setContadorPse(i++); setContadorPse2(contadorPse); navigation.navigate('PSE Omni', { omeExercicio: nome, repeticao: i - 1, diario: diario, index: index - 1, detalhamento }); verificaCampos(tipoExercicio, i - 1) }}>
                                         <MaterialCommunityIcons name="checkbox-multiple-marked-outline" size={60} color="white" />
                                         <Text style={[estilo.textoSmall12px, { marginBottom: 3 }, style.Montserrat, estilo.textoCorLight]}>PSE Série{i}</Text>
                                     </TouchableOpacity>
@@ -475,7 +468,7 @@ export default ({ route, navigation }) => {
                                     <TouchableOpacity
                                         disabled={desabilitarPSES}
                                         style={desabilitarPSES ? [style.quadrado, estilo.corDisabled, { borderRadius: 15 }] : contadorPse >= i ? [style.quadrado, estilo.corSuccess, { borderRadius: 15 }] : [style.quadrado, estilo.corPrimaria, { borderRadius: 15 }]}
-                                        onPress={() => { setContadorPse(i++); setContadorPse2(contadorPse); console.log("iiiii" + i + " " + "contadorPSE: " + contadorPse2); navigation.navigate('PSE Borg', { nomeExercicio: nome, serie: i - 1 }); verificaCampos(tipoExercicio, i - 1) }}>
+                                        onPress={() => { setContadorPse(i++); setContadorPse2(contadorPse); console.log("iiiii" + i + " " + "contadorPSE: " + contadorPse2); navigation.navigate('PSE Borg', { omeExercicio: nome, repeticao: i - 1, diario: diario, index: index - 1, detalhamento }); verificaCampos(tipoExercicio, i - 1) }}>
                                         <MaterialCommunityIcons name="checkbox-multiple-marked-outline" size={60} color="white" />
                                         <Text style={[estilo.textoSmall12px, { marginBottom: 3 }, style.Montserrat, estilo.textoCorLight]}>PSE Série{i}</Text>
                                     </TouchableOpacity>
@@ -486,7 +479,7 @@ export default ({ route, navigation }) => {
                                             <TouchableOpacity
                                                 disabled={desabilitarPSES}
                                                 style={desabilitarPSES ? [style.quadrado, estilo.corDisabled, { borderRadius: 15 }] : contadorPse >= i ? [style.quadrado, estilo.corSuccess, { borderRadius: 15 }] : [style.quadrado, estilo.corPrimaria, { borderRadius: 15 }]}
-                                                onPress={() => { setContadorPse2(contadorPse); setContadorPse(i++);  navigation.navigate('Perflex', { nomeExercicio: nome, repeticao: i - 1, diario: diario, index: index - 1 }); verificaCampos(tipoExercicio, i - 1) }}>
+                                                onPress={() => { setContadorPse2(contadorPse); setContadorPse(i++); navigation.navigate('Perflex', { nomeExercicio: nome, repeticao: i - 1, diario: diario, index: index - 1, detalhamento }); verificaCampos(tipoExercicio, i - 1) }}>
                                                 <MaterialCommunityIcons name="checkbox-multiple-marked-outline" size={60} color="white" />
                                                 <Text style={[estilo.textoSmall12px, { marginBottom: 3 }, style.Montserrat, estilo.textoCorLight]}>PSE Repet.{i}</Text>
                                             </TouchableOpacity>

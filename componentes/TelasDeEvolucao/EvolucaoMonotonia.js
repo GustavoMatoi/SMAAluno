@@ -10,11 +10,11 @@ import { Entypo } from '@expo/vector-icons';
 import Spinner from "react-native-loading-spinner-overlay"
 import NetInfo from '@react-native-community/netinfo';
 import BotaoSelect from "../BotaoSelect"
-import { alunoLogado } from "../Home"
 import moment from 'moment';
 
 
-export default props => {
+export default ({route}) => {
+    const {aluno} = route.params
     const [carregandoDados, setCarregandoDados] = useState(true);
     const [conexao, setConexao] = useState(true)
     const [arrayMeses, setArrayMeses] = useState([])
@@ -45,11 +45,11 @@ export default props => {
         const diariosRef = collection(
           db,
           "Academias",
-          alunoLogado.getAcademia(),
+          aluno.Academia,
           "Professores",
-          alunoLogado.getProfessor(),
+          aluno.professorResponsavel,
           "alunos",
-          `Aluno ${alunoLogado.getEmail()}`,
+          `Aluno ${aluno.email}`,
           "Diarios"
         );
         const querySnapshot = await getDocs(diariosRef);

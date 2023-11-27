@@ -13,9 +13,9 @@ import moment from "moment"
 import Spinner from "react-native-loading-spinner-overlay"
 import ModalSemConexao from "../ModalSemConexao"
 
-import { alunoLogado } from "../Home"
-export default props => {
-    const [arrayPse, setArrayPse] = useState([]);
+export default ({route}) => {
+    const {aluno} = route.params
+  const [arrayPse, setArrayPse] = useState([]);
     const [carregandoDados, setCarregandoDados] = useState(true);
     const [conexao, setConexao] = useState(true)
     const [arrayMeses, setArrayMeses] = useState([])
@@ -42,7 +42,7 @@ export default props => {
     console.log(mesInicial)
     const getPse = async () => {    
         const db = getFirestore();
-        const diariosRef = collection(db, "Academias", alunoLogado.getAcademia(), "Professores", alunoLogado.getProfessor(), "alunos",`Aluno ${alunoLogado.getEmail()}`, 'Diarios');
+        const diariosRef = collection(db, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel, "alunos",`Aluno ${aluno.email}`, 'Diarios');
         const querySnapshot = await getDocs(diariosRef);
 
         const newArrayPse = []
@@ -266,7 +266,7 @@ console.log(arrayPseNoGrafico)
                   {conexao ?   carregandoDados ? (
                         <Spinner
                         visible={carregandoDados}
-                        textContent={'Carregando alunos...'}
+                        textContent={'Carregando dados...'}
                         textStyle={[estilo.textoCorLight, estilo.textoP16px]}
                         />                    
                         ) : arrayPse.length == 0 ? (<View>

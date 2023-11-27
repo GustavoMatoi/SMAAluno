@@ -19,9 +19,9 @@ export default ({navigation, route}) => {
     })
 
     const [conexao, setConexao] = useState(true)
+    const [detalhamento, setDetalhamento] = useState({})
 
-
-
+    console.log('ficha ', ficha.Exercicios.length)
     
     useEffect(() => {
       const unsubscribe = NetInfo.addEventListener(state => {
@@ -48,7 +48,14 @@ export default ({navigation, route}) => {
           navigation.navigate('Modal sem conexão');
         } else {
             diario.maneiraDeTreino = 'Diario'
-            navigation.navigate('Diario', {diario: diario, ficha, aluno});
+            if(!detalhamento.Exercicios) detalhamento.Exercicios= []
+            console.log('Aa')
+            for(let i = 0; i < ficha.Exercicios.length; i++){
+              detalhamento.Exercicios[i] = {}
+              console.log('for')
+            }
+            console.log('detalhamento, ', detalhamento)
+            navigation.navigate('Diario', {diario: diario, ficha, aluno, detalhamento});
             }
       }
 

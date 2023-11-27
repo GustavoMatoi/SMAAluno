@@ -15,12 +15,11 @@ import { contadorPSE } from "../Detalhamento";
 const detalhamento = new DetalhamentoExercicioForca()
 export default ({options =[], tipoPSE, navigation, route}) => {
     const [selected, setSelected] = useState(0)
-    const {nomeExercicio, repeticao, diario, index} = route.params
-
+    const {nomeExercicio, repeticao, diario, index, detalhamento} = route.params
 
     console.log("Diario no detalhamento ", diario)
-    const [value, setValue] = useState('')
-    const [resposta, setResposta] = useState('')
+    const [value, setValue] = useState(0)
+    const [resposta, setResposta] = useState('"0 - 30. Normalidade')
     const data = new Date()
     let dia = data.getDate()
     let mes = data.getMonth() + 1
@@ -33,16 +32,21 @@ export default ({options =[], tipoPSE, navigation, route}) => {
         mes = `0${mes}`
       }
 
-    function criarDetalhamento() {
+      const criarDetalhamento = () => {
         const chave = `PerflexDoExercicio${repeticao}`;
-
-      const dados = {
-         resposta: resposta,
-         valor: value,
-      };
-      diario.Exercicio[index][chave]= dados
-      console.log('Diario no perflex ', diario)
-      }
+      
+        if(value == 0){
+            setValue(0)
+            setResposta("0 - 30. Normalidade")
+        }
+        const dados = {
+          resposta: resposta,
+          valor: value,
+        };
+        
+        detalhamento.Exercicios[index][chave] = dados
+        console.log('detalhamento.Exercicios[index][chave] = dados ', detalhamento.Exercicios[index][chave])
+    }
 
     return (
         <Modal
@@ -52,7 +56,6 @@ export default ({options =[], tipoPSE, navigation, route}) => {
         <ScrollView style={[style.container, estilo.corLightMenos1]}>
             <SafeAreaView style={[style.conteudo, estilo.centralizado]}>
                 <Text style={[estilo.tituloH523px, estilo.textoCorSecundaria]}>{tipoPSE}</Text>
-                <Button title="Aa" onPress={() => console.log('Diario aaa', dia)}></Button>
                 {tipoPSE == 'PSE' ? <Text style={[estilo.tituloH619px, estilo.textoCorSecundaria, style.subtitulo]}>Quão intenso foi seu treino?</Text> :  
                                <Text style={[estilo.tituloH619px, estilo.textoCorSecundaria, style.subtitulo]}>Quão intenso foi esta série de exercício?</Text>
  }

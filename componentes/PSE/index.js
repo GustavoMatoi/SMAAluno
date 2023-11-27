@@ -10,7 +10,9 @@ import { horaInicio, minutoInicio} from "../Qtr";
 
 const pseDoDia = new PSE('', '')
 export default ({ options = [], tipoPSE, navigation, route }) => {
-    const { diario, aluno } = route.params;
+    const { diario, aluno, detalhamento } = route.params;
+    console.log('diario no pse', diario)
+    console.log('detalhamento', detalhamento)
     const [selected, setSelected] = useState(0);
     const [pseValue, setPSEValue] = useState(0);
     const [pseResposta, setPseResposta] = useState('0. Repouso')
@@ -28,8 +30,8 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
             mes = `0${mes}`
           }
         const minuto = data.getMinutes()
-    
         const fimDoTreino = `${hora}:${minuto}`
+        console.log('fimDoTreino, ', fimDoTreino)
     
         const duracaoDoTreinoHoras = (hora - horaInicio) * 60
         const duracaoDoTreinoMinutos = (minuto - minutoInicio)
@@ -40,29 +42,35 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
             const duracao = duracao*(-1)
         }
       
-      
-        diario.fimDoTreino = fimDoTreino;
-      diario.duracao = duracao;
-      diario.PSE.valor = pseValue;
-      diario.PSE.resposta = pseResposta
-      
-      // Update PSE value
-      setDoc(
-        doc(
-          firebaseBD,
-          'Academias',
-          aluno.Academia,
-          'Professores',
-          aluno.professorResponsavel,
-          'alunos',
-          `Aluno ${aluno.email}`,
-          'Diarios',
-          `Diario${ano}|${mes}|${dia}`
-        ),
+        console.log(detalhamento)
+
+        detalhamento.Exercicios.forEach(element => {
+          setDoc(doc(firebaseBD, 'Academias', aluno.Academia, 'Professores', aluno.professorResponsavel, 'alunos', `Aluno ${aluno.email}`, `Diarios`,  `Diario${ano}|${mes}|${dia}`, 'Exercicio', element.Nome), {
+            ...element
+          })
+        });
+
+        setDoc(
+          doc(firebaseBD, 'Academias', aluno.Academia, 'Professores', aluno.professorResponsavel, 'alunos', `Aluno ${aluno.email}`, `Diarios`,  `Diario${ano}|${mes}|${dia}`),
         {
-          diario,
+         fimDoTreino: fimDoTreino,
+         duracao: duracao,
+         inicio: diario.inicio, 
+         mes: mes, 
+         ano: ano, 
+         dia: dia,
+         tipoDeTreino: 'Diario',
+         PSE : {
+            valor: pseValue,
+            resposta: pseResposta
+          },
+          QTR: {
+            valor: diario.QTR.valor,
+            resposta: diario.QTR.resposta
+          },
         }
       );
+      
     };
   
     return (

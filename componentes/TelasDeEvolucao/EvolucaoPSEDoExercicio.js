@@ -13,7 +13,8 @@ import BotaoSelect from "../BotaoSelect"
 import { alunoLogado } from "../Home"
 import moment from 'moment';
 
-export default ({navigation}) => {
+export default ({navigation, route}) => {
+  const {aluno} = route.params
     const [arrayNomeExercicio, setArrayExercicio] = useState([]);
     const [carregandoDados, setCarregandoDados] = useState(true);
     const [conexao, setConexao] = useState(true)
@@ -29,12 +30,8 @@ export default ({navigation}) => {
       }
     })
     const getExercicios = async () => {
-      const user = firebase.auth().currentUser;
-      const db = getFirestore();
-      const alunoRef = collection(db, "aluno");
-      const email = user.email;
-      const queryAluno = query(alunoRef, where("email", "==", email));
-      const diariosRef = collection(db, "Academias", alunoLogado.getAcademia(), "Professores", alunoLogado.getProfessor(),"alunos", `Aluno ${alunoLogado.getEmail()}`, 'FichaDeExercicios');
+      const db = getFirestore()
+      const diariosRef = collection(db, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel,"alunos", `Aluno ${aluno.email}`, 'FichaDeExercicios');
 
       const querySnapshot = await getDocs(diariosRef);
     
@@ -63,7 +60,7 @@ export default ({navigation}) => {
       getExercicios();
     }, []);
   
-    console.log(arrayNomeExercicio)
+    console.log('aluno ', aluno)
     return (
       <ScrollView style={[estilo.corLightMenos1, {height: '100%'} ]}>
         <SafeAreaView style={[estilo.container]}>
@@ -88,6 +85,7 @@ export default ({navigation}) => {
         navigation.navigate("Evolução PSE do Exercício", {
           nome: exercicio.nome,
           tipo: exercicio.tipo, 
+          aluno: aluno,
         })
       }
     >

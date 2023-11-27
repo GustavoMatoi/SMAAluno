@@ -14,6 +14,7 @@ import { alunoLogado } from "../Home"
 import moment from 'moment';
 
 export default ({navigation, route}) => {
+    const {aluno} = route.params
     const [arrayPse, setArrayPse] = useState([]);
     const [carregandoDados, setCarregandoDados] = useState(true);
     const [pseObj, setPseObj] = useState([])
@@ -24,13 +25,13 @@ export default ({navigation, route}) => {
     const [arrayParametroX, setArrayParametroX] = useState([])
     const [arrayFiltrado, setArrayFiltrado] = useState([{x: 0, y: 0}])
     const [arraySomador, setArraySomador] = useState([])
-
+  console.log("ALUNOO", aluno)
     const [conexao, setConexao] = useState(true)
     useEffect(()=> {
         const unsubscribe = NetInfo.addEventListener(state => {
             setConexao(state.type === 'wifi' || state.type == 'cellular')
         })
-
+      
         return () => {
             unsubscribe()
         }
@@ -42,11 +43,11 @@ export default ({navigation, route}) => {
       const diariosRef = collection(
         db,
         "Academias",
-        alunoLogado.getAcademia(),
+       aluno.Academia,
         "Professores",
-        alunoLogado.getProfessor(),
+        aluno.professorResponsavel,
         "alunos",
-        `Aluno ${alunoLogado.getEmail()}`,
+        `Aluno ${aluno.email}`,
         "Diarios"
       );
     

@@ -6,11 +6,10 @@ import {VictoryChart, VictoryLine, VictoryTheme, VictoryVoronoiContainer, Victor
 import {useFonts} from 'expo-font'
 import { doc, setDoc, collection,getDocs, query,where ,addDoc, getFirestore } from "firebase/firestore"; 
 import { firebase, firebaseBD } from "../configuracoes/firebaseconfig/config"
-import { alunoLogado } from "../Home"
 import { Entypo } from '@expo/vector-icons'; 
 
-export default props => {
-
+export default ({route}) => {
+    const {aluno} = route.params
     const [arrayMassaCorporal, setArrayMassaCorporal] = useState([]);
     const [arrayEstatura, setArrayEstatura] = useState([]);
     const [arrayBracoRelaxadoMedida3, setArrayBracoRelaxadoMedida3] = useState([]);
@@ -40,11 +39,11 @@ export default props => {
               const avaliacoesRef = collection(
                 db,
                 "Academias",
-                alunoLogado.getAcademia(),
+               aluno.Academia,
                 "Professores",
-                alunoLogado.getProfessor(),
+               aluno.professorResponsavel,
                 "alunos",
-                `Aluno ${alunoLogado.getEmail()}`,
+                `Aluno ${aluno.email}`,
                 "Avaliações"
               );
               const querySnapshot = await getDocs(avaliacoesRef);

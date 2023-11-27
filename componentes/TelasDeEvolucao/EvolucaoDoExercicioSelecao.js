@@ -9,9 +9,8 @@ import { firebase, firebaseBD } from "../configuracoes/firebaseconfig/config"
 import { Entypo } from '@expo/vector-icons'; 
 import { Exercicio } from "../../classes/Exercicio"
 
-const exercicioNovo = new Exercicio('', '')
-import { alunoLogado } from "../Home"
-export default ({navigation}) => {
+export default ({navigation, route}) => {
+  const {aluno} = route.params
     const [fontsLoaded] = useFonts({
       'Montserrat': require('../../assets/Montserrat.ttf'),
     })
@@ -19,12 +18,8 @@ export default ({navigation}) => {
     const [carregandoDados, setCarregandoDados] = useState(true);
   
     const getExercicios = async () => {
-      const user = firebase.auth().currentUser;
-      const db = getFirestore();
-      const alunoRef = collection(db, "aluno");
-      const email = user.email;
-      const queryAluno = query(alunoRef, where("email", "==", email));
-      const diariosRef = collection(db, "Academias", alunoLogado.getAcademia(), "Professores", alunoLogado.getProfessor(),"alunos", `Aluno ${alunoLogado.getEmail()}`, 'FichaDeExercicios');
+      const db = getFirestore()
+      const diariosRef = collection(db, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel,"alunos", `Aluno ${aluno.email}`, 'FichaDeExercicios');
 
       const querySnapshot = await getDocs(diariosRef);
     
@@ -54,35 +49,6 @@ export default ({navigation}) => {
     }, []);
   
     console.log(arrayNomeExercicio)
-    /*
-                  return (
-                <TouchableOpacity
-                  style={[
-                    styles.botaoExercicio,
-                    estilo.corLight,
-                    estilo.sombra,
-                  ]}
-                  onPress={() =>
-                    navigation.navigate("EVOLUÇÃO DO EXERCÍCIO", {
-                      nome: exercicio.nome,
-                      tipo: exercicio.tipo, // Adicione esta linha para passar o tipo
-                    })
-                  }
-                >
-                  <Text
-                    style={[
-                      estilo.textoP16px,
-                      styles.Montserrat,
-                      estilo.textoCorSecundaria,
-                      { marginLeft: "5%", marginTop: "auto", marginBottom: "auto" },
-                    ]}
-                  >
-                    Exercício {exercicio.nome} ({exercicio.tipo})
-                  </Text>
-                </TouchableOpacity>
-              );
-    
-    */
     return (
       <ScrollView style={[estilo.corLightMenos1, {height: '100%'} ]}>
         <SafeAreaView style={[estilo.container]}>
@@ -103,6 +69,7 @@ export default ({navigation}) => {
                       navigation.navigate("EVOLUÇÃO DO EXERCÍCIO", {
                         nome: exercicio.nome,
                         tipo: exercicio.tipo, // Adicione esta linha para passar o tipo
+                        aluno: aluno
                       })
                     }
                   >
@@ -129,7 +96,8 @@ export default ({navigation}) => {
                     onPress={() =>
                       navigation.navigate("EVOLUÇÃO DO EXERCÍCIO", {
                         nome: exercicio.nome,
-                        tipo: exercicio.tipo, // Adicione esta linha para passar o tipo
+                        tipo: exercicio.tipo, 
+                        aluno: aluno
                       })
                     }
                   >

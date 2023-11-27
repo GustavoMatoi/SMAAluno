@@ -8,9 +8,8 @@ import { doc, setDoc, collection,getDocs, query,where ,addDoc, getFirestore, get
 import { firebase, firebaseBD } from "../configuracoes/firebaseconfig/config"
 import { Entypo } from '@expo/vector-icons'; 
 
-import { alunoLogado } from "../Home"
-export default props => {
-
+export default ({route}) => {
+    const {nome, aluno, tipo} = route.params
     const [arrayPrimeiroParametro, setArrayPrimeiroParametro] = useState([]);
     const [arrayDatas, setArrayDatas] = useState([])
     const [arraySegundoParametro, setArraySegundoParametro] = useState([]);
@@ -20,22 +19,14 @@ export default props => {
     const[opcao2, setOpcao2] = useState('')
 
 
-    const [fontsLoaded] = useFonts({
-        'Montserrat': require('../../assets/Montserrat-Light.ttf'),
-    })
-
-    console.log('props.nome:', props.route.params.nome);
-    console.log('Tipo', props.route.params.tipo)
+    console.log("tipo", tipo)
+    console.log('nome', nome.exercicio)
     const getPse = async () => {
-        const user = firebase.auth().currentUser;
         const db = getFirestore();
-        const alunoRef = collection(db, "aluno");
-        const email = user.email;
-        const queryAluno = query(alunoRef, where("email", "==", email));
-        const diariosRef = collection(db, "Academias", alunoLogado.getAcademia(), "Professores", alunoLogado.getProfessor(),"alunos" , `Aluno ${alunoLogado.getEmail()}`, 'Diarios');
+        const diariosRef = collection(db, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel ,"alunos" , `Aluno ${aluno.email}`, 'Diarios');
         const querySnapshot = await getDocs(diariosRef);
       
-
+        
         const newArrayDatas = [];
         const newPseArray = [];
         const newArraySegundoParametro = [];
@@ -44,12 +35,13 @@ export default props => {
           if (doc.get('tipoDeTreino') === 'Diario') {
             const exerciciosRef = collection(doc.ref, 'Exercicio');
             const exerciciosSnapshot = await getDocs(exerciciosRef);
+
             exerciciosSnapshot.forEach((exercicioDoc) => {
               const exercicio = exercicioDoc.data();
-
-                if (props.route.params.nome === exercicioDoc.get('Nome')) {
-
-                    if(props.route.params.tipo == 'força'){                    
+              let nomeAux = nome.exercicio
+                if (nomeAux === exercicioDoc.get('Nome')) {
+                    
+                    if(tipo == 'força'){                    
                         let somador = 0;
                         const atributosDoExercicio = exercicio.pesoLevantado ?? [];
                             for(let i =0; i < atributosDoExercicio.length; i++){
@@ -60,7 +52,9 @@ export default props => {
 
             
             }else {
-                if(props.route.params.tipo == 'aerobico'){    
+                if(tipo == 'aerobico'){    
+
+                    
                     const atributosDoExercicio = exercicio.intensidade ?? [];
                         for(let i =0; i < atributosDoExercicio.length; i++){
                         newPseArray.push(atributosDoExercicio[i])
@@ -117,9 +111,6 @@ export default props => {
     console.log(arrayDatas)
 
 
-    const avaliacaoPorOrdem = vetorContador.map((i) => {
-        return `Avaliação ${i}`
-    })
 
     return (
         <ScrollView style={[estilo.corLightMenos1, style.container]}>
@@ -133,17 +124,17 @@ export default props => {
                             Você ainda não cadastrou nenhum detalhamento referente a esse exercício no diário. Cadastre e tente novamente mais tarde.</Text>
                     </View>) :   (
                     <View>
-                        { props.route.params.tipo == 'força'  ? 
+                        { tipo == 'força'  ? 
                         <Text style={[estilo.tituloH619px, estilo.textoCorSecundaria, estilo.centralizado, {marginTop: '3%'}]}>
                         {opcao2 == 0 ? "Evolução do peso levantado" : "Evolução do Volume Total de Treino"} 
-                        do exercício {props.route.params.nome}</Text>
+                        do exercício {nome.exercicio}</Text>
                         :
-                        props.route.params.tipo == 'aerobico' ? 
+                       tipo == 'aerobico' ? 
                         <Text style={[estilo.tituloH619px, estilo.textoCorSecundaria, estilo.centralizado, {marginTop: '3%'}]}>
-                            {opcao2 == 0 ? "Evolução da velocidade" : "Evolução da duração"} do exercício {props.route.params.nome}</Text>
+                            {opcao2 == 0 ? "Evolução da velocidade" : "Evolução da duração"} do exercício {nome.exercicio}</Text>
                         :
                         <Text style={[estilo.tituloH619px, estilo.textoCorSecundaria, estilo.centralizado, {marginTop: '3%'}]}>
-                            {opcao2 == 0 ? "Evolução da duração" : "Evolução da intensidade"} do exercício {props.route.params.nome}</Text>
+                            {opcao2 == 0 ? "Evolução da duração" : "Evolução da intensidade"} do exercício {nome.exercicio}</Text>
 
                         }
                     <VictoryChart theme={VictoryTheme.material}>
@@ -163,15 +154,15 @@ export default props => {
                     <View style={{marginLeft: '5%', marginBottom: '10%'}}>
                     <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Selecione o parâmetro que deseja visualizar sua evolução:</Text>
                     <RadioBotao
-                            options={ props.route.params.tipo == 'força' ?['Evolução peso levantado', 'Evolução volume total de treino']
-                            :         props.route.params.tipo == 'aerobico' ? ['Evolução velocidade', 'Evolução duração'] : 
+                            options={ tipo == 'força' ?['Evolução peso levantado', 'Evolução volume total de treino']
+                            :         tipo == 'aerobico' ? ['Evolução velocidade', 'Evolução duração'] : 
                                     ['Evolução duração', 'Evolução intensidade'] }
                             selected={opcao2}
                             onChangeSelect={(opt, i) => { setOpcao2(i); console.log(opcao2)}}
                         />
                 </View>
                     </View>
-                    ) }
+                        ) }
                 
 
             </SafeAreaView>

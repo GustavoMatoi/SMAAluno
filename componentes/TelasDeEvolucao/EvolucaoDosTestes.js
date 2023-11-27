@@ -8,9 +8,8 @@ import { doc, setDoc, collection,getDocs, query,where ,addDoc, getFirestore } fr
 import { firebase, firebaseBD } from "../configuracoes/firebaseconfig/config"
 import { Entypo } from '@expo/vector-icons'; 
 
-import { alunoLogado } from "../Home"
-export default props => {
-
+export default ({route}) => {
+    const {aluno} = route.params
     const [arrayDinamometriaPernas, setArrayDinamometriaPernas] = useState([]);
     const [arrayResistenciaAbdominal, setArrayResistenciaAbdominal] = useState([]);
     const [arraySentarAlcancar, setArraySentarAlcancar] = useState([]);
@@ -30,7 +29,7 @@ export default props => {
         const alunoRef = collection(db, "aluno");
         const email = user.email;
         const queryAluno = query(alunoRef, where("email", "==", email));
-        const avaliacoesRef = collection(db, "Academias", `${alunoLogado.getAcademia()}`,"Professores", alunoLogado.getProfessor(), "alunos", `Aluno ${alunoLogado.getEmail()}`, 'Avaliações');
+        const avaliacoesRef = collection(db, "Academias", aluno.Academia,"Professores", aluno.professorResponsavel, "alunos", `Aluno ${aluno.email}`, 'Avaliações');
         const querySnapshot = await getDocs(avaliacoesRef);
 
 
