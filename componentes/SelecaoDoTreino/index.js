@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react"
-import {Text, View, TouchableOpacity, StyleSheet, SafeAreaView, Dimensions} from 'react-native'
+import {Text, View, TouchableOpacity, StyleSheet, SafeAreaView, Dimensions, Alert} from 'react-native'
 import estilo from "../estilo"
 import { Foundation } from '@expo/vector-icons'; 
 import { Ionicons } from '@expo/vector-icons'; 
@@ -8,6 +8,7 @@ import { firebase, firebaseBD } from "../configuracoes/firebaseconfig/config"
 import { alunoLogado, academiaDoAluno} from "../Home";
 import {useFonts } from "expo-font"
 import NetInfo from '@react-native-community/netinfo';
+import { AntDesign } from '@expo/vector-icons';
 
 const height = Dimensions.get('window').height
 export default ({navigation, route}) => {
@@ -31,21 +32,7 @@ export default ({navigation, route}) => {
         unsubscribe()
       }
     }, [])
-  
-    const checkWifiConnection = () => {
-        NetInfo.fetch().then((state) => {
-          if (state.type === 'wifi' || state.type === 'cellular') {
-            console.log('Conectado ao Wi-Fi');
-            setConexao(true)
-          } else {
-            console.log('Não conectado ao Wi-Fi');
-            setConexao(false)
-        }
-        });
-      };
-      useEffect(() => {
-        checkWifiConnection();
-      }, []);
+
     
       const handleNavegacaoFicha = () => {
         if (!conexao) {
@@ -61,12 +48,23 @@ export default ({navigation, route}) => {
           navigation.navigate('Modal sem conexão');
         } else {
             diario.maneiraDeTreino = 'Diario'
-            navigation.navigate('Diario', {diario: diario});
+            navigation.navigate('Diario', {diario: diario, ficha, aluno});
             }
       }
 
     return (
         <SafeAreaView style={[estilo.corLightMenos1, style.container]}>
+                          {!conexao ?
+        <TouchableOpacity onPress={() => {
+          Alert.alert(
+            "Modo Offline",
+            "Atualmente, o seu dispositivo está sem conexão com a internet. Por motivos de segurança, o aplicativo oferece funcionalidades limitadas nesse estado. Durante o período offline, os dados são armazenados localmente e serão sincronizados com o banco de dados assim que uma conexão estiver disponível."
+          );
+        }} style={[estilo.centralizado, { marginTop: '10%', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }]}>
+          <Text style={[estilo.textoP16px, estilo.textoCorDisabled]}>MODO OFFLINE - </Text>
+          <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
+        </TouchableOpacity>
+        : null}
             <Text style={[estilo.textoP16px, style.textoEscolha, estilo.centralizado, style.Montserrat]}>Por onde gostaria de treinar? Não se esqueça de responder o formulário PSE para cadastrar sua presença.</Text>
             <View style={[style.areaBotoes, estilo.centralizado ]}>
                 <TouchableOpacity style={[estilo.corPrimaria,style.containerBotao]} onPress={()=>{handleNavegacaoFicha()}}>

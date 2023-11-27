@@ -2,10 +2,11 @@ import React, {useState, useEffect} from "react";
 import {Text, View, SafeAreaView, ScrollView, Image, StyleSheet, TouchableOpacity} from 'react-native'
 import estilo from "../../estilo";
 import Foto from "./Foto";
-export default ({professor, navigation, backgroundColor}) => {
+export default ({professor, navigation, backgroundColor, aluno}) => {
     console.log( professor.professor.nome)
+    console.log("ALUNO conversas", aluno)
     return (
-        <TouchableOpacity style={[style.chat, estilo.corLight, {backgroundColor: backgroundColor}]} onPress={() =>navigation.navigate('Mensagens', {professor: professor})}> 
+        <TouchableOpacity style={[style.chat, estilo.corLight, {backgroundColor: backgroundColor}]} onPress={() =>navigation.navigate('Mensagens', {professor: professor, aluno: aluno})}> 
         <View>
         <Foto cpf={professor.professor.cpf}/>
 

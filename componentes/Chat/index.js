@@ -13,7 +13,8 @@ import NetInfo from "@react-native-community/netinfo"
 import ModalSemConexao from "../ModalSemConexao";
 import * as Notification from "expo-notifications"
 
-export default ({navigation}) => {
+export default ({navigation, route}) => {
+  const {aluno} = route.params
     const [imageUrl, setImageUrl] = useState(null);
     const [loading, setLoading] = useState(true)
     const [professores, setProfessores] = useState([])
@@ -41,7 +42,7 @@ export default ({navigation}) => {
     
           for (const academiaDoc of querySnapshot.docs) {
             const academiaNome = academiaDoc.get('nome');
-            if (academiaNome === alunoLogado.getAcademia()) {
+            if (academiaNome === aluno.Academia) {
               const professoresRef = collection(
                 academiaDoc.ref,
                 'Professores'
@@ -51,9 +52,9 @@ export default ({navigation}) => {
               for (const professorDoc of professoresSnapshot.docs) {
                 const professorData = professorDoc.data();
                 const mensagensRef = collection(
-                  firebaseBD, 'Academias', alunoLogado.getAcademia(), 'Professores', professorData.nome,
+                  firebaseBD, 'Academias', aluno.Academia, 'Professores', professorData.nome,
                   'Mensagens',
-                  `Mensagens ${alunoLogado.getEmail()}`,
+                  `Mensagens ${aluno.email}`,
                   'todasAsMensagens'
                 );
                 
@@ -106,10 +107,10 @@ export default ({navigation}) => {
     />
 ) : (
   professores.map((professor) => {
-    professor.remetente !== alunoLogado.getEmail() && professor.remetente !== 'ninguem' ?  handleNotificationLocal(professor.remetente) : ''
+    professor.remetente !== aluno.email && professor.remetente !== 'ninguem' ?  handleNotificationLocal(professor.remetente) : ''
     console.log('professor', professor.remetente)
     return(    
-      <Conversas professor={professor} navigation={navigation} backgroundColor={professor.remetente !== alunoLogado.getEmail() && professor.remetente !== 'ninguem' ? '#0066FF' : '#FFFFFF'}/>
+      <Conversas professor={professor} aluno={aluno} navigation={navigation} backgroundColor={professor.remetente !== aluno.email && professor.remetente !== 'ninguem' ? '#0066FF' : '#FFFFFF'}/>
 
       )
       

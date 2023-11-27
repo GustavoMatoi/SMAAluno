@@ -17,21 +17,17 @@ import { Exercicio } from "../../classes/Exercicio"
 import { Diario } from "../../classes/Diario"
 import NetInfo from '@react-native-community/netinfo';
 import { Entypo } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 
 const largura = Dimensions.get('window').width
 
 export default ({ navigation, route }) => {
-  const {dadosIniciaisDoDiario} = route.params
+  const {dadosIniciaisDoDiario, ficha, aluno} = route.params
   const [diario, setDiario] = useState(dadosIniciaisDoDiario); // Substitua dadosIniciaisDoDiario pelos valores iniciais apropriados
-  const [exercicio, setExercicio] = useState(new Exercicio())
-  const [exercicioNoDiario, setExercicioNaFicha] = useState(new ExercicioNaFicha())
-  const [fichaDeExercicios, setFichaDeExercicios] = useState(new FichaDeExercicios())
-  const [isLoading, setIsLoading] = useState(true)
-  const [ultimaFicha, setUltimaFicha] = useState([]);
   const [verificador, setVerificador] = useState(false)
   const [conexao, setConexao] = useState(true);
   const [backPressedCount, setBackPressedCount] = useState(0);
-
+  console.log('ficha ', ficha)
 
   const data = new Date()
   let dia = data.getDate()
@@ -44,6 +40,7 @@ export default ({ navigation, route }) => {
   if (mes < 10) {
     mes = `0${mes}`
   }
+  const exercicios = [...ficha.Exercicios]
   function handleBackPress() {
     setBackPressedCount(backPressedCount + 1);
 
@@ -55,8 +52,7 @@ export default ({ navigation, route }) => {
       }, 3000);
       return true;
     } else if (backPressedCount === 2) {
-      excluirDocumento();
-
+    
       setBackPressedCount(0);
       return true;
     }
@@ -82,9 +78,7 @@ export default ({ navigation, route }) => {
       }, 3000);
       return true;
     } else if (backPressedCount === 2) {
-      excluirDocumento().then(() => {
         navigation.navigate('Home');
-      });
       setBackPressedCount(0);
       return true;
     }
@@ -99,57 +93,6 @@ export default ({ navigation, route }) => {
 
     return () => backHandler.remove();
   }, [backPressedCount]);
-
-  useEffect(() => {
-    async function getExercicios() {
-      const db = getFirestore();
-      const diarioRef = collection(db, "Academias", `${alunoLogado.getAcademia()}`, "Professores", `${alunoLogado.getProfessor()}`, "alunos", `Aluno ${alunoLogado.getEmail()}`, "FichaDeExercicios");
-      const exerciciosSnapshot = await getDocs(diarioRef);
-      const exerciciosPromises = exerciciosSnapshot.docs.map(async (exercicioDoc) => {
-        const exerciciosRef = collection(exercicioDoc.ref, "Exercicios");
-        const exerciciosSnapshot = await getDocs(exerciciosRef);
-        return exerciciosSnapshot.docs.map((exercicio) => {
-          const exercicioData = exercicio.data();
-          const novoExercicio = new Exercicio();
-          novoExercicio.setNome(exercicioData.Nome);
-          novoExercicio.setTipo(exercicioData.tipo);
-          const novoExercicioNaFicha = new ExercicioNaFicha();
-          novoExercicioNaFicha.setExercicio(novoExercicio);
-          novoExercicioNaFicha.setConjugado(false);
-          novoExercicioNaFicha.setDescanso(exercicioData.descanso);
-          novoExercicioNaFicha.setDuracao(exercicioData.duracao);
-          novoExercicioNaFicha.setRepeticoes(exercicioData.repeticoes);
-          novoExercicioNaFicha.setSeries(exercicioData.series);
-          novoExercicioNaFicha.setVelocidade(exercicioData.velocidade);
-          novoExercicioNaFicha.setImagem(exercicioData.imagem)
-          return novoExercicioNaFicha;
-        });
-      });
-      const exercicios = await Promise.all(exerciciosPromises);
-      const arrayFicha = Object.values(exercicios);
-      const exerciciosFlat = exercicios.flat();
-      for (let i = 0; i < arrayFicha.length; i++) {
-        for (const key in arrayFicha[i]) {
-          if (arrayFicha[i].hasOwnProperty(key)) {
-            const value = arrayFicha[i][key];
-            if (typeof value === 'object') {
-              console.log('Atributo: ' + key + ', Valor: ' + JSON.stringify(value, null, 2));
-            } else {
-              console.log('Atributo: ' + key + ', Valor: ' + value);
-            }
-          }
-        }
-      }
-      for (let i = 0; i < arrayFicha.length; i++) {
-        alunoLogado.addFichaDeExercicios(arrayFicha)
-      }
-      const ultimaFicha = arrayFicha[arrayFicha.length - 1]
-      setUltimaFicha(ultimaFicha);
-      setIsLoading(false);
-    }
-    getExercicios();
-  }, []);
-
 
 
 
@@ -234,7 +177,7 @@ export default ({ navigation, route }) => {
   let contador = 0
 
   const confereDetalhamento = () => {
-    if (ultimaFicha.length === contador) {
+    if (ficha.Exercicios.length === contador) {
       setVerificador(true)
     }
   }
@@ -244,20 +187,31 @@ export default ({ navigation, route }) => {
   return (
     <ScrollView style={[style.container, estilo.corLightMenos1]}>
       <View style={[estilo.corPrimaria, style.header]}>
+      {!conexao ?
+        <TouchableOpacity onPress={() => {
+          Alert.alert(
+            "Modo Offline",
+            "Atualmente, o seu dispositivo está sem conexão com a internet. Por motivos de segurança, o aplicativo oferece funcionalidades limitadas nesse estado. Durante o período offline, os dados são armazenados localmente e serão sincronizados com o banco de dados assim que uma conexão estiver disponível."
+          );
+        }} style={[estilo.centralizado, { marginTop: '10%', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }]}>
+          <Text style={[estilo.textoP16px, estilo.textoCorDisabled]}>MODO OFFLINE - </Text>
+          <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
+        </TouchableOpacity>
+        : null}
         <Text style={[estilo.textoCorLight, estilo.tituloH148px]}>DIÁRIO</Text>
       </View>
       <SafeAreaView style={[style.caixa]}>
         <Caixinha></Caixinha>
       </SafeAreaView>
 
-      {ultimaFicha && ultimaFicha.map((exercicioNaFicha, index) => (
+      {exercicios.map((exercicioNaFicha, index) => (
         <View key={index}>
           <ScrollView horizontal={true}>
-            {exercicioNaFicha.exercicio.tipo == 'força' ?
+            {exercicioNaFicha.tipo == 'força' ?
               <Text style={[{ marginTop: 20 }]}>
                 <View style={{ width: largura }}>
                   <ExerciciosForça
-                    nomeDoExercicio={exercicioNaFicha.exercicio.nome.exercicio}
+                    nomeDoExercicio={exercicioNaFicha.Nome.exercicio}
                     series={exercicioNaFicha.series}
                     repeticoes={exercicioNaFicha.repeticoes}
                     descanso={exercicioNaFicha.descanso}
@@ -265,11 +219,11 @@ export default ({ navigation, route }) => {
                 </View>
                 <BotaoDetalhamento onPress={() => { handleNavegacaoForca(exercicioNaFicha) }} />
               </Text>
-              : exercicioNaFicha.exercicio.tipo == 'alongamento' ?
+              : exercicioNaFicha.tipo == 'alongamento' ?
                 <Text style={[{ marginTop: 20 }]}>
                   <View style={{ width: largura }}>
                     <ExerciciosAlongamento
-                      nomeDoExercicio={exercicioNaFicha.exercicio.nome}
+                      nomeDoExercicio={exercicioNaFicha.Nome}
                       series={exercicioNaFicha.series}
                       repeticoes={exercicioNaFicha.repeticoes}
                       descanso={exercicioNaFicha.descanso}
@@ -278,12 +232,12 @@ export default ({ navigation, route }) => {
                   </View>
                   <BotaoDetalhamento onPress={() => { handleNavegacaoAlongamento(exercicioNaFicha) }} />
                 </Text>
-                : exercicioNaFicha.exercicio.tipo == 'aerobico' ?
+                : exercicioNaFicha.tipo == 'aerobico' ?
                   <Text style={[{ marginTop: 20 }]}>
                     <View style={{ width: largura }}>
                       <ExerciciosCardio
-                        nomeDoExercicio={exercicioNaFicha.exercicio.nome.exercicio}
-                        velocidadeDoExercicio={exercicioNaFicha.velocidade}
+                    nomeDoExercicio={exercicioNaFicha.Nome.exercicio}
+                    velocidadeDoExercicio={exercicioNaFicha.velocidade}
                         duracaoDoExercicio={exercicioNaFicha.duracao}
                         seriesDoExercicio={exercicioNaFicha.series}
                         descansoDoExercicio={exercicioNaFicha.descanso}
@@ -295,8 +249,8 @@ export default ({ navigation, route }) => {
             }
           </ScrollView>
         </View>
-      ))}
-      {ultimaFicha ?
+          )) }
+      {exercicios.length !== 0 ?
         <TouchableOpacity style={verificador ? [estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado] : [estilo.corDisabled, style.botaoResponderPSE, estilo.centralizado]}
           disabled={!verificador}
           onPress={() => { handleNavegacaoPse() }}>
@@ -315,7 +269,7 @@ export default ({ navigation, route }) => {
           </Text>
 
           <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]}
-            onPress={() => { excluirDocumento(); navigation.navigate('Home') }}>
+            onPress={() => {  navigation.navigate('Home') }}>
             <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>VOLTAR</Text>
           </TouchableOpacity>
         </View>

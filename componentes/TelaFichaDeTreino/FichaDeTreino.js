@@ -1,16 +1,12 @@
 import React, {useState, useEffect, useRef} from "react"
-import {Text, View, BackHandler, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity} from 'react-native'
-import { collection, doc, getDocs, getFirestore, where, deleteDoc, query, addDoc } from "firebase/firestore";
-import { alunoLogado, academiaDoAluno} from "../Home";
+import {Text, View, BackHandler, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Alert} from 'react-native'
 import estilo from "../estilo"
 import FichaDeTreino from "../Ficha/FichaDeTreino"
 import Caixinha from "./Caixinha"
 import NetInfo from '@react-native-community/netinfo';
 import { Entypo } from '@expo/vector-icons'; 
-import { Exercicio } from "../../classes/Exercicio";
-import { ExercicioNaFicha } from "../../classes/ExercicioNaFicha";
-import { horaInicio, minutoInicio} from "../Qtr";
-import { useNavigation } from '@react-navigation/native';
+
+import { AntDesign } from '@expo/vector-icons';
 
 export default ({navigation, route}) => {
     const [conexao, setConexao] = useState(true)
@@ -60,6 +56,17 @@ export default ({navigation, route}) => {
     return (
         <ScrollView style={[estilo.corPrimaria, style.container]}>
             <SafeAreaView style={[estilo.centralizado, style.header]}>
+            {!conexao ?
+        <TouchableOpacity onPress={() => {
+          Alert.alert(
+            "Modo Offline",
+            "Atualmente, o seu dispositivo está sem conexão com a internet. Por motivos de segurança, o aplicativo oferece funcionalidades limitadas nesse estado. Durante o período offline, os dados são armazenados localmente e serão sincronizados com o banco de dados assim que uma conexão estiver disponível."
+          );
+        }} style={[estilo.centralizado, { marginTop: '10%', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }]}>
+          <Text style={[estilo.textoP16px, estilo.textoCorDisabled]}>MODO OFFLINE - </Text>
+          <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
+        </TouchableOpacity>
+        : null}
                 <Text style={[estilo.textoCorLight, estilo.tituloH240px, estilo.centralizado]}>FICHA</Text>
 
             </SafeAreaView>

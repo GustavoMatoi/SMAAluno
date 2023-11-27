@@ -83,20 +83,6 @@ export default ({ navigation, route }) => {
     }
   }, [])
 
-  const checkWifiConnection = () => {
-    NetInfo.fetch().then((state) => {
-      if (state.type === 'wifi' || state.type === 'cellular') {
-        console.log('Conectado ao Wi-Fi');
-        setConexao(true)
-      } else {
-        console.log('Não conectado ao Wi-Fi');
-        setConexao(false)
-      }
-    });
-  };
-  useEffect(() => {
-    checkWifiConnection();
-  }, []);
   const handlePressIniciarTreino = async () => {
 
     if (distanciaDaAcademia < 600) {
@@ -214,19 +200,19 @@ export default ({ navigation, route }) => {
           <View style={style.areaBotoes}>
 
             <View style={style.containerBotao}  >
-              <TouchableOpacity style={[estilo.corPrimaria, style.botao]} onPress={() => handleEvolucao()}>
+              <TouchableOpacity style={[conexao? estilo.corPrimaria: estilo.corDisabled, style.botao]} onPress={() => handleEvolucao()} disabled={!conexao}>
                 <View style={[style.iconeBotao]}>
                   <Entypo name="line-graph" size={120} color="white" />
                 </View>
-                <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}>EVOLUÇÃO DO TREINO</Text>
+                <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}>EVOLUÇÃO DO TREINO {conexao? "" : "OFFLINE"}</Text>
               </TouchableOpacity>
             </View>
             <View style={[style.containerBotao]} >
-              <TouchableOpacity style={[estilo.corPrimaria, style.botao]} onPress={() => navigation.navigate('Chat - Professores')}>
+              <TouchableOpacity style={[conexao? estilo.corPrimaria : estilo.corDisabled, style.botao]} onPress={() => navigation.navigate('Chat - Professores', {aluno: aluno})} disabled={!conexao}>
                 <View style={[style.iconeBotao]}>
                   <AntDesign name="wechat" size={120} color="white" />
                 </View>
-                <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}> MENSAGENS</Text>
+                <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}> MENSAGENS {conexao? "" : "OFFLINE"}</Text>
               </TouchableOpacity>
             </View>
           </View>

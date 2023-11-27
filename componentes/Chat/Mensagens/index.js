@@ -11,15 +11,17 @@ import { alunoLogado } from '../../Home';
 
 export default ({ route }) => {
 
-  const aluno = route.params.professor.professor
-  console.log('Aluno', aluno.nome)
+  const professor = route.params.professor.professor
+  const aluno = route.params.aluno
+  console.log('professor', professor.nome)
 
+  console.log('route.params ', aluno)
   const altura = Dimensions.get('screen').height
   const [mensagem, setMensagem] = useState('')
   const [mensagens, setMensagens] = useState([])
   const [keyboardStatus, setKeyboardStatus] = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  console.log(aluno.nome)
+  console.log(professor.nome)
   useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', (event) => {
       setKeyboardStatus('Keyboard Shown');
@@ -46,19 +48,19 @@ export default ({ route }) => {
     const mensagemRef = collection(
       firebaseBD,
       'Academias',
-      alunoLogado.getAcademia(),
+      aluno.Academia,
       'Professores',
-      aluno.nome,
+      professor.nome,
       'Mensagens',
-      `Mensagens ${alunoLogado.getEmail()}`,
+      `Mensagens ${aluno.email}`,
       'todasAsMensagens'
     );
 
     const novaMensagem = {
       texto: mensagem,
       data: serverTimestamp(), // Timestamp: data atual
-      remetente: alunoLogado.getEmail(),
-      destinatario: aluno.nome,
+      remetente: aluno.email,
+      destinatario: professor.nome,
     };
 
     addDoc(mensagemRef, novaMensagem)
@@ -76,11 +78,11 @@ export default ({ route }) => {
       const mensagemRef = collection(
         firebaseBD,
         'Academias',
-        alunoLogado.getAcademia(),
+       aluno.Academia,
         'Professores',
-        aluno.nome,
+        professor.nome,
         'Mensagens',
-        `Mensagens ${alunoLogado.getEmail()}`,
+        `Mensagens ${aluno.email}`,
         'todasAsMensagens'
       );
 
@@ -96,9 +98,9 @@ export default ({ route }) => {
 
       return () => unsubscribe();
     } catch (error) {
-      console.log('Erro ao recuperar as mensagens:', error);
+      console.log('Erro ao recuperar as mensagens: aaaaaaa', error);
     }
-  }, [aluno.email]);
+  }, [professor.email]);
   useLayoutEffect(() => {
     recuperarMensagens();
   }, [recuperarMensagens]);
@@ -106,11 +108,11 @@ export default ({ route }) => {
   return (
     <KeyboardAvoidingView>
       <View style={[estilo.corLightMenos1, { minHeight: altura }]}>
-        <Header aluno={aluno} />
+        <Header aluno={professor} />
         <ScrollView style={{height: '50%', marginBottom: 50}}>
           <View style={[estilo.centralizado, estilo.corLightMenos1]}>
             {mensagens.map((mensagem) => (
-              mensagem.remetente === alunoLogado.getEmail() ?
+              mensagem.remetente === aluno.email ?
                 <MensagemEnviada texto={mensagem.texto} key={mensagem.id} /> :
                 <MensagemRecebida texto={mensagem.texto} key={mensagem.id} />
             ))}
