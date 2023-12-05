@@ -19,52 +19,69 @@ import { alunoLogado, enderecoAluno, enderecoAcademia } from "./NavegacaoLoginSc
 
 
 export default ({ navigation, route }) => {
-  const {fichas, avaliacoes, academia, aluno} = route.params
+  const { fichas, avaliacoes, academia, aluno } = route.params
   const [conexao, setConexao] = useState(true)
   const [location, setLocation] = useState()
   const [locationAcademia, setLocationAcademia] = useState([0])
-  const [distanciaDaAcademia, setDistanciaDaAcademia] = useState()
+  const [distanciaDaAcademia, setDistanciaDaAcademia] = useState(0)
   const [carregador, setCarregador] = useState(true)
   const [locationPermissionRequested, setLocationPermissionRequested] = useState(false);
+  const [distanciaCarregada, setDistanciaCarregada] = useState(false);
 
-  console.log("Fichas na home", fichas[fichas.length - 1])
+
+  console.log("FICHAS NA HOME", fichas)
   useEffect(() => {
-
     const fetchData = async () => {
-      try {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          if (!locationPermissionRequested) {
-            setLocationPermissionRequested(true);
-            alert("A localização é uma maneira de garantir sua presença na academia. Por favor, conceda");
+      if (conexao) {
+        try {
+          let { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== 'granted') {
+            if (!locationPermissionRequested) {
+              setLocationPermissionRequested(true);
+              alert(
+                'A localização é uma maneira de garantir sua presença na academia. Por favor, conceda'
+              );
+            }
+            return;
           }
-          return;
-        }
-        const currentLocation = await Location.getCurrentPositionAsync({});
-        setLocation(currentLocation);
-        const geocodedLocation = await Location.geocodeAsync(
-          `${academia.endereco.rua}, ${academia.endereco.numero} - ${academia.endereco.bairro}, ${academia.endereco.cidade} - ${academia.endereco.estado}`
-        );
+          const currentLocation = await Location.getCurrentPositionAsync({});
+          setLocation(currentLocation);
+          const geocodedLocation = await Location.geocodeAsync(
+            `${academia.endereco.rua}, ${academia.endereco.numero} - ${academia.endereco.bairro}, ${academia.endereco.cidade} - ${academia.endereco.estado}`
+          );
 
-        setLocationAcademia(geocodedLocation);
-        const distance = getDistance(
-          { latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude },
-          { latitude: geocodedLocation[0].latitude, longitude: geocodedLocation[0].longitude }
-        );
-        setDistanciaDaAcademia(distance);
-        console.log(distance);
-        setCarregador(false);
-      } catch (error) {
-        console.log(error);
+          setLocationAcademia(geocodedLocation);
+          const distance = getDistance(
+            {
+              latitude: currentLocation.coords.latitude,
+              longitude: currentLocation.coords.longitude,
+            },
+            {
+              latitude: geocodedLocation[0].latitude,
+              longitude: geocodedLocation[0].longitude,
+            }
+          );
+          setDistanciaDaAcademia(distance);
+          console.log(distance);
+          setDistanciaCarregada(true);
+        } catch (error) {
+          console.log(error);
+          setDistanciaCarregada(true);
+        }
+      } else {
+        setDistanciaDaAcademia(0);
+        setDistanciaCarregada(true);
+        setLocation(true);
       }
     };
 
     const executarFuncoes = async () => {
-      await fetchData()
-    }
+      await fetchData();
+    };
 
-    executarFuncoes()
+    executarFuncoes();
   }, []);
+
 
   const openAppSettings = () => {
     if (Platform.OS === 'android') {
@@ -86,27 +103,18 @@ export default ({ navigation, route }) => {
   const handlePressIniciarTreino = async () => {
 
     if (distanciaDaAcademia < 600) {
-      navigation.navigate('QTR', {ficha: fichas[fichas.length - 1], aluno: aluno})
-    } else if (distanciaDaAcademia == undefined) {
-      Alert.alert(
-        "Recuperando sua localização",
-        `Estamos recuperando sua localização. Aperte novamente para prosseguir.`,
-        [
-          { text: 'Ok' }
-        ],
-        { titleStyle: { color: 'red', fontSize: 20 } }
-      );
-    } else {
+      navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
+    }  else {
       Alert.alert(
         "Muito longe da academia",
-        `No momento, parece que você está fora da academia. Distância atual: ${distanciaDaAcademia} metros de distância.`,
+        `No momento, parece que você está fora da academia.`,
         [
           { text: 'OK' }
         ],
         { titleStyle: { color: 'red', fontSize: 20 } }
 
       );
-      navigation.navigate('QTR', {ficha: fichas[fichas.length - 1], aluno: aluno})
+      navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
 
     }
   }
@@ -115,36 +123,15 @@ export default ({ navigation, route }) => {
 
 
   const handlePressAnalise = () => {
-      navigation.navigate('Avaliações', {avaliacoes, fichas});
-    
+    navigation.navigate('Avaliações', { avaliacoes, fichas });
+
   }
   const handleEvolucao = () => {
 
-      navigation.navigate('Evolução do treino', {aluno: aluno});
-    
+    navigation.navigate('Evolução do treino', { aluno: aluno });
+
   }
 
-
-  const [backButtonPressCount, setBackButtonPressCount] = useState(0);
-
-  function handleBackButtonPress() {
-    setBackButtonPressCount(backButtonPressCount + 1);
-
-    if (backButtonPressCount < 1) {
-      ToastAndroid.show('Pressione novamente para sair', ToastAndroid.SHORT);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', handleBackButtonPress);
-
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackButtonPress);
-    };
-  }, [backButtonPressCount]);
 
 
   return (
@@ -158,64 +145,75 @@ export default ({ navigation, route }) => {
           NÃO HÁ DESCULPAS PARA O SUCESSO. TREINE COM FOCO E DEDICAÇÃO!
         </Text>
       </View>
-      { <>
-          <View style={style.areaBotoes}>
-            <View style={style.containerBotao}>
+      {<>
+        <View style={style.areaBotoes}>
+          <View style={style.containerBotao}>
 
-              {location ?
-                (carregador ?
-                  <TouchableOpacity disabled style={[estilo.corDisabled, style.botao]}>
-                    <ActivityIndicator color="#fffff" size="large" />
-                    <Text style={[estilo.textoSmall12px, estilo.textoCorLight]}>Carregando distância...</Text>
-                  </TouchableOpacity>
-                  :
-                  <TouchableOpacity style={[estilo.corPrimaria, style.botao]} onPress={() => { handlePressIniciarTreino() }}>
-                    <View style={[{ transform: [{ rotate: '-45deg' }] }, style.iconeBotao]}>
-                      <Ionicons name="barbell-outline" size={120} color="white" />
-                    </View>
-                    <Text style={[estilo.textoSmall12px, estilo.textoCorLight]}>INICIAR TREINO</Text>
-                  </TouchableOpacity>
-                ) :
-                <TouchableOpacity style={[estilo.corDisabled, style.botao]} onPress={() => openAppSettings()}>
-                  <MaterialIcons name="not-listed-location" size={120} color="white" />
-                  <Text style={[estilo.textoSmall12px, estilo.textoCorLight, estilo.centralizado]}>PERMITA ACESSO E REINICIE O APP.</Text>
-
+            {location ? (
+              distanciaCarregada ? (
+                <TouchableOpacity
+                  style={[estilo.corPrimaria, style.botao]}
+                  onPress={() => {
+                    handlePressIniciarTreino();
+                  }}
+                >
+                  <View style={[{ transform: [{ rotate: '-45deg' }] }, style.iconeBotao]}>
+                    <Ionicons name="barbell-outline" size={120} color="white" />
+                  </View>
+                  <Text style={[estilo.textoSmall12px, estilo.textoCorLight]}>INICIAR TREINO</Text>
                 </TouchableOpacity>
-              }
-
-            </View>
-
-            <View style={style.containerBotao}>
-              <TouchableOpacity style={[estilo.corPrimaria, style.botao]} onPress={() => handlePressAnalise()}>
-                <View style={[style.iconeBotao]}>
-                  <MaterialCommunityIcons name="clipboard-text-search-outline" size={120} color="white" />
-                </View>
-                <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}>AVALIAÇÕES E FICHAS</Text>
+              ) : (
+                <TouchableOpacity
+                  disabled
+                  style={[estilo.corDisabled, style.botao]}
+                >
+                  <ActivityIndicator color="#fffff" size="large" />
+                  <Text style={[estilo.textoSmall12px, estilo.textoCorLight]}>Carregando distância...</Text>
+                </TouchableOpacity>
+              )
+            ) : (
+              <TouchableOpacity
+                style={[estilo.corDisabled, style.botao]}
+                onPress={() => openAppSettings()}
+              >
+                <MaterialIcons name="not-listed-location" size={120} color="white" />
+                <Text style={[estilo.textoSmall12px, estilo.textoCorLight, estilo.centralizado]}>PERMITA ACESSO E REINICIE O APP.</Text>
               </TouchableOpacity>
-            </View>
+            )}
 
           </View>
-          <View style={style.areaBotoes}>
 
-            <View style={style.containerBotao}  >
-              <TouchableOpacity style={[conexao? estilo.corPrimaria: estilo.corDisabled, style.botao]} onPress={() => handleEvolucao()} disabled={!conexao}>
-                <View style={[style.iconeBotao]}>
-                  <Entypo name="line-graph" size={120} color="white" />
-                </View>
-                <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}>EVOLUÇÃO DO TREINO {conexao? "" : "OFFLINE"}</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={[style.containerBotao]} >
-              <TouchableOpacity style={[conexao? estilo.corPrimaria : estilo.corDisabled, style.botao]} onPress={() => navigation.navigate('Chat - Professores', {aluno: aluno})} disabled={!conexao}>
-                <View style={[style.iconeBotao]}>
-                  <AntDesign name="wechat" size={120} color="white" />
-                </View>
-                <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}> MENSAGENS {conexao? "" : "OFFLINE"}</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={style.containerBotao}>
+            <TouchableOpacity style={[estilo.corPrimaria, style.botao]} onPress={() => handlePressAnalise()}>
+              <View style={[style.iconeBotao]}>
+                <MaterialCommunityIcons name="clipboard-text-search-outline" size={120} color="white" />
+              </View>
+              <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}>AVALIAÇÕES E FICHAS</Text>
+            </TouchableOpacity>
           </View>
 
-        </>}
+        </View>
+        <View style={style.areaBotoes}>
+
+          <View style={style.containerBotao}  >
+            <TouchableOpacity style={[conexao ? estilo.corPrimaria : estilo.corDisabled, style.botao]} onPress={() => handleEvolucao()} disabled={!conexao}>
+              <View style={[style.iconeBotao]}>
+                <Entypo name="line-graph" size={120} color="white" />
+              </View>
+              <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}>EVOLUÇÃO DO TREINO {conexao ? "" : "OFFLINE"}</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={[style.containerBotao]} >
+            <TouchableOpacity style={[conexao ? estilo.corPrimaria : estilo.corDisabled, style.botao]} onPress={() => navigation.navigate('Chat - Professores', { aluno: aluno })} disabled={!conexao}>
+              <View style={[style.iconeBotao]}>
+                <AntDesign name="wechat" size={120} color="white" />
+              </View>
+              <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}> MENSAGENS {conexao ? "" : "OFFLINE"}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+      </>}
 
 
     </SafeAreaView>

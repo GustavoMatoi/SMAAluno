@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import {Text, View, SafeAreaView, ScrollView, StyleSheet, Modal, TouchableOpacity} from 'react-native'
 import estilo from "../estilo"
 import RadioBotao from "../RadioBotao"
@@ -7,6 +7,8 @@ import { firebase, firebaseBD } from "../configuracoes/firebaseconfig/config"
 import { alunoLogado, academiaDoAluno} from "../Home";
 import {PSE} from "../../classes/PSE"
 import { horaInicio, minutoInicio} from "../Qtr";
+import NetInfo from '@react-native-community/netinfo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const pseDoDia = new PSE('', '')
 export default ({ options = [], tipoPSE, navigation, route }) => {
@@ -16,8 +18,19 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
     const [selected, setSelected] = useState(0);
     const [pseValue, setPSEValue] = useState(0);
     const [pseResposta, setPseResposta] = useState('0. Repouso')
-    console.log("ALUNOOOO NO PSEEEE", aluno)
-    const responderPSE = () => {
+    const [conexao, setConexao] = useState(true)
+    
+    useEffect(() => {
+      const unsubscribe = NetInfo.addEventListener(state => {
+        setConexao(state.type === 'wifi' || state.type === 'cellular')
+      })
+  
+      return () => {
+        unsubscribe()
+      }
+    }, [])
+    
+    const responderPSE = async () => {
         const data = new Date()
         let dia = data.getDate()
         let mes = data.getMonth() + 1
@@ -43,35 +56,66 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
         }
       
         console.log(detalhamento)
+        let tipoTreino = 'Ficha de Treino'
+        if(typeof detalhamento !== 'undefined'){
+          tipoTreino = "Diario"
+        }
+        console.log(detalhamento)
+        const diarioSalvo =  {
+          fimDoTreino: fimDoTreino,
+          duracao: duracao,
+          inicio: diario.inicio, 
+          mes: mes, 
+          ano: ano, 
+          dia: dia,
+          tipoDeTreino: tipoTreino,
+          PSE : {
+             valor: pseValue,
+             resposta: pseResposta
+           },
+           QTR: {
+             valor: diario.QTR.valor,
+             resposta: diario.QTR.resposta
+           },
+         }
+
+        if(conexao){
+          setDoc(
+            doc(firebaseBD, 'Academias', aluno.Academia, 'Professores', aluno.professorResponsavel, 'alunos', `Aluno ${aluno.email}`, `Diarios`,  `Diario${ano}|${mes}|${dia}`),
+         diarioSalvo
+        );
 
         detalhamento.Exercicios.forEach(element => {
           setDoc(doc(firebaseBD, 'Academias', aluno.Academia, 'Professores', aluno.professorResponsavel, 'alunos', `Aluno ${aluno.email}`, `Diarios`,  `Diario${ano}|${mes}|${dia}`, 'Exercicio', element.Nome), {
             ...element
           })
         });
+        } else {
+          try {
+            const diarioString = JSON.stringify(diarioSalvo)
+            await AsyncStorage.setItem(`Diario ${ano}|${mes}|${dia}`, diarioString)
 
-        setDoc(
-          doc(firebaseBD, 'Academias', aluno.Academia, 'Professores', aluno.professorResponsavel, 'alunos', `Aluno ${aluno.email}`, `Diarios`,  `Diario${ano}|${mes}|${dia}`),
-        {
-         fimDoTreino: fimDoTreino,
-         duracao: duracao,
-         inicio: diario.inicio, 
-         mes: mes, 
-         ano: ano, 
-         dia: dia,
-         tipoDeTreino: 'Diario',
-         PSE : {
-            valor: pseValue,
-            resposta: pseResposta
-          },
-          QTR: {
-            valor: diario.QTR.valor,
-            resposta: diario.QTR.resposta
-          },
+            
+            console.log("diarioString", diarioSalvo)
+            console.log("diarioString", diarioSalvo)
+            if(typeof detalhamento !== 'undefined'){
+              detalhamento.Exercicios.forEach(async(i, index) => {
+                console.log(`i `, i)
+                const exercicioString = JSON.stringify(i)
+                const data = `${ano}|${mes}|${dia}`
+                await AsyncStorage.setItem(`Diario ${data} - Exercicio ${index}`, exercicioString)
+              })
+            }
+          } catch (error) {
+            console.log("Erro: ", error)
+          }
         }
-      );
       
     };
+
+
+
+    
   
     return (
       <Modal animationType="slide">

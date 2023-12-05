@@ -30,21 +30,6 @@ export default ({ navigation, route }) => {
     }
   }, [])
 
-  const checkWifiConnection = () => {
-      NetInfo.fetch().then((state) => {
-        if (state.type === 'wifi' || state.type === 'cellular') {
-          console.log('Conectado ao Wi-Fi');
-          setConexao(true)
-        } else {
-          console.log('Não conectado ao Wi-Fi');
-          setConexao(false)
-      }
-      });
-    };
-    useEffect(() => {
-      checkWifiConnection();
-    }, []);
-
     const handleNavegacaoAnalise = (i) => {
         navigation.navigate('Analise do Programa de Treino', {avaliacao: avaliacoes[i],avaliacaoAnterior: avaliacoes[i-1], posicaoDoArray: i, ficha: fichas[i]}) 
     }

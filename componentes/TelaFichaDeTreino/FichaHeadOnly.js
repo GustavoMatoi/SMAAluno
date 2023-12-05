@@ -1,13 +1,11 @@
-import React, { useState } from "react"
-import { Text, View, SafeAreaView, StyleSheet, ScrollView, Image } from 'react-native'
+import React, { useState, useEffect } from "react"
+import { Text, View, SafeAreaView, StyleSheet, ScrollView, Alert } from 'react-native'
 import estilo from "../estilo"
 import FichaDeTreino from "../Ficha/FichaDeTreino"
 import Caixinha from "./Caixinha"
 
 export default ({ route }) => {
     const { ficha } = route.params
-    console.log("Ficha na head only", ficha)
-    { /*                   <Caixinha></Caixinha>*/ }
 
     return (
         <ScrollView style={[estilo.corPrimaria, style.container]}>
@@ -17,7 +15,7 @@ export default ({ route }) => {
             </SafeAreaView>
             <SafeAreaView style={[estilo.corLightMenos1, style.body]}>
                 <View style={[{ marginTop: -80, width: '90%', marginLeft: 'auto' }]}>
-                    <Caixinha responsavel={ficha.responsavel} dataFim={ficha.dataFim} dataInicio={ficha.dataInicio} objetivoDoTreino={ficha.objetivoDoTreino}/>
+                    <Caixinha responsavel={ficha.responsavel} dataFim={ficha.dataFim} dataInicio={ficha.dataInicio} objetivoDoTreino={ficha.objetivoDoTreino} />
                 </View>
                 <View style={[style.areaDaFicha]}>
                     <FichaDeTreino exercicios={ficha.Exercicios}></FichaDeTreino>

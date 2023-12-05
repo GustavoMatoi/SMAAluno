@@ -66,14 +66,6 @@ export default ({ navigation, route }) => {
 
 
 
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-
-    return () => backHandler.remove();
-  }, [backPressedCount]);
-
-
-
   let i = 0;
 
 
@@ -94,13 +86,10 @@ export default ({ navigation, route }) => {
       navigation.navigate('Detalhamento', { numeroDeSeries: exercicioNaFicha.series, repeticoes: exercicioNaFicha.repeticoes, descanso: exercicioNaFicha.descanso, tipoExercicio: 'força', nomeExercicio: exercicioNaFicha.Nome.exercicio, diario: diario, index: contador, detalhamento});
     }
   const handleNavegacaoAerobico = (exercicioNaFicha) => {
-    if (!conexao) {
-      navigation.navigate('Modal sem conexão diario');
-    } else {
       contador++
       confereDetalhamento()
       navigation.navigate('Detalhamento', { numeroDeSeries: exercicioNaFicha.series, tipoExercicio: 'cardio', nomeExercicio: exercicioNaFicha.Nome.exercicio, diario: diario, index: contador, detalhamento })
-    }
+    
   }
   const handleNavegacaoAlongamento = (exercicioNaFicha) => {
       contador++

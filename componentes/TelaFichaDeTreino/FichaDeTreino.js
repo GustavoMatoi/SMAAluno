@@ -1,40 +1,49 @@
-import React, {useState, useEffect, useRef} from "react"
-import {Text, View, BackHandler, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Alert} from 'react-native'
+import React, { useState, useEffect, useRef } from "react"
+import { Text, View, BackHandler, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native'
 import estilo from "../estilo"
 import FichaDeTreino from "../Ficha/FichaDeTreino"
 import Caixinha from "./Caixinha"
 import NetInfo from '@react-native-community/netinfo';
-import { Entypo } from '@expo/vector-icons'; 
+import { Entypo } from '@expo/vector-icons';
 
 import { AntDesign } from '@expo/vector-icons';
 
-export default ({navigation, route}) => {
-    const [conexao, setConexao] = useState(true)
+export default ({ navigation, route }) => {
     const backButtonRef = useRef(0)
     const [ultimaFicha, setUltimaFicha] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
-    const {diario, ficha, aluno} = route.params
-    
+    const { diario, ficha, aluno } = route.params
+
+    const [conexao, setConexao] = useState(true)
+
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener(state => {
-            setConexao(state.type === 'wifi')
+            setConexao(state.type === 'wifi' || state.type === 'cellular')
         })
-
-        BackHandler.addEventListener('hardwareBackPress', handleBackPress)
 
         return () => {
             unsubscribe()
+        }
+
+
+    }, [])
+
+    useEffect(() => {
+        BackHandler.addEventListener('hardwareBackPress', handleBackPress)
+
+        return () => {
             BackHandler.removeEventListener('hardwareBackPress', handleBackPress)
         }
+
     }, [])
     const onPressHandler = () => {
-      navigation.navigate('PSE', { diario, aluno });
-      console.log("DIARIO ANTES DE NAVEGAR PRO PSE", diario);
+        navigation.navigate('PSE', { diario, aluno });
+        console.log("DIARIO ANTES DE NAVEGAR PRO PSE", diario);
     };
 
 
 
-   
+
     const handleBackPress = () => {
         backButtonRef.current += 1
         if (backButtonRef.current === 2) {
@@ -48,58 +57,58 @@ export default ({navigation, route}) => {
     }
 
 
-      console.log("ULTIMA FICHAAAA" + ultimaFicha)
-    
+    console.log("ULTIMA FICHAAAA" + ultimaFicha)
+
 
     return (
         <ScrollView style={[estilo.corPrimaria, style.container]}>
             <SafeAreaView style={[estilo.centralizado, style.header]}>
-            {!conexao ?
-        <TouchableOpacity onPress={() => {
-          Alert.alert(
-            "Modo Offline",
-            "Atualmente, o seu dispositivo está sem conexão com a internet. Por motivos de segurança, o aplicativo oferece funcionalidades limitadas nesse estado. Durante o período offline, os dados são armazenados localmente e serão sincronizados com o banco de dados assim que uma conexão estiver disponível."
-          );
-        }} style={[estilo.centralizado, { marginTop: '10%', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }]}>
-          <Text style={[estilo.textoP16px, estilo.textoCorDisabled]}>MODO OFFLINE - </Text>
-          <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
-        </TouchableOpacity>
-        : null}
+                {!conexao ?
+                    <TouchableOpacity onPress={() => {
+                        Alert.alert(
+                            "Modo Offline",
+                            "Atualmente, o seu dispositivo está sem conexão com a internet. Por motivos de segurança, o aplicativo oferece funcionalidades limitadas nesse estado. Durante o período offline, os dados são armazenados localmente e serão sincronizados com o banco de dados assim que uma conexão estiver disponível."
+                        );
+                    }} style={[estilo.centralizado, { marginTop: '10%', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }]}>
+                        <Text style={[estilo.textoP16px, estilo.textoCorDisabled]}>MODO OFFLINE - </Text>
+                        <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
+                    </TouchableOpacity>
+                    : null}
                 <Text style={[estilo.textoCorLight, estilo.tituloH240px, estilo.centralizado]}>FICHA</Text>
 
             </SafeAreaView>
             <SafeAreaView style={[estilo.corLightMenos1, style.body]}>
-                <View style={[{marginTop: -80, width: '90%', marginLeft: 'auto'}]}>
-                <Caixinha responsavel={ficha.responsavel} dataFim={ficha.dataFim} dataInicio={ficha.dataInicio} objetivoDoTreino={ficha.objetivoDoTreino}/>
+                <View style={[{ marginTop: -80, width: '90%', marginLeft: 'auto' }]}>
+                    <Caixinha responsavel={ficha.responsavel} dataFim={ficha.dataFim} dataInicio={ficha.dataInicio} objetivoDoTreino={ficha.objetivoDoTreino} />
                 </View>
                 <View style={[style.areaDaFicha]}>
-                    {ultimaFicha?
-                
-                     <View>
-                        <FichaDeTreino exercicios={ficha.Exercicios}></FichaDeTreino>
-                        <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]} onPress={onPressHandler}>
-                            <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>RESPONDER PSE</Text>
-                        </TouchableOpacity>
-                    </View>  : 
-                                 <View style={[estilo.centralizado, {marginTop: '5%',marginLeft: '20%', marginRight: '20%', marginBottom: '20%'}]}>
-                                 <View style={estilo.centralizado}>
-                                   <Text style={[estilo.tituloH427px, estilo.textoCorSecundaria, {textAlign: 'center', fontFamily: 'Montserrat'}]}>
-                                   Ops...
-                                   </Text>
-                                   <Entypo name="emoji-sad" size={150} color="#182128" />
-                                 </View>
-                                 <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, {textAlign: 'center', fontFamily: 'Montserrat'}]}>
-                                     Parece que você ainda não possui nenhuma ficha de exercícios. Que tal solicitar uma ao seu professor responsável?
-                                 </Text>
-               
-                                 <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]}
-                                               onPress={()=>{excluirDiario();navigation.navigate('Home')}}>
-                                                   <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>VOLTAR</Text>
-                                 </TouchableOpacity>
-                               </View> }
-                    
+                    {ultimaFicha ?
+
+                        <View>
+                            <FichaDeTreino exercicios={ficha.Exercicios}></FichaDeTreino>
+                            <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]} onPress={onPressHandler}>
+                                <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>RESPONDER PSE</Text>
+                            </TouchableOpacity>
+                        </View> :
+                        <View style={[estilo.centralizado, { marginTop: '5%', marginLeft: '20%', marginRight: '20%', marginBottom: '20%' }]}>
+                            <View style={estilo.centralizado}>
+                                <Text style={[estilo.tituloH427px, estilo.textoCorSecundaria, { textAlign: 'center', fontFamily: 'Montserrat' }]}>
+                                    Ops...
+                                </Text>
+                                <Entypo name="emoji-sad" size={150} color="#182128" />
+                            </View>
+                            <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, { textAlign: 'center', fontFamily: 'Montserrat' }]}>
+                                Parece que você ainda não possui nenhuma ficha de exercícios. Que tal solicitar uma ao seu professor responsável?
+                            </Text>
+
+                            <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]}
+                                onPress={() => { excluirDiario(); navigation.navigate('Home') }}>
+                                <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>VOLTAR</Text>
+                            </TouchableOpacity>
+                        </View>}
+
                 </View>
-                
+
 
             </SafeAreaView>
 
@@ -125,7 +134,7 @@ const style = StyleSheet.create({
     botaoResponderPSE: {
         paddingVertical: 10,
         alignItems: 'center',
-        borderRadius:15,
+        borderRadius: 15,
         width: '60%',
         marginTop: '20%'
     }
