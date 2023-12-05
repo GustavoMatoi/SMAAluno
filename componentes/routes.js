@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ficha from './TelaFichaDeTreino/FichaHeadOnly'
 import { Text } from 'react-native'
 import Perfil from './Perfil/Perfil'
+import {View} from "react-native"
 import Home from './Home'
 import Notificacoes from './Notificacoes'
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +12,9 @@ import { AntDesign } from '@expo/vector-icons';
 import { enderecoAcademia, enderecoAluno, alunoLogado } from "./NavegacaoLoginScreen/LoginScreen";
 import NetInfo from "@react-native-community/netinfo"
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Progress from 'react-native-progress';
 import { collection, getDocs, getFirestore, setDoc, doc } from 'firebase/firestore'
+import estilo from './estilo'
 const Tab = createBottomTabNavigator()
 
 export default function Routes({ route }) {
@@ -20,6 +23,7 @@ export default function Routes({ route }) {
   const [avaliacoes, setAvaliacoes] = useState([])
   const [diarios, setDiarios] = useState([])
   const [conexao, setConexao] = useState('')
+  const [progresso, setProgresso] = useState(0.0)
   const { aluno, academia } = route.params
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -39,7 +43,7 @@ export default function Routes({ route }) {
 
 
   const fetchDadosWifi = async () => {
-
+    setProgresso(0)
     try {
       const bd = getFirestore()
       const fichasRef = collection(bd, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel, "alunos", `Aluno ${aluno.email}`, 'FichaDeExercicios')
@@ -63,6 +67,7 @@ export default function Routes({ route }) {
 
         index++
       }
+      setProgresso(0.3)
       setFichas(arrayFichaAux)
       const avaliacoesRef = collection(bd, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel, "alunos", `Aluno ${aluno.email}`, 'Avaliações')
       const avaliacoesSnapshot = await getDocs(avaliacoesRef)
@@ -81,6 +86,8 @@ export default function Routes({ route }) {
           console.log("Error ", error)
         }
       })
+      setProgresso(0.6)
+
       setAvaliacoes(arrayAvaliacoes)
 
       arrayAvaliacoes.forEach(async (i, index) => {
@@ -120,6 +127,7 @@ export default function Routes({ route }) {
     } catch (error) {
       console.error('Erro ao buscar alunos:', error);
     } finally {
+      setProgresso(1)
       setCarregando(false)
     }
   };
@@ -127,6 +135,8 @@ export default function Routes({ route }) {
   const fetchAlunosSemNet = async () => {
     const fichasAux = []
     const avaliacoesAux = []
+    setProgresso(0)
+
     try {
       const keys = await AsyncStorage.getAllKeys()
       for (const key of keys) {
@@ -135,12 +145,14 @@ export default function Routes({ route }) {
           const itemDoAsJSON = JSON.parse(itemDoAS)
           console.log("Key: ", key, "item do AS:", itemDoAsJSON)
           fichasAux.push(itemDoAsJSON)
+          setProgresso(0.3)
         }
         if (key.includes('Avaliacao')) {
           const itemDoAS = await AsyncStorage.getItem(key)
           const itemDoAsJSON = JSON.parse(itemDoAS)
           console.log("Key: ", key, "item do AS:", itemDoAsJSON)
           avaliacoesAux.push(itemDoAsJSON)
+          setProgresso(0.6)
         }
 
       }
@@ -151,6 +163,7 @@ export default function Routes({ route }) {
       console.log("Erro no Async Storage")
     } finally {
       setCarregando(false)
+      setProgresso(1)
     }
     console.log("fichas na tela anterior ", fichas)
     console.log("avaliacoes na tela anterior", avaliacoes)
@@ -217,7 +230,11 @@ export default function Routes({ route }) {
 
   if (carregando) {
     return (
-      <Text>Carregando...</Text>
+      <View style={[estilo.centralizado, {marginTop: 'auto', marginBottom: 'auto', alignItems: 'center'}]}>
+        <Text style={[estilo.textoCorPrimaria, estilo.textoP16px, {marginBottom: 20}]}>Carregando...</Text>
+        <Progress.Circle size={100} indeterminate={false} progress={progresso} />
+
+      </View>
     )
   }
   return (
