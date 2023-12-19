@@ -70,7 +70,9 @@ export default ({navigation}) => {
     const [senhaInvalida, setSenhaInvalida] = useState(false)
 
     const [selectedOption, setSelectedOption] = useState('');
+    const [academiaValida, setAcademiaValida] = useState(false)
     const [selectedOptionProfessor, setSelectedOptionProfessor] = useState('');
+    const [professorValido, setProfessorValido] = useState(false)
 
 
     const [fontsLoaded] = useFonts({
@@ -81,12 +83,12 @@ export default ({navigation}) => {
     const [conexao, setConexao] = useState(true);
 
     const handleSelectChange = (value) => {
-      console.log(value)
         setSelectedOption(value);
+        setAcademiaValida(true)
       }
     const handleSelectChangeProfessor = (value) => {
-      console.log(value)
         setSelectedOptionProfessor(value);
+        setProfessorValido(true)
       }
       
     novoAluno.setNome(nome)
@@ -503,14 +505,14 @@ export default ({navigation}) => {
                     </View>
                     <View style={style.inputArea}>
                         <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>ACADEMIA:</Text>
-                        <BotaoSelect     selecionado={selectedOption == '' ? false : true}  onChange={handleSelectChange} titulo='Academias cadastradas' max={1} options={academiasCadastradas}>
+                        <BotaoSelect     selecionado={academiaValida}  onChange={handleSelectChange} titulo='Academias cadastradas' max={1} options={academiasCadastradas}>
                         </BotaoSelect>
 
                     </View>
                     <View style={style.inputArea}>
                         <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>PROFESSOR:</Text>
                         {carregouProf?                         
-                        <BotaoSelect     selecionado={selectedOptionProfessor == '' ? false : true}  onChange={handleSelectChangeProfessor} titulo={`Professores da ${selectedOption}`} max={1} options={professoresDaAcademia}>
+                        <BotaoSelect     selecionado={professorValido}  onChange={handleSelectChangeProfessor} titulo={`Professores da ${selectedOption}`} max={1} options={professoresDaAcademia}>
                         <Text>
                           {console.log(selectedOptionProfessor)}
                         </Text>
@@ -656,7 +658,7 @@ export default ({navigation}) => {
                     </View>
                     <TouchableOpacity onPress={() => {
                         {
-                            if ( nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' ||  cep == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == ''){
+                            if ( nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' ||  cep == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == '' || !academiaValida || !professorValido){
                               Alert.alert("Campos não preenchidos",`Há campos não preenchidos ou que foram preenchidos de maneira incorreta. Preencha-os e tente novamente.`)
 
                                 if (nome == ''){
@@ -692,10 +694,10 @@ export default ({navigation}) => {
                                 if (senha == ''){
                                   setSenhaInvalida(true)
                                 }
-                                if(selectedOption == ''){
+                                if(!academiaValida){
                                   Alert.alert("Academia inválida.", "Selecione alguma academia para concluir seu cadastro.")
                                 }
-                                if(selectedOptionProfessor == ''){
+                                if(!professorValido){
                                   Alert.alert("Professor inválido.", "Selecione algum professor para concluir seu cadastro.")
                                 }
                               } else {
