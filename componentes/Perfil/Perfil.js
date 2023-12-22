@@ -78,7 +78,7 @@ export default ({navigation, route}) => {
                 <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>{aluno.endereco.rua}, {aluno.endereco.numero} {aluno.endereco.complemento}, {aluno.endereco.bairro}, {aluno.endereco.cidade}, {aluno.endereco.estado}, {aluno.endereco.cep}</Text>
 
    </View>
-         <TouchableOpacity style={[conexao ? estilo.corPrimaria: estilo.corDisabled, estilo.botao, {marginTop: '5%', marginBottom: '5%'}, estilo.sombra]} disabled={!conexao} onPress={()=>navigation.navigate('Editar perfil')}>
+         <TouchableOpacity style={[conexao ? estilo.corPrimaria: estilo.corDisabled, estilo.botao, {marginTop: '5%', marginBottom: '5%'}, estilo.sombra]} disabled={!conexao} onPress={()=>navigation.navigate('Editar perfil', {aluno})}>
                         <Text style={[estilo.textoSmall12px, estilo.textoCorLight, estilo.tituloH523px]}>ALTERAR FOTO</Text>
                     </TouchableOpacity>        
          <TouchableOpacity style={[conexao ? estilo.corPrimaria: estilo.corDisabled, estilo.botao, {marginTop: '5%', marginBottom: '5%'}, estilo.sombra]} disabled={!conexao} onPress={()=>{handleLogout()}}>

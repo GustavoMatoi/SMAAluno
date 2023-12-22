@@ -5,7 +5,6 @@ import estilo from "../estilo"
 import InputTexto from '../InputTexto'
 import Botao from '../Botao'
 import {useFonts} from 'expo-font'
-import {alunoLogado, usuarioLogado} from "../Home"
 import { getStorage, ref, uploadBytes, getDownloadURL } from '@firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Endereco } from "../../classes/Endereco"
@@ -15,11 +14,11 @@ import { collection,setDoc,doc, getDocs, getDoc,getFirestore, where , query , ad
 
 const altura = Dimensions.get('window').height
 
-export default ({navigation}) => {
+export default ({navigation, route}) => {
     const [imageUrl, setImageUrl] = useState(null);
     const [endereco, setEndereco] = useState(new Endereco());
     const [image, setImage] = useState(null);
-
+    const {aluno} = route.params
 
     const [fontsLoaded] = useFonts({
         'Montserrat': require('../../assets/Montserrat-Light.ttf'),
@@ -27,7 +26,7 @@ export default ({navigation}) => {
         
     const getStoredImage = async () => {
         const storage = getStorage();
-        const storeRef = ref(storage, `foto${alunoLogado.getCpf()}.jpg`);
+        const storeRef = ref(storage, `foto${aluno.cpf}.jpg`);
       
         try {
             const url = await getDownloadURL(storeRef);
@@ -60,7 +59,7 @@ export default ({navigation}) => {
     
         if (!result.canceled) {
             const storage = getStorage(); //Storage
-            const storeRef = ref(storage, `foto${alunoLogado.getCpf()}.jpg`) // Como a imagem é salva 
+            const storeRef = ref(storage, `foto${aluno.cpf}.jpg`) // Como a imagem é salva 
             
             //converter imagem em array de bytes
             const img = await fetch(result.assets[0].uri)
