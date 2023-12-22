@@ -67,6 +67,8 @@ export default function Routes({ route }) {
 
         index++
       }
+      console.log('arrayFichaAux ', arrayFichaAux)
+      console.log(aluno)
       setProgresso(0.3)
       setFichas(arrayFichaAux)
       const avaliacoesRef = collection(bd, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel, "alunos", `Aluno ${aluno.email}`, 'Avaliações')
@@ -143,14 +145,14 @@ export default function Routes({ route }) {
         if (key.includes('Ficha')) {
           const itemDoAS = await AsyncStorage.getItem(key)
           const itemDoAsJSON = JSON.parse(itemDoAS)
-          console.log("Key: ", key, "item do AS:", itemDoAsJSON)
+          //console.log("Key: ", key, "item do AS:", itemDoAsJSON)
           fichasAux.push(itemDoAsJSON)
           setProgresso(0.3)
         }
         if (key.includes('Avaliacao')) {
           const itemDoAS = await AsyncStorage.getItem(key)
           const itemDoAsJSON = JSON.parse(itemDoAS)
-          console.log("Key: ", key, "item do AS:", itemDoAsJSON)
+         // console.log("Key: ", key, "item do AS:", itemDoAsJSON)
           avaliacoesAux.push(itemDoAsJSON)
           setProgresso(0.6)
         }
@@ -166,7 +168,7 @@ export default function Routes({ route }) {
       setProgresso(1)
     }
     console.log("fichas na tela anterior ", fichas)
-    console.log("avaliacoes na tela anterior", avaliacoes)
+    //console.log("avaliacoes na tela anterior", avaliacoes)
   }
 
   const verificaDocumentos = async () => {

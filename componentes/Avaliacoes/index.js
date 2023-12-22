@@ -52,7 +52,7 @@ export default ({ navigation, route }) => {
           <TouchableOpacity
           
             style={[estilo.botao, estilo.corPrimaria]}
-            onPress={() => navigation.navigate('Analise do Programa de Treino', {avaliacao: avaliacaoArray[0], posicaoDoArray: 0, ficha: fichas[0]})}
+            onPress={() => navigation.navigate('Analise do Programa de Treino', {avaliacao: avaliacoes[0], posicaoDoArray: 0, ficha: fichas[0]})}
           >
             <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>
               {console.log(data)}

@@ -30,7 +30,33 @@ export default ({route}) => {
         'Montserrat': require('../../assets/Montserrat-Light.ttf'),
     })
 
-
+    const isNumeric =(value) =>{
+        return !isNaN(parseFloat(value)) && isFinite(value);
+      }
+  
+      const valorNoGrafico = (valor1, valor2, valor3) => {
+        if (valor2 === 0 && valor3 === 0){
+          return valor1 
+        } else if (valor3 == 0){
+          return (valor1 + valor2)/2
+        } else {
+          let valores = [valor1, valor2, valor3]
+          return calculaMediana(valores)
+        }
+      }
+  
+      const calculaMediana = (valores) => {
+        const sortedData = valores.slice().sort((a, b) => a - b);
+        const middleIndex = Math.floor(sortedData.length / 2);
+        if (sortedData.length % 2 === 0) {
+          const value1 = sortedData[middleIndex - 1];
+          const value2 = sortedData[middleIndex];
+          return (value1 + value2) / 2;
+        } else {
+          return sortedData[middleIndex];
+        }
+      }
+  
       
       useEffect(() => {
         const getAvaliacoes = async () => {
@@ -65,19 +91,57 @@ export default ({route}) => {
                 const data = doc.data();
                 console.log(data)
     
-                newArrayMassaCorporal.push(data.massaCorporal);
-                newArrayEstatura.push(data.estatura);
-                newArrayBracoRelaxadoMedida3.push(data.bracoRelaxadoMedida3);
-                newArrayBracoContraidoMedida3.push(data.bracoContraidoMedida3);
-                newArrayCinturaMedida3.push(data.cinturaMedida3);
-                newArrayAbdomenMedida3.push(data.abdomenMedida3);
-                newArrayQuadrilMedida3.push(data.quadrilMedida3);
-                newArrayCoxaMedida3.push(data.coxaMedida3);
-                newArrayPernaMedida3.push(data.pernaMedida3);
-                newArrayDCPeitoralMedida3.push(data.DCPeitoralMedida3);
-                newArrayDCAbomenMedida3.push(data.DCabdomenMedida3);
-                newArrayDCCoxaMedida3.push(data.DCCoxaMedida3);
-                newArrayDCCristaIliacaMedida3.push(data.DCCristaIliacaMedida3);
+                if (isNumeric(data.massaCorporal)) {
+                    newArrayMassaCorporal.push(data.massaCorporal);
+                  }
+                  
+                  if (isNumeric(data.estatura)) {
+                    newArrayEstatura.push(data.estatura);
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.bracoRelaxadoMedida1, data.bracoRelaxadoMedida2, data.bracoRelaxadoMedida3))) {
+                    newArrayBracoRelaxadoMedida3.push(valorNoGrafico(data.bracoRelaxadoMedida1, data.bracoRelaxadoMedida2, data.bracoRelaxadoMedida3));
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.bracoContraidoMedida1, data.bracoContraidoMedida2, data.bracoContraidoMedida3))) {
+                    newArrayBracoContraidoMedida3.push(valorNoGrafico(data.bracoContraidoMedida1, data.bracoContraidoMedida2, data.bracoContraidoMedida3));
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.cinturaMedida1, data.cinturaMedida2, data.cinturaMedida3))) {
+                    newArrayCinturaMedida3.push(valorNoGrafico(data.cinturaMedida1, data.cinturaMedida2, data.cinturaMedida3));
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.abdomenMedida1, data.abdomenMedida2, data.abdomenMedida3))) {
+                    newArrayAbdomenMedida3.push(valorNoGrafico(data.abdomenMedida1, data.abdomenMedida2, data.abdomenMedida3));
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.quadrilMedida1, data.quadrilMedida2, data.quadrilMedida3))) {
+                    newArrayQuadrilMedida3.push(valorNoGrafico(data.quadrilMedida1, data.quadrilMedida2, data.quadrilMedida3));
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.coxaMedida1, data.coxaMedida2, data.coxaMedida3))) {
+                    newArrayCoxaMedida3.push(valorNoGrafico(data.coxaMedida1, data.coxaMedida2, data.coxaMedida3));
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.pernaMedida1, data.pernaMedida2, data.pernaMedida3))) {
+                    newArrayPernaMedida3.push(valorNoGrafico(data.pernaMedida1, data.pernaMedida2, data.pernaMedida3));
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.DCPeitoralMedida1, data.DCPeitoralMedida2, data.DCPeitoralMedida3))) {
+                    newArrayDCPeitoralMedida3.push(valorNoGrafico(data.DCPeitoralMedida1, data.DCPeitoralMedida2, data.DCPeitoralMedida3));
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.DCabdomenMedida1, data.DCabdomenMedida2, data.DCabdomenMedida3))) {
+                    newArrayDCAbomenMedida3.push(valorNoGrafico(data.DCabdomenMedida1, data.DCabdomenMedida2, data.DCabdomenMedida3));
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.DCCoxaMedida1, data.DCCoxaMedida2, data.DCCoxaMedida3))) {
+                    newArrayDCCoxaMedida3.push(valorNoGrafico(data.DCCoxaMedida1, data.DCCoxaMedida2, data.DCCoxaMedida3));
+                  }
+                  
+                  if (isNumeric(valorNoGrafico(data.DCCristaIliacaMedida1, data.DCCristaIliacaMedida2, data.DCCristaIliacaMedida3))) {
+                    newArrayDCCristaIliacaMedida3.push(valorNoGrafico(data.DCCristaIliacaMedida1, data.DCCristaIliacaMedida2, data.DCCristaIliacaMedida3));
+                  }
               });
           
               setArrayMassaCorporal(newArrayMassaCorporal);
@@ -190,6 +254,24 @@ export default ({route}) => {
                     <View>
                                     <Text style={[estilo.tituloH619px, estilo.textoCorSecundaria, estilo.centralizado, {marginTop: '3%'}]}>Evolução corporal:</Text>
                 <Text style={[estilo.tituloH619px, estilo.textoCorSecundaria, estilo.centralizado, {marginTop: '3%'}]}>{titulo || 'Massa corporal'}</Text>
+
+
+                <Text style={[estilo.textoCorSecundaria, estilo.tituloH619px, {marginLeft: 10}]}>Resultados:</Text>
+                {titulo === 'Massa corporal'? arrayMassaCorporal.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'Estatura'? arrayEstatura.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'Braço relaxado'? arrayBracoRelaxadoMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'Braço contraído'? arrayBracoContraidoMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'Cintura'? arrayCinturaMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'Abdômen'? arrayAbdomenMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'Quadril'? arrayQuadrilMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'Coxa'? arrayCoxaMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'Perna'? arrayPernaMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'DC Peitoral'? arrayDCPeitoralMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'DC Abdômen'? arrayDCAbdomenMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'DC Coxa'? arrayDCCoxaMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+                {titulo === 'DC Crista ilíaca'? arrayDCCristaIliacaMedida3.map((index, value) => <Text style ={[estilo.textoCorSecundaria, estilo.textoSmall12px, {marginLeft: 10}]}>Avaliação {value + 1}: {index}</Text>) : null}
+
+
                         <VictoryChart theme={VictoryTheme.material}>
                             <VictoryLine
                                 containerComponent={<VictoryVoronoiContainer/>}

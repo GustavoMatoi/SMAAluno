@@ -22,7 +22,7 @@ export default props => {
                     <Text style={[Estilo.tituloH427px, Estilo.textoCorPrimariaMenos1]}>App</Text>
                 </View>
                 <View style={[Estilo.corPrimariaMais1, style.logoAlunoSmall]}>
-                        <Text style={[Estilo.tituloH619px, Estilo.textoCorLight]}>ALUNO</Text>
+                        <Text style={[{fontSize:15, fontWeight: 'bold'}, Estilo.textoCorLight]}>ALUNO</Text>
                 </View>
             </View>            
         )

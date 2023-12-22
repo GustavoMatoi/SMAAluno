@@ -29,7 +29,7 @@ export default ({ navigation, route }) => {
   const [distanciaCarregada, setDistanciaCarregada] = useState(false);
 
 
-  console.log("FICHAS NA HOME", fichas)
+  console.log("avaliacoes NA HOME", avaliacoes)
   useEffect(() => {
     const fetchData = async () => {
       if (conexao) {
@@ -263,14 +263,14 @@ const style = StyleSheet.create({
     alignItems: 'center'
   },
   containerBotao: {
-    width: '45%',
+    width: '40%',
     height: '100%',
   },
   botao: {
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    height: '80%',
+    height: '75%',
     borderRadius: 15,
     padding: 5
   },
