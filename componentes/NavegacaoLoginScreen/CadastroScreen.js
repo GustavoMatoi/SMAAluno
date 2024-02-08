@@ -61,7 +61,10 @@ export default ({navigation}) => {
     const [ruaInvalida, setRuaInvalida] = useState(false)
 
     const [numero, setNumero] = useState('')
+    const [numeroInvalido, setNumeroInvalido] = useState(false)
+
     const [complemento, setComplemento] = useState('')
+    const [complementoInvalido, setComplementoInvalido] = useState(false)
     
     const [email, setEmail] = useState('')
     const [emailInvalido, setEmailInvalido] = useState(false)
@@ -73,7 +76,7 @@ export default ({navigation}) => {
     const [academiaValida, setAcademiaValida] = useState(false)
     const [selectedOptionProfessor, setSelectedOptionProfessor] = useState('');
     const [professorValido, setProfessorValido] = useState(false)
-
+    const [selectedOptionTurma, setSelectedOptionTurma] = useState('')
 
     const [fontsLoaded] = useFonts({
         'Montserrat': require('../../assets/Montserrat-Regular.ttf'),
@@ -81,7 +84,7 @@ export default ({navigation}) => {
     const [selected, setSelected] = useState(0)
 
     const [conexao, setConexao] = useState(true);
-
+    const [turmas, setTurmas] = useState([])
     const handleSelectChange = (value) => {
         setSelectedOption(value);
         setAcademiaValida(true)
@@ -89,6 +92,10 @@ export default ({navigation}) => {
     const handleSelectChangeProfessor = (value) => {
         setSelectedOptionProfessor(value);
         setProfessorValido(true)
+      }
+     
+      const handleSelectChangeTurma = (value) => {
+        setSelectedOptionTurma(value);
       }
       
     novoAluno.setNome(nome)
@@ -100,6 +107,7 @@ export default ({navigation}) => {
     novoAluno.setDiaNascimento(parseInt(diaNascimento))
     novoAluno.setMesNascimento(parseInt(mesNascimento))
     novoAluno.setAnoNascimento(parseInt(anoNascimento))
+    novoAluno.setTurma(selectedOptionTurma)
     novoAluno.setTelefone(telefone)
     novoAluno.setEndereco(enderecoNovoAluno)
     novoAluno.setEmail(email)
@@ -366,14 +374,28 @@ export default ({navigation}) => {
           const academiaDoc = academiaSnapshot.docs[0];
           const professoresRef = collection(academiaDoc.ref, "Professores");
           const querySnapshot = await getDocs(professoresRef);
-    
           const professores = [];
           querySnapshot.forEach((doc) => {
             const nome = doc.data().nome;
             professores.push(nome);
             console.log(nome);
+          
           });
+
+          const turmasRef = collection(academiaDoc.ref, "Turmas")
+          const turmas = []
+
+          const turmasSnapshot = await getDocs(turmasRef)
+
+          turmasSnapshot.forEach((doc) => {
+            const nome = doc.data().nome
+            turmas.push(nome)
+            console.log(nome)
+          })
+          
+          
           setProfessoresDaAcademia(professores);
+          setTurmas(turmas)
           setCarregouProf(true)
         }
       } catch (error) {
@@ -513,11 +535,17 @@ export default ({navigation}) => {
                         <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>PROFESSOR:</Text>
                         {carregouProf?                         
                         <BotaoSelect     selecionado={professorValido}  onChange={handleSelectChangeProfessor} titulo={`Professores da ${selectedOption}`} max={1} options={professoresDaAcademia}>
-                        <Text>
-                          {console.log(selectedOptionProfessor)}
-                        </Text>
                         </BotaoSelect> :
                         <Text style={[estilo.textoP16px, style.Montserrat]}>Selecione um professor</Text>
+                        }
+                    </View>
+
+                    <View style={style.inputArea}>
+                        <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>Turmas:</Text>
+                        {carregouProf?                         
+                        <BotaoSelect     selecionado={true}  onChange={handleSelectChangeTurma} titulo={`Turmas da ${selectedOption}`} max={1} options={turmas}>
+                        </BotaoSelect> :
+                        <Text style={[estilo.textoP16px, style.Montserrat]}>Selecione uma turma</Text>
                         }
                     </View>
 
@@ -609,7 +637,7 @@ export default ({navigation}) => {
                         <View style={[style.inputArea, style.campoPequeno]}>
                             <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NÚMERO:</Text>
                             <TextInput 
-                                style={[style.inputText, estilo.sombra, estilo.corLight]} placeholder="Número da sua residência"
+                                style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido? {borderWidth: 1, borderColor: 'red'} : {}]} placeholder="Número da sua residência"
                                 value={numero}
                                 keyboardType='numeric'
                                 onChangeText={(text) => setNumero(text)}
@@ -619,7 +647,7 @@ export default ({navigation}) => {
                         <View style={[style.inputArea, style.campoPequeno]}>
                             <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>COMPLEMENTO:</Text>
                             <TextInput 
-                                style={[style.inputText, estilo.sombra, estilo.corLight]} placeholder="complemento"
+                                style={[style.inputText, estilo.sombra, estilo.corLight,  complementoInvalido? {borderWidth: 1, borderColor: 'red'} : {}]} placeholder="complemento"
                                 value={complemento}
                                 onChangeText={(text) => setComplemento(text)}
                                 ></TextInput>
@@ -667,6 +695,12 @@ export default ({navigation}) => {
                                 if (cpf == ''){
                                   setCpfInvalido(true)
                                 }              
+                                if (numero == '') {
+                                  setNumeroInvalido(true)
+                                }
+                                if (complemento == ''){
+                                  setComplementoInvalido(true)
+                                }
                                 if (telefone == ''){
                                   setTelefoneValido(false)
                                 }

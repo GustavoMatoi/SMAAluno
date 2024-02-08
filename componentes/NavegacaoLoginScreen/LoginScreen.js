@@ -225,14 +225,17 @@ export default ({ navigation }) => {
       const querySnapshot = await getDocs(academiaRef);
       for (const academiaDoc of querySnapshot.docs) {
         const academiaNome = academiaDoc.get("nome");
-        const professoresRef = collection(firebaseBD, "Academias", academiaNome, "Professores");
+        const alunosRef = collection(firebaseBD, "Academias", academiaNome, "Alunos");
+        console.log("Chegou aqui")
+        const alunosSnapshot = await getDocs(alunosRef);
 
-        const professoresSnapshot = await getDocs(professoresRef);
-
-        for (const professorDoc of professoresSnapshot.docs) {
-          const professorNome = professorDoc.get("nome")
-
-          const alunoLogin = collection(firebaseBD, "Academias", academiaNome, "Professores", professorNome, "alunos");
+        for (const alunoDoc of alunosSnapshot.docs) {
+          const alunoEmail = alunoDoc.get("email")
+          const alunoAcademia = alunoDoc.get('Academia')
+          console.log(alunoEmail)
+          const alunoLogin = collection(firebaseBD,"Academias", alunoAcademia,  "Alunos");
+          console.log(alunoAcademia)
+          console.log("Chegou aqui3")
 
           const alunoSnapshot = await getDocs(alunoLogin);
           for (const alunoDoc of alunoSnapshot.docs) {
@@ -282,7 +285,6 @@ export default ({ navigation }) => {
     }
 
   }
-
   return (
     <SafeAreaView style={[Estilo.corLightMenos1]}>
       <View style={style.container}>

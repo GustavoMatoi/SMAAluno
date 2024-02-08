@@ -9,7 +9,7 @@ import { alunoLogado, academiaDoAluno } from "../Home";
 import { useFonts } from "expo-font"
 import NetInfo from '@react-native-community/netinfo';
 import { AntDesign } from '@expo/vector-icons';
-
+import { Entypo } from '@expo/vector-icons';
 const height = Dimensions.get('window').height
 export default ({ navigation, route }) => {
   const { diario, ficha, aluno } = route.params
@@ -21,7 +21,6 @@ export default ({ navigation, route }) => {
   const [conexao, setConexao] = useState(true)
   const [detalhamento, setDetalhamento] = useState({})
 
-  console.log('ficha ', ficha.Exercicios.length)
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -63,7 +62,10 @@ export default ({ navigation, route }) => {
           <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
         </TouchableOpacity>
         : null}
-      <Text style={[estilo.textoP16px, style.textoEscolha, estilo.centralizado, style.Montserrat]}>Por onde gostaria de treinar? Não se esqueça de responder o formulário PSE para cadastrar sua presença.</Text>
+        {
+          ficha ? 
+          <>
+                <Text style={[estilo.textoP16px, style.textoEscolha, estilo.centralizado, style.Montserrat]}>Por onde gostaria de treinar? Não se esqueça de responder o formulário PSE para cadastrar sua presença.</Text>
       <View style={[style.areaBotoes, estilo.centralizado]}>
         <TouchableOpacity style={[estilo.corPrimaria, style.containerBotao]} onPress={() => { handleNavegacaoFicha() }}>
           <View style={{ height: '80%' }}>
@@ -79,6 +81,23 @@ export default ({ navigation, route }) => {
         </TouchableOpacity>
 
       </View>
+          </>
+          :
+          <>
+                <Text style={[estilo.textoP16px, style.textoEscolha, estilo.centralizado, style.Montserrat]}>Sua ficha ainda não foi lançada.</Text>
+      <View style={[style.areaBotoes, estilo.centralizado]}>
+        <TouchableOpacity style={[estilo.corPrimaria, style.containerBotao]} onPress={() => { navigation.navigate('Home') }}>
+          <View style={{ height: '80%' }}>
+            <Entypo name="back" size={100} color="#FFF" />
+          </View>
+          <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>VOLTAR</Text>
+        </TouchableOpacity>
+
+      </View>
+          
+          </>
+          
+          }
     </SafeAreaView>
   )
 }

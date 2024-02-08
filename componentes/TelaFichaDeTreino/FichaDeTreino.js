@@ -79,16 +79,39 @@ export default ({ navigation, route }) => {
             </SafeAreaView>
             <SafeAreaView style={[estilo.corLightMenos1, style.body]}>
                 <View style={[{ marginTop: -80, width: '90%', marginLeft: 'auto' }]}>
-                    <Caixinha responsavel={ficha.responsavel} dataFim={ficha.dataFim} dataInicio={ficha.dataInicio} objetivoDoTreino={ficha.objetivoDoTreino} />
+                    {ficha ?
+                        <Caixinha responsavel={ficha.responsavel} dataFim={ficha.dataFim} dataInicio={ficha.dataInicio} objetivoDoTreino={ficha.objetivoDoTreino} />
+                        : null}
                 </View>
                 <View style={[style.areaDaFicha]}>
                     {ultimaFicha ?
 
                         <View>
-                            <FichaDeTreino exercicios={ficha.Exercicios}></FichaDeTreino>
-                            <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]} onPress={onPressHandler}>
-                                <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>RESPONDER PSE</Text>
-                            </TouchableOpacity>
+                            {ficha ?
+                                <>
+                                    <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]} onPress={onPressHandler}>
+                                        <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>RESPONDER PSE</Text>
+                                    </TouchableOpacity>
+                                </>
+                                : <>
+                                    <View style={[estilo.centralizado, { marginTop: '5%', marginLeft: '20%', marginRight: '20%', marginBottom: '20%' }]}>
+                                        <View style={estilo.centralizado}>
+                                            <Text style={[estilo.tituloH427px, estilo.textoCorSecundaria, { textAlign: 'center', fontFamily: 'Montserrat', marginTop: 50 }]}>
+                                                Ops...
+                                            </Text>
+                                            <Entypo name="emoji-sad" size={150} color="#182128" />
+                                        </View>
+                                        <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, { textAlign: 'center', fontFamily: 'Montserrat' }]}>
+                                            Parece que você ainda não possui nenhuma ficha de exercícios. Que tal solicitar uma ao seu professor responsável?
+                                        </Text>
+
+                                        <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]}
+                                            onPress={() => {navigation.navigate('Home') }}>
+                                            <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>VOLTAR</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </>}
+
                         </View> :
                         <View style={[estilo.centralizado, { marginTop: '5%', marginLeft: '20%', marginRight: '20%', marginBottom: '20%' }]}>
                             <View style={estilo.centralizado}>

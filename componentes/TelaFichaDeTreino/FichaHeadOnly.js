@@ -13,7 +13,9 @@ export default ({ route }) => {
                 <Text style={[estilo.textoCorLight, estilo.tituloH240px, estilo.centralizado]}>FICHA</Text>
 
             </SafeAreaView>
-            <SafeAreaView style={[estilo.corLightMenos1, style.body]}>
+            {
+                ficha ? 
+                <SafeAreaView style={[estilo.corLightMenos1, style.body]}>
                 <View style={[{ marginTop: -80, width: '90%', marginLeft: 'auto' }]}>
                     <Caixinha responsavel={ficha.responsavel} dataFim={ficha.dataFim} dataInicio={ficha.dataInicio} objetivoDoTreino={ficha.objetivoDoTreino} />
                 </View>
@@ -23,7 +25,13 @@ export default ({ route }) => {
                 </View>
 
 
-            </SafeAreaView>
+            </SafeAreaView> : 
+                            <View style={[estilo.corLightMenos1, style.body]}>
+                            <Text style={[estilo.centralizado, estilo.textoP16px, estilo.textoCorSecundaria]}>
+                                Ficha ainda não lançada. Contate o professor responsável e tente novamente.
+                            </Text>
+                        </View>
+            }
         </ScrollView>
     )
 }

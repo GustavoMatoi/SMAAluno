@@ -40,16 +40,8 @@ export default ({navigation, route}) => {
 
     const getPse = async () => {
       const db = getFirestore();
-      const diariosRef = collection(
-        db,
-        "Academias",
-       aluno.Academia,
-        "Professores",
-        aluno.professorResponsavel,
-        "alunos",
-        `Aluno ${aluno.email}`,
-        "Diarios"
-      );
+      const diariosRef = collection(db, "Academias", aluno.Academia, "Alunos",`${aluno.email}`, 'Diarios');
+
     
       const querySnapshot = await getDocs(diariosRef);
     

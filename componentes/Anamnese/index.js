@@ -1,5 +1,5 @@
 import React,{useState, useEffect} from "react"
-import { Text, View, SafeAreaView, StyleSheet, ScrollView, TextInput, TouchableOpacity} from "react-native"
+import { Text, View, SafeAreaView, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert} from "react-native"
 import RadioBotao from "../RadioBotao"
 import estilo from "../estilo"
 import {useFonts} from 'expo-font'
@@ -142,14 +142,29 @@ export default ({navigation}) => {
             
             console.log(userCredential);
           })
-          .catch((error) => {
-            // Cadastro falhou
-            alert(`Ocorreu o seguinte erro no seu cadastro: ${error}`)
+          .catch(error => {
+            let errorMessage = '';
+            switch (error.code) {
+              case 'auth/email-already-in-use':
+                errorMessage = 'O email fornecido já está em uso por outra conta.';
+                break;
+              case 'auth/invalid-email':
+                errorMessage = 'O email fornecido é inválido.';
+                break;
+              case 'auth/weak-password':
+                errorMessage = 'A senha fornecida é muito fraca. Escolha uma senha mais forte.';
+                break;
+              default:
+                errorMessage = 'Ocorreu um erro ao cadastrar o usuário. Tente novamente.';
+            }
+      
+            Alert.alert('Erro no cadastro', errorMessage);
+            console.log(error);
           });
       };
       console.log(novoAluno)
       const criarUsuario  = () =>{
-        setDoc(doc(firebaseBD,"Academias", `${novoAluno.getAcademia()}`, 'Professores', `${novoAluno.getProfessor()}`,  "alunos", `Aluno ${novoAluno.getEmail()}`), {
+        setDoc(doc(firebaseBD,"Academias", `${novoAluno.getAcademia()}`,  "Alunos", `${novoAluno.getEmail()}`), {
             nome: novoAluno.getNome(),
             cpf: novoAluno.getCpf(),
             diaNascimento: novoAluno.getDiaNascimento(),
@@ -163,6 +178,7 @@ export default ({navigation}) => {
             Academia: novoAluno.getAcademia(),
             professorResponsavel: novoAluno.getProfessor(),
             tipo: 'aluno',
+            turma: novoAluno.getTurma(),
             endereco: {
                 cep: enderecoNovoAluno.getCep(),
                 rua: enderecoNovoAluno.getRua(),
@@ -216,7 +232,7 @@ export default ({navigation}) => {
           .catch((erro) => {
             console.error('Erro ao criar novo documento:', erro);
           });
-          setDoc(doc(firebaseBD,"Academias", `${novoAluno.getAcademia()}`, 'Professores', `${novoAluno.getProfessor()}`,  "alunos", `Aluno ${novoAluno.getEmail()}`, "Notificações", `Notificação${ano}|${mes}|${dia}`), {
+          setDoc(doc(firebaseBD,"Academias", `${novoAluno.getAcademia()}`,  "Alunos", `${novoAluno.getEmail()}`, "Notificações", `Notificação${ano}|${mes}|${dia}`), {
             data: `${dia}/${mes}/${ano}`,
             nova: false,
             remetente: 'Gustavo & cia',

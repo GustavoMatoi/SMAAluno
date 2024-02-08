@@ -29,7 +29,7 @@ export default ({route}) => {
         const alunoRef = collection(db, "aluno");
         const email = user.email;
         const queryAluno = query(alunoRef, where("email", "==", email));
-        const avaliacoesRef = collection(db, "Academias", aluno.Academia,"Professores", aluno.professorResponsavel, "alunos", `Aluno ${aluno.email}`, 'Avaliações');
+        const avaliacoesRef = collection(db, "Academias", aluno.Academia,"Professores", 'Alunos', `${aluno.email}`, 'Avaliações');
         const querySnapshot = await getDocs(avaliacoesRef);
 
 

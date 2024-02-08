@@ -29,7 +29,7 @@ export default ({route}) => {
     }, [])
     const getPse = async () => {
         const db = getFirestore();
-        const diariosRef = collection(db, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel ,"alunos", `Aluno ${aluno.email}`, 'Diarios');
+        const diariosRef = collection(db, "Academias", aluno.Academia,'Alunos', `${aluno.email}`, 'Diarios');
         const querySnapshot = await getDocs(diariosRef);
 
         const newArrayPse = []
@@ -60,16 +60,8 @@ export default ({route}) => {
     const [strain, setStrain] = useState([])
     const getPseSemanal = async () => {
         const db = getFirestore();
-        const diariosRef = collection(
-          db,
-          "Academias",
-          aluno.Academia,
-          "Professores",
-          aluno.professorResponsavel,
-          "alunos",
-          `Aluno ${aluno.email}`,
-          "Diarios"
-        );
+        const diariosRef = collection(db, "Academias", aluno.Academia,'Alunos', `${aluno.email}`, 'Diarios');
+
         const querySnapshot = await getDocs(diariosRef);
     
         const newArrayPse = [];

@@ -46,7 +46,7 @@ export default function Routes({ route }) {
     setProgresso(0)
     try {
       const bd = getFirestore()
-      const fichasRef = collection(bd, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel, "alunos", `Aluno ${aluno.email}`, 'FichaDeExercicios')
+      const fichasRef = collection(bd, "Academias", aluno.Academia, "Alunos", `${aluno.email}`, 'FichaDeExercicios')
 
       const fichasSnaspshot = await getDocs(fichasRef)
       const arrayFichaAux = []
@@ -57,7 +57,7 @@ export default function Routes({ route }) {
         arrayFichaAux.push(fichaData)
         arrayFichaAux[index].Exercicios = []
 
-        const exerciciosRef = collection(bd, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel, "alunos", `Aluno ${aluno.email}`, 'FichaDeExercicios', fichaDoc.id, "Exercicios")
+        const exerciciosRef = collection(bd, "Academias","Alunos", `${aluno.email}`, 'FichaDeExercicios', fichaDoc.id, "Exercicios")
         const exercicioSnapshot = await getDocs(exerciciosRef)
 
         for (const exercicioDoc of exercicioSnapshot.docs) {
@@ -71,7 +71,7 @@ export default function Routes({ route }) {
       console.log(aluno)
       setProgresso(0.3)
       setFichas(arrayFichaAux)
-      const avaliacoesRef = collection(bd, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel, "alunos", `Aluno ${aluno.email}`, 'Avaliações')
+      const avaliacoesRef = collection(bd, "Academias", aluno.Academia, "Alunos", `Aluno ${aluno.email}`, 'Avaliações')
       const avaliacoesSnapshot = await getDocs(avaliacoesRef)
       const arrayAvaliacoes = []
       for (const avaliacaoDoc of avaliacoesSnapshot.docs) {
@@ -194,7 +194,7 @@ export default function Routes({ route }) {
               const diarioDoc = JSON.parse(value);
               console.log("DiarioDoc", diarioDoc);
 
-              setDoc(doc(bd, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel, "alunos", `Aluno ${aluno.email}`, 'Diarios', `Diario${palavraData}`), diarioDoc);
+              setDoc(doc(bd, "Academias", aluno.Academia, "Alunos", `Aluno ${aluno.email}`, 'Diarios', `Diario${palavraData}`), diarioDoc);
               AsyncStorage.removeItem(key)
 
             
@@ -217,7 +217,7 @@ export default function Routes({ route }) {
               console.log("DiarioDoc", diarioDoc);
 
 
-              setDoc(doc(bd, "Academias", aluno.Academia, "Professores", aluno.professorResponsavel, "alunos", `Aluno ${aluno.email}`, 'Diarios', `Diario${palavraData}`, 'Exercicio', `Exercicio ${palavraNumeroExercicio}`), diarioDoc);
+              setDoc(doc(bd, "Academias", aluno.Academia, "Alunos", `Aluno ${aluno.email}`, 'Diarios', `Diario${palavraData}`, 'Exercicio', `Exercicio ${palavraNumeroExercicio}`), diarioDoc);
               AsyncStorage.removeItem(key)
 
             }

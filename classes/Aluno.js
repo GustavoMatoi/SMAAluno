@@ -20,6 +20,8 @@ class Aluno extends Pessoa {
 
     getTipoSanguineo = () => {return this.tipoSanguineo}
 
+    getTurma = () => {return this.turma}
+    setTurma = (turma) => this.turma = turma
     setProfissao = (profissao) => this.profissao = profissao
 
     getProfissao = () => {return this.profissao} 

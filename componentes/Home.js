@@ -114,7 +114,6 @@ export default ({ navigation, route }) => {
         { titleStyle: { color: 'red', fontSize: 20 } }
 
       );
-      navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
 
     }
   }
