@@ -19,7 +19,7 @@ export default ({navigation, route}) => {
   
     const getExercicios = async () => {
       const db = getFirestore()
-      const diariosRef = collection(db, "Academias", aluno.Academia, "Alunos",`${aluno.email}`, 'Diarios');
+      const diariosRef = collection(db, "Academias", aluno.Academia, "Alunos",`${aluno.email}`, 'FichaDeExercicios');
 
       const querySnapshot = await getDocs(diariosRef);
     

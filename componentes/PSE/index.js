@@ -81,12 +81,12 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
 
         if(conexao){
           setDoc(
-            doc(firebaseBD, 'Academias', aluno.Academia, 'Alunos', `Aluno ${aluno.email}`, `Diarios`,  `Diario${ano}|${mes}|${dia}`),
+            doc(firebaseBD, 'Academias', aluno.Academia, 'Alunos', `${aluno.email}`, `Diarios`,  `Diario${ano}|${mes}|${dia}`),
          diarioSalvo
         );
 
         detalhamento.Exercicios.forEach(element => {
-          setDoc(doc(firebaseBD, 'Academias', aluno.Academia, 'Alunos', `Aluno ${aluno.email}`, `Diarios`,  `Diario${ano}|${mes}|${dia}`, 'Exercicio', element.Nome), {
+          setDoc(doc(firebaseBD, 'Academias', aluno.Academia, 'Alunos', `${aluno.email}`, `Diarios`,  `Diario${ano}|${mes}|${dia}`, 'Exercicio', element.Nome), {
             ...element
           })
         });

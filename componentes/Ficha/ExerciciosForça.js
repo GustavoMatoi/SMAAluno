@@ -1,19 +1,23 @@
 import React, {useState} from 'react'
-import {Text, View, SafeAreaView, StyleSheet} from 'react-native'
+import {Text, View, SafeAreaView, StyleSheet, Image} from 'react-native'
 import estilo from '../estilo'
 import {Exercicio} from '../../classes/Exercicio'
 import { ExercicioNaFicha } from '../../classes/ExercicioNaFicha'
 
 
 export default props => {
-    {console.log(props.conjugado)}  
-
     return (
         <View style={ props.conjugado? [style.containerConjugado] :  [style.container, {marginTop: 12}]}>
-            <View style={[estilo.corLightMais1, style.nomeDoExercicio]}>
-                <Text style={estilo.textoSmall12px}>{props.nomeDoExercicio || "Exercício Força"}</Text>
+          
+            <View style={[estilo.corLightMais1, style.nomeDoExercicio, {flexDirection: 'row', justifyContent: 'space-around'}]}>
+                <Image
+                style={{width: 50, height: 50}}
+                source={{uri: props.imagem || ''}}>
+
+                </Image>
+                <Text style={[estilo.textoSmall12px, {width: 100}]}>{props.nomeDoExercicio || "Exercício Alongamento"}</Text>
             </View>
-            
+
             <View style={[style.parametroGrande,estilo.corLight]}>
                 <Text style={[ style.tituloParametro]}>Séries</Text>
                 <Text style={[estilo.textoSmall12px, style.textoParametro]}>{props.series || "Ser."}</Text>
@@ -56,7 +60,7 @@ const style = StyleSheet.create({
 
     parametroGrande: {
         width: '12%',
-        height: '100%'
+        height: '100%',
     },
     tituloParametro: {
         marginTop: -12,
@@ -65,7 +69,6 @@ const style = StyleSheet.create({
     textoParametro: {
         textAlign: 'center',
         width: '100%',
-        marginTop: 20,
-
+        marginTop: 10
     }
 })

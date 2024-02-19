@@ -84,11 +84,11 @@ export default ({ navigation, route }) => {
                         : null}
                 </View>
                 <View style={[style.areaDaFicha]}>
-                    {ultimaFicha ?
 
                         <View>
                             {ficha ?
                                 <>
+                                <FichaDeTreino exercicios={ficha.Exercicios}/>
                                     <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]} onPress={onPressHandler}>
                                         <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>RESPONDER PSE</Text>
                                     </TouchableOpacity>
@@ -112,26 +112,8 @@ export default ({ navigation, route }) => {
                                     </View>
                                 </>}
 
-                        </View> :
-                        <View style={[estilo.centralizado, { marginTop: '5%', marginLeft: '20%', marginRight: '20%', marginBottom: '20%' }]}>
-                            <View style={estilo.centralizado}>
-                                <Text style={[estilo.tituloH427px, estilo.textoCorSecundaria, { textAlign: 'center', fontFamily: 'Montserrat' }]}>
-                                    Ops...
-                                </Text>
-                                <Entypo name="emoji-sad" size={150} color="#182128" />
-                            </View>
-                            <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, { textAlign: 'center', fontFamily: 'Montserrat' }]}>
-                                Parece que você ainda não possui nenhuma ficha de exercícios. Que tal solicitar uma ao seu professor responsável?
-                            </Text>
-
-                            <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]}
-                                onPress={() => { excluirDiario(); navigation.navigate('Home') }}>
-                                <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>VOLTAR</Text>
-                            </TouchableOpacity>
-                        </View>}
-
                 </View>
-
+                                </View>
 
             </SafeAreaView>
 

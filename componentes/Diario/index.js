@@ -144,6 +144,8 @@ export default ({ navigation, route }) => {
                     repeticoes={exercicioNaFicha.repeticoes}
                     descanso={exercicioNaFicha.descanso}
                     cadencia={exercicioNaFicha.cadencia}
+                    imagem={exercicioNaFicha.Nome.imagem}
+
                   />
                 </View>
                 <BotaoDetalhamento onPress={() => { handleNavegacaoForca(exercicioNaFicha) }} />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ficha from './TelaFichaDeTreino/FichaHeadOnly'
-import { Text } from 'react-native'
+import { Alert, Text } from 'react-native'
 import Perfil from './Perfil/Perfil'
 import {View} from "react-native"
 import Home from './Home'
@@ -15,9 +15,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Progress from 'react-native-progress';
 import { collection, getDocs, getFirestore, setDoc, doc } from 'firebase/firestore'
 import estilo from './estilo'
+import { getAuth, signOut } from 'firebase/auth'
 const Tab = createBottomTabNavigator()
 
-export default function Routes({ route }) {
+export default function Routes({ route, navigation }) {
   const [carregando, setCarregando] = useState(true)
   const [fichas, setFichas] = useState([])
   const [avaliacoes, setAvaliacoes] = useState([])
@@ -25,6 +26,8 @@ export default function Routes({ route }) {
   const [conexao, setConexao] = useState('')
   const [progresso, setProgresso] = useState(0.0)
   const { aluno, academia } = route.params
+
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setConexao(state.type === 'wifi' || state.type === 'cellular')
@@ -57,7 +60,7 @@ export default function Routes({ route }) {
         arrayFichaAux.push(fichaData)
         arrayFichaAux[index].Exercicios = []
 
-        const exerciciosRef = collection(bd, "Academias","Alunos", `${aluno.email}`, 'FichaDeExercicios', fichaDoc.id, "Exercicios")
+        const exerciciosRef = collection(bd, "Academias", aluno.Academia ,"Alunos", `${aluno.email}`, 'FichaDeExercicios', fichaDoc.id, "Exercicios")
         const exercicioSnapshot = await getDocs(exerciciosRef)
 
         for (const exercicioDoc of exercicioSnapshot.docs) {
@@ -71,7 +74,7 @@ export default function Routes({ route }) {
       console.log(aluno)
       setProgresso(0.3)
       setFichas(arrayFichaAux)
-      const avaliacoesRef = collection(bd, "Academias", aluno.Academia, "Alunos", `Aluno ${aluno.email}`, 'Avaliações')
+      const avaliacoesRef = collection(bd, "Academias", aluno.Academia, "Alunos", `${aluno.email}`, 'Avaliações')
       const avaliacoesSnapshot = await getDocs(avaliacoesRef)
       const arrayAvaliacoes = []
       for (const avaliacaoDoc of avaliacoesSnapshot.docs) {

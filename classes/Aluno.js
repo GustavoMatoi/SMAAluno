@@ -18,12 +18,16 @@ class Aluno extends Pessoa {
 
     setTipoSanguineo = (tipoSanguineo) => this.tipoSanguineo = tipoSanguineo
 
+
+
     getTipoSanguineo = () => {return this.tipoSanguineo}
 
     getTurma = () => {return this.turma}
     setTurma = (turma) => this.turma = turma
     setProfissao = (profissao) => this.profissao = profissao
 
+    getInativo = () => {return this.inativo}
+    setInativo = (inativo) => {this.inativo = inativo}
     getProfissao = () => {return this.profissao} 
 
     setParq = (parq) => { this.parq = parq}

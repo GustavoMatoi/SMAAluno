@@ -262,6 +262,7 @@ export default ({ navigation }) => {
             enderecoAluno.setRua(alunoData.endereco.rua)
             enderecoAluno.setNumero(alunoData.endereco.numero)
             alunoLogado.setAcademia(alunoData.academia)
+            alunoLogado.setInativo(alunoData.inativo)
             enderecoAcademia.setBairro(academiaData.endereco.bairro)
             enderecoAcademia.setCep(academiaData.endereco.cep)
             enderecoAcademia.setCidade(academiaData.endereco.cidade)

@@ -7,6 +7,7 @@ import Caixinha from "./Caixinha"
 export default ({ route }) => {
     const { ficha } = route.params
 
+    console.log(ficha)
     return (
         <ScrollView style={[estilo.corPrimaria, style.container]}>
             <SafeAreaView style={[estilo.centralizado, style.header]}>

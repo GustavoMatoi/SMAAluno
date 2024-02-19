@@ -16,6 +16,8 @@ import * as Linking from 'expo-linking';
 import { AntDesign } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { alunoLogado, enderecoAluno, enderecoAcademia } from "./NavegacaoLoginScreen/LoginScreen";
+import { getAuth, signOut } from "firebase/auth";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default ({ navigation, route }) => {
@@ -28,8 +30,20 @@ export default ({ navigation, route }) => {
   const [locationPermissionRequested, setLocationPermissionRequested] = useState(false);
   const [distanciaCarregada, setDistanciaCarregada] = useState(false);
 
+  if(aluno.inativo === true){
+    Alert.alert("Aluno inativo", "Algum professor te marcou como inativo. Se isso for engano, entre em contato com algum professor da academia e tente novamente mais tarde.")
+    navigation.navigate('Login')
+    const auth = getAuth()
+    signOut(auth)
+      .then(() => {
+        navigation.navigate('Login')
+        AsyncStorage.clear()
+      })
+      .catch((error) => {
+        console.error(error.message);
+      });
+  }
 
-  console.log("avaliacoes NA HOME", avaliacoes)
   useEffect(() => {
     const fetchData = async () => {
       if (conexao) {
