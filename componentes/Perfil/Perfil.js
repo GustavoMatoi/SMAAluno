@@ -4,7 +4,7 @@ import BotaoLight from "../BotaoLight"
 import estilo from "../estilo"
 import Caixa from "./Caixa"
 import { useFonts } from "expo-font"
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, signOut } from "firebase/auth";
 import NetInfo from '@react-native-community/netinfo';
 import { AntDesign } from '@expo/vector-icons';
@@ -34,6 +34,7 @@ export default ({ navigation, route }) => {
         console.log("Usuário deslogado com sucesso!");
         alert("Desconectado com sucesso!")
         navigation.navigate('Login')
+        AsyncStorage.clear()
       })
       .catch((error) => {
         console.error(error.message);

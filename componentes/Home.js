@@ -18,6 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 import { alunoLogado, enderecoAluno, enderecoAcademia } from "./NavegacaoLoginScreen/LoginScreen";
 import { getAuth, signOut } from "firebase/auth";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from "moment";
 
 
 export default ({ navigation, route }) => {
@@ -30,19 +31,43 @@ export default ({ navigation, route }) => {
   const [locationPermissionRequested, setLocationPermissionRequested] = useState(false);
   const [distanciaCarregada, setDistanciaCarregada] = useState(false);
 
-  if(aluno.inativo === true){
-    Alert.alert("Aluno inativo", "Algum professor te marcou como inativo. Se isso for engano, entre em contato com algum professor da academia e tente novamente mais tarde.")
-    navigation.navigate('Login')
-    const auth = getAuth()
-    signOut(auth)
-      .then(() => {
-        navigation.navigate('Login')
-        AsyncStorage.clear()
-      })
-      .catch((error) => {
-        console.error(error.message);
-      });
-  }
+
+
+  const comparaDataVencimento = (date1, date2) => {
+    const momentDate1 = moment(date1, 'DD/MM/YY');
+    const momentDate2 = moment(date2, 'DD/MM/YY');
+
+    const daysDifference = momentDate1.diff(momentDate2, 'days');
+    return Math.abs(daysDifference) === 7;
+  };
+
+
+  const data = new Date()
+  const dia = data.getDate()
+  const mes = data.getMonth() + 1
+  const ano = data.getFullYear()
+
+
+
+    if (comparaDataVencimento(fichas[fichas.length - 1].dataFim, `${dia}/${mes}/${ano}`)) {
+      Alert.alert("Sua ficha está vencendo!", `A sua ficha está prestes a vencer. Marque uma avaliação com um professor para que uma nova ficha seja montada. A ficha vence na data: ${fichas[fichas.length - 1].dataFim}`)
+ 
+    }
+
+    console.log(aluno.inativo)
+    if(aluno.inativo === true){
+      Alert.alert("Aluno inativo", "Algum professor te marcou como inativo. Se isso for engano, entre em contato com algum professor da academia e tente novamente mais tarde.")
+      navigation.navigate('Login')
+      const auth = getAuth()
+      signOut(auth)
+        .then(() => {
+          navigation.navigate('Login')
+          AsyncStorage.clear()
+        })
+        .catch((error) => {
+          console.error(error.message);
+        });
+    }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -128,9 +153,11 @@ export default ({ navigation, route }) => {
         { titleStyle: { color: 'red', fontSize: 20 } }
 
       );
+      navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
 
     }
   }
+
 
 
 

@@ -239,7 +239,9 @@ export default ({ navigation }) => {
 
           const alunoSnapshot = await getDocs(alunoLogin);
           for (const alunoDoc of alunoSnapshot.docs) {
-            if (email == alunoDoc.get("email")) {
+            console.log('email', email)
+            console.log('alunoDoc.get(email)', alunoDoc.get('email'))
+            if (email.trim() === alunoDoc.get("email")) {
               console.log("AAAAAAAAAAAAAAAAAAAAAAAa")
               const academiaData = academiaDoc.data()
               const alunoData = alunoDoc.data()

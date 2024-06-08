@@ -4,6 +4,12 @@ import estilo from "./estilo"
 import TabelaResultados from "./TabelaResultados"
 import FichaDeTreinoAnalise from "./Ficha/FichaDeTreinoAnalise";
 import NetInfo from "@react-native-community/netinfo"
+import DinamometriaMembrosInferiores from "./TabelasDeClassificacao/DinamometriaMembrosInferiores";
+import SentarAlcancar from "./TabelasDeClassificacao/SentarAlcancar";
+import ResistenciaAbdominal from "./TabelasDeClassificacao/ResistenciaAbdominal";
+import IMC from "./TabelasDeClassificacao/IMC";
+import FrequenciaCardiacaDeRepouso from "./TabelasDeClassificacao/FrequenciaCardiacaDeRepouso";
+import PressaoArterial from "./TabelasDeClassificacao/PressaoArterial";
 
 
 const getPressaoArterial = (pressaoSistolica, pressaoDiastolica) => {
@@ -53,6 +59,7 @@ export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
             <SafeAreaView style={[estilo.corLightMenos1, style.container]}>
 
                 <ScrollView>
+                    <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, { margin: '2%' }]}>Obs: Caso fique confuso em relação as medidas, consulte as tabelas de classificação que estão disponíveis abaixo do Programa de Treino</Text>
                     <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Resultados obtidos</Text>
 
                     <TabelaResultados
@@ -134,6 +141,22 @@ export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
                         <FichaDeTreinoAnalise posicaoDoArray={posicaoDoArray} exercicios={ficha.Exercicios} ></FichaDeTreinoAnalise>
 
                     }
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Tabelas de Classificações:</Text>
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Dinamometria Membros Inferiores:</Text>
+                    <DinamometriaMembrosInferiores />
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Sentar e Alcançar:</Text>
+                    <SentarAlcancar />
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Resistência Abdominal:</Text>
+                    <ResistenciaAbdominal />
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Resistência Abdominal (18 anos):</Text>
+                    <ResistenciaAbdominal/>
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>IMC:</Text>
+                    <IMC/>
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Frequência Cardíaca de Repouso:</Text>
+                    <FrequenciaCardiacaDeRepouso/>
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Pressão Arterial:</Text>
+                    <PressaoArterial/>
+
                 </ScrollView>
             </SafeAreaView>
         )
@@ -295,6 +318,22 @@ export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
                         <FichaDeTreinoAnalise posicaoDoArray={posicaoDoArray} exercicios={ficha.Exercicios} ></FichaDeTreinoAnalise>
 
                     }
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Tabelas de Classificações:</Text>
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Dinamometria Membros Inferiores:</Text>
+                    <DinamometriaMembrosInferiores />
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Sentar e Alcançar:</Text>
+                    <SentarAlcancar />
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Resistência Abdominal:</Text>
+                    <ResistenciaAbdominal />
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Resistência Abdominal (18 anos):</Text>
+                    <ResistenciaAbdominal/>
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>IMC:</Text>
+                    <IMC/>
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Frequência Cardíaca de Repouso:</Text>
+                    <FrequenciaCardiacaDeRepouso/>
+                    <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Pressão Arterial:</Text>
+                    <PressaoArterial/>
+
 
                 </ScrollView>
             </SafeAreaView>

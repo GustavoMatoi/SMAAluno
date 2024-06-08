@@ -21,20 +21,14 @@ export default ({ route }) => {
   const [mensagens, setMensagens] = useState([])
   const [keyboardStatus, setKeyboardStatus] = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  console.log(professor.nome)
   useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', (event) => {
       setKeyboardStatus('Keyboard Shown');
-      console.log('Keyboard Shown');
       setKeyboardHeight(event.endCoordinates.height);
-      console.log(keyboardHeight);
-      console.log(event.endCoordinates.height)
     });
     const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
       setKeyboardStatus('Keyboard Hidden');
-      console.log('Keyboard Hidden');
       setKeyboardHeight(0);
-      console.log(keyboardHeight);
 
     });
 
@@ -50,12 +44,12 @@ export default ({ route }) => {
       'Academias',
       aluno.Academia,
       'Professores',
-      professor.nome,
+      professor.email,
       'Mensagens',
       `Mensagens ${aluno.email}`,
       'todasAsMensagens'
     );
-
+      console.log('professor.email', professor.email)
     const novaMensagem = {
       texto: mensagem,
       data: serverTimestamp(), // Timestamp: data atual
@@ -80,7 +74,7 @@ export default ({ route }) => {
         'Academias',
        aluno.Academia,
         'Professores',
-        professor.nome,
+        professor.email,
         'Mensagens',
         `Mensagens ${aluno.email}`,
         'todasAsMensagens'

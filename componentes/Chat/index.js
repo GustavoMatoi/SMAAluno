@@ -52,7 +52,7 @@ export default ({navigation, route}) => {
               for (const professorDoc of professoresSnapshot.docs) {
                 const professorData = professorDoc.data();
                 const mensagensRef = collection(
-                  firebaseBD, 'Academias', aluno.Academia, 'Professores', professorData.nome,
+                  firebaseBD, 'Academias', aluno.Academia, 'Professores', professorData.email,
                   'Mensagens',
                   `Mensagens ${aluno.email}`,
                   'todasAsMensagens'

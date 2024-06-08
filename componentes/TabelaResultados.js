@@ -5,8 +5,27 @@ import estilo from "./estilo"
 
 export default (props) => {
 
-    
-    return(
+    const avaliaIMC = (imc)=> {
+        const imcFloat = parseFloat(imc)
+        if (imcFloat < 18.5) {
+            return "Abaixo do peso";
+        } else if (imcFloat >= 18.5 && imcFloat <= 24.9) {
+            return "Peso normal";
+        } else if (imcFloat >= 24.9 && imcFloat <= 29.9) {
+            return "Sobrepeso";
+        } else if (imcFloat >= 30 && imcFloat <= 34.9) {
+            return "Obesidade grau I";
+        } else if (imcFloat > 35 && imcFloat < 39.9) {
+            return "Obesidade grau II";
+        } else if (imcFloat >= 40) {
+            return "Obesidade grau III";
+        } else {
+            return "Aa";
+        }
+    }
+
+  
+  return(
         <ScrollView style={style.container}>
            <SafeAreaView>
             <View style={style.linha}>
@@ -303,7 +322,7 @@ export default (props) => {
                     <Text style={[estilo.textoSmall12px, estilo.textoCorSecundaria]}>IMC</Text>
                 </View>
                 <View style={[style.umaMedida, estilo.corLight]}>
-                    <Text style={[estilo.textoSmall12px, estilo.textoCorSecundaria]}>{props.imc}</Text>
+                    <Text style={[estilo.textoSmall12px, estilo.textoCorSecundaria]}>{props.imc}, {avaliaIMC(props.imc)}</Text>
                 </View>
             </View>
 

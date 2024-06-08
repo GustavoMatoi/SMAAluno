@@ -117,6 +117,8 @@ class Anamnese {
     setObjetivo = (objetivo) => this.objetivo = objetivo
     getObjetivo  = () => {return this.objetivo}
 
+    setOutro = (outro) => this.outro = outro 
+    getOutro = () => {return this.outro}
 
 }
 
