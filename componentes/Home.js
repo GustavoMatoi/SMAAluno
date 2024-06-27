@@ -49,9 +49,11 @@ export default ({ navigation, route }) => {
 
 
 
-    if (comparaDataVencimento(fichas[fichas.length - 1].dataFim, `${dia}/${mes}/${ano}`)) {
-      Alert.alert("Sua ficha está vencendo!", `A sua ficha está prestes a vencer. Marque uma avaliação com um professor para que uma nova ficha seja montada. A ficha vence na data: ${fichas[fichas.length - 1].dataFim}`)
- 
+    if(fichas.length > 0){
+      if (comparaDataVencimento(fichas[fichas.length - 1].dataFim, `${dia}/${mes}/${ano}`)) {
+        Alert.alert("Sua ficha está vencendo!", `A sua ficha está prestes a vencer. Marque uma avaliação com um professor para que uma nova ficha seja montada. A ficha vence na data: ${fichas[fichas.length - 1].dataFim}`)
+   
+      }
     }
 
     console.log(aluno.inativo)
