@@ -142,8 +142,8 @@ export default ({ navigation, route }) => {
   }, [])
 
   const handlePressIniciarTreino = async () => {
-
-    if (distanciaDaAcademia < 600) {
+    console.log(distanciaDaAcademia)
+    if (distanciaDaAcademia < 1000) {
       navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
     }  else {
       Alert.alert(
@@ -155,12 +155,10 @@ export default ({ navigation, route }) => {
         { titleStyle: { color: 'red', fontSize: 20 } }
 
       );
-      navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
-
     }
   }
 
-
+  console.log("Oii")
 
 
 

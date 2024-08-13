@@ -50,8 +50,9 @@ export default ({navigation, route}) => {
               const professoresSnapshot = await getDocs(professoresRef);
 
               for (const professorDoc of professoresSnapshot.docs) {
+
                 const professorData = professorDoc.data();
-                const mensagensRef = collection(
+                   const mensagensRef = collection(
                   firebaseBD, 'Academias', aluno.Academia, 'Professores', professorData.email,
                   'Mensagens',
                   `Mensagens ${aluno.email}`,
@@ -61,6 +62,7 @@ export default ({navigation, route}) => {
                 const q = query(mensagensRef, orderBy('data', 'asc'));
                 const mensagensSnapshot = await getDocs(q);
       
+                console.log(q._query.he.ce)
                 const lastMessageDoc = mensagensSnapshot.docs[mensagensSnapshot.docs.length - 1];
                 if (lastMessageDoc) {
                   const remetente = lastMessageDoc.get('remetente');
@@ -75,6 +77,7 @@ export default ({navigation, route}) => {
           }
           setProfessores(newArrayProfessores);
           setCarregandoProfessores(false);
+          console.log('newArrayProfessores', newArrayProfessores)
         } catch (error) {
           console.log(error);
         }
@@ -100,11 +103,14 @@ export default ({navigation, route}) => {
         <ScrollView 
         style={style.container}>
            {conexao?  carregandoProfessores ? (
-      <Spinner
-      visible={carregandoProfessores}
-      textContent={'Carregando mensagens...'}
-      textStyle={[estilo.textoCorLight, estilo.textoP16px]}
-    />
+             <>
+             <Spinner
+             visible={carregandoProfessores}
+             textContent={'Carregando mensagens...'}
+             textStyle={[estilo.textoCorLight, estilo.textoP16px]}
+           />
+           {    alert("Não apareceram professores.")           }
+            </>
 ) : (
   professores.map((professor) => {
     professor.remetente !== aluno.email && professor.remetente !== 'ninguem' ?  handleNotificationLocal(professor.remetente) : ''

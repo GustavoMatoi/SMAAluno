@@ -17,8 +17,13 @@ const getMonthName = (month: number) => {
   ];
   return months[month - 1];
 };
+type ObjetoDatas = {
+  dia: string | number,
+  mes: string | number, 
+  ano: string | number
+}
 
-const organizeData = (arrayPse) => {
+const organizeData = (arrayPse: Array<ObjetoDatas>) => {
   const organizedData = {};
   arrayPse.forEach((element) => {
     const dataFormatada = moment(`${element.ano}-${element.mes}-${element.dia}`, 'YYYY-MM-DD');
@@ -78,13 +83,23 @@ export default ({ route }) => {
     data: string,
     dia: string | number
   }
+  type DadosQTR  = {
+    dia: string | number,
+    mes: string | number,
+    ano: string | number,
+    qtr: number,
+    diaDaSemana: string | number
+  }
 
   const combinedTextStyle: TextStyle = {
     ...estilo.textoCorLight,
     ...estilo.textoP16px,
   };
   const { aluno } = route.params;
-  const [arrayPse, setArrayPse] = useState<Array<object>>([]);
+
+
+  
+  const [arrayPse, setArrayPse] = useState<Array<DadosQTR>>([]);
   const [carregandoDados, setCarregandoDados] = useState<boolean>(true);
   const [conexao, setConexao] = useState<boolean>(true);
   const [arrayMeses, setArrayMeses] = useState<Array<MesesObj>>([]);
@@ -214,6 +229,8 @@ export default ({ route }) => {
   }, [mesSelecionado, arrayBotaoSelectSemRepeticoes]);
 
   const eixoXNoGrafico = arrayPseNoGrafico.map((i, element) => `Dia ${element + 1}`);
+
+
   return (
     <ScrollView style={[estilo.corLightMenos1, style.container]}>
       <SafeAreaView>

@@ -28,9 +28,12 @@ export default function Routes({ route, navigation }) {
   const { aluno, academia } = route.params
 
 
-  useEffect(() => {
+  useEffect( () => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setConexao(state.type === 'wifi' || state.type === 'cellular')
+      const keys = AsyncStorage.getAllKeys();
+      const numberOfKeys = keys.length;
+
       if (conexao !== '') {
         if (conexao) {
           fetchDadosWifi()
@@ -47,6 +50,8 @@ export default function Routes({ route, navigation }) {
 
   const fetchDadosWifi = async () => {
     setProgresso(0)
+
+    console.log('alUNO', aluno)
     try {
       const bd = getFirestore()
       const fichasRef = collection(bd, "Academias", aluno.Academia, "Alunos", `${aluno.email}`, 'FichaDeExercicios')
@@ -70,8 +75,8 @@ export default function Routes({ route, navigation }) {
 
         index++
       }
-      console.log('arrayFichaAux ', arrayFichaAux)
-      console.log(aluno)
+
+
       setProgresso(0.3)
       setFichas(arrayFichaAux)
       const avaliacoesRef = collection(bd, "Academias", aluno.Academia, "Alunos", `${aluno.email}`, 'Avaliações')
@@ -148,20 +153,20 @@ export default function Routes({ route, navigation }) {
         if (key.includes('Ficha')) {
           const itemDoAS = await AsyncStorage.getItem(key)
           const itemDoAsJSON = JSON.parse(itemDoAS)
-          //console.log("Key: ", key, "item do AS:", itemDoAsJSON)
+
           fichasAux.push(itemDoAsJSON)
           setProgresso(0.3)
         }
         if (key.includes('Avaliacao')) {
           const itemDoAS = await AsyncStorage.getItem(key)
           const itemDoAsJSON = JSON.parse(itemDoAS)
-         // console.log("Key: ", key, "item do AS:", itemDoAsJSON)
+
           avaliacoesAux.push(itemDoAsJSON)
           setProgresso(0.6)
         }
 
       }
-      console.log("Fichas Aux", fichasAux)
+
       setAvaliacoes(avaliacoesAux)
       setFichas(fichasAux)
     } catch (error) {
@@ -170,8 +175,8 @@ export default function Routes({ route, navigation }) {
       setCarregando(false)
       setProgresso(1)
     }
-    console.log("fichas na tela anterior ", fichas)
-    //console.log("avaliacoes na tela anterior", avaliacoes)
+
+
   }
 
   const verificaDocumentos = async () => {
@@ -184,19 +189,19 @@ export default function Routes({ route, navigation }) {
           index = 0
           if (value) {
             if (key.includes('Diario') && !key.includes('Exercicio')) {
-              console.log("Chegou aqui ZAS");
 
-              console.log('keykeykeykeykeykey ', key, " Value ", value);
+              
+
               const chavesDoDiario = key.split(' ');
               const palavraDiario = chavesDoDiario[0];
               const palavraData = chavesDoDiario[1];
 
-              console.log('palavraDiario', palavraDiario);
-              console.log('palavraData', palavraData);
+
+              ;
 
               const diarioDoc = JSON.parse(value);
-              console.log("DiarioDoc", diarioDoc);
 
+              
               setDoc(doc(bd, "Academias", aluno.Academia, "Alunos", `Aluno ${aluno.email}`, 'Diarios', `Diario${palavraData}`), diarioDoc);
               AsyncStorage.removeItem(key)
 
@@ -204,20 +209,15 @@ export default function Routes({ route, navigation }) {
             }
             if (key.includes('Diario') && key.includes('Exercicio')) {
 
-              console.log('keykeykeykeykeykey ', key, " Value ", value);
               const chavesDoDiario = key.split(' ');
               const palavraDiario = chavesDoDiario[0];
               const palavraData = chavesDoDiario[1];
               const palavraExercicio = chavesDoDiario[2];
               const palavraExercicio2 = chavesDoDiario[3];
               const palavraNumeroExercicio = chavesDoDiario[4]
-              console.log('palavraDiario', palavraDiario);
-              console.log('palavraData', palavraData);
-              console.log('palavraExercicio', palavraExercicio);
-              console.log('palavraExercicio', palavraExercicio2);
+
 
               const diarioDoc = JSON.parse(value);
-              console.log("DiarioDoc", diarioDoc);
 
 
               setDoc(doc(bd, "Academias", aluno.Academia, "Alunos", `Aluno ${aluno.email}`, 'Diarios', `Diario${palavraData}`, 'Exercicio', `Exercicio ${palavraNumeroExercicio}`), diarioDoc);

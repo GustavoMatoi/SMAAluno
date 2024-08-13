@@ -14,7 +14,7 @@ import NetInfo from '@react-native-community/netinfo';
 import ModalSemConexao from '../ModalSemConexao'
 import Modal from 'react-native-modal'
 import { FontAwesome5 } from '@expo/vector-icons';
-import { collection, doc, getDocs, getFirestore } from 'firebase/firestore'
+import { collection, collectionGroup, doc, getDocs, getFirestore, query, where } from 'firebase/firestore'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Aluno } from '../../classes/Aluno'
 import { Endereco } from '../../classes/Endereco'
@@ -130,7 +130,6 @@ export default ({ navigation }) => {
     };
 
     fetchData();
-    getValueFunction()
   }, [])
 
   const checkWifiConnection = () => {
@@ -159,9 +158,10 @@ export default ({ navigation }) => {
         await AsyncStorage.setItem('senha', password);
         setPassword('');
       }
-      await getValueFunction();
     } catch (error) {
       console.error('Erro ao salvar dados no AsyncStorage:', error);
+    } finally {
+      getValueFunction()
     }
   };
   const getValueFunction = async () => {
@@ -215,79 +215,35 @@ export default ({ navigation }) => {
       }
     }
   };
-  useEffect(() => {
-    fetchAlunoData()
-  }, [])
+
   const fetchAlunoData = async () => {
     const firebaseBD = getFirestore()
-    try {
-      const academiaRef = collection(firebaseBD, "Academias");
-      const querySnapshot = await getDocs(academiaRef);
-      for (const academiaDoc of querySnapshot.docs) {
-        const academiaNome = academiaDoc.get("nome");
-        const alunosRef = collection(firebaseBD, "Academias", academiaNome, "Alunos");
-        console.log("Chegou aqui")
-        const alunosSnapshot = await getDocs(alunosRef);
+   
 
-        for (const alunoDoc of alunosSnapshot.docs) {
-          const alunoEmail = alunoDoc.get("email")
-          const alunoAcademia = alunoDoc.get('Academia')
-          console.log(alunoEmail)
-          const alunoLogin = collection(firebaseBD,"Academias", alunoAcademia,  "Alunos");
-          console.log(alunoAcademia)
-          console.log("Chegou aqui3")
+  try {
+    const alunosQuery = query(
+      collectionGroup(firebaseBD, 'Alunos'),
+      where('email', '==', email)  // Replace 'email' with the email you want to query
+    );
 
-          const alunoSnapshot = await getDocs(alunoLogin);
-          for (const alunoDoc of alunoSnapshot.docs) {
-            console.log('email', email)
-            console.log('alunoDoc.get(email)', alunoDoc.get('email'))
-            if (email.trim() === alunoDoc.get("email")) {
-              console.log("AAAAAAAAAAAAAAAAAAAAAAAa")
-              const academiaData = academiaDoc.data()
-              const alunoData = alunoDoc.data()
-            setAlunoData(alunoDoc.data())
-            alunoLogado.setNome(alunoData.nome);
-            alunoLogado.setEmail(alunoData.email);
-            alunoLogado.setSenha(alunoData.senha)
-            alunoLogado.setDiaNascimento(alunoData.diaNascimento);
-            alunoLogado.setMesNascimento(alunoData.mesNascimento);
-            alunoLogado.setAnoNascimento(alunoData.anoNascimento);
-            alunoLogado.setProfessor(alunoData.professorResponsavel)
-            alunoLogado.setSexo(alunoData.sexo);
-            alunoLogado.setProfissao(alunoData.profissao);
-            alunoLogado.setCpf(alunoData.cpf);
-            alunoLogado.setTelefone(alunoData.telefone);
-            enderecoAluno.setBairro(alunoData.endereco.bairro)
-            enderecoAluno.setCep(alunoData.endereco.cep)
-            enderecoAluno.setCidade(alunoData.endereco.cidade)
-            enderecoAluno.setEstado(alunoData.endereco.estado)
-            enderecoAluno.setRua(alunoData.endereco.rua)
-            enderecoAluno.setNumero(alunoData.endereco.numero)
-            alunoLogado.setAcademia(alunoData.academia)
-            alunoLogado.setInativo(alunoData.inativo)
-            enderecoAcademia.setBairro(academiaData.endereco.bairro)
-            enderecoAcademia.setCep(academiaData.endereco.cep)
-            enderecoAcademia.setCidade(academiaData.endereco.cidade)
-            enderecoAcademia.setEstado(academiaData.endereco.estado)
-            enderecoAcademia.setNumero(academiaData.endereco.numero)
-            const alunoString = JSON.stringify(alunoData)
-            const academiaString = JSON.stringify(academiaDoc.data())
-            console.log('academiaString ', academiaString)
-            AsyncStorage.setItem('alunoLocal', alunoString)
-            AsyncStorage.setItem('academia', academiaString)
-          }
-        }
-      }
-    }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      //console.log('finally')
-      saveValueFunction()
-
-    }
-
+    const querySnapshot = await getDocs(alunosQuery);
+    querySnapshot.forEach((doc) => {
+      const alunoData = doc.data();
+      console.log('Aluno encontrado:', alunoData);
+      
+      setAlunoData(alunoData);
+      alunoLogado.setNome(alunoData.nome);
+      const alunoString = JSON.stringify(alunoData);
+      AsyncStorage.setItem('alunoLocal', alunoString);
+    });
+  } catch (error) {
+    console.log('Erro ao buscar os dados do aluno:', error);
+  } finally {
+    saveValueFunction()
   }
+}
+
+  
   return (
     <SafeAreaView style={[Estilo.corLightMenos1]}>
       <View style={style.container}>
