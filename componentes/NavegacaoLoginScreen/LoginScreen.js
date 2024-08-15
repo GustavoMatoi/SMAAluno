@@ -14,7 +14,7 @@ import NetInfo from '@react-native-community/netinfo';
 import ModalSemConexao from '../ModalSemConexao'
 import Modal from 'react-native-modal'
 import { FontAwesome5 } from '@expo/vector-icons';
-import { collection, collectionGroup, doc, getDocs, getFirestore, query, where } from 'firebase/firestore'
+import { collection, collectionGroup, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Aluno } from '../../classes/Aluno'
 import { Endereco } from '../../classes/Endereco'
@@ -167,14 +167,20 @@ export default ({ navigation }) => {
   const getValueFunction = async () => {
     const alunoLocalTeste = await AsyncStorage.getItem('alunoLocal')
     const academiaLocal = await AsyncStorage.getItem('academia')
-    const academiaObj = JSON.parse(academiaLocal)
     const alunoObj = JSON.parse(alunoLocalTeste)
-
+    const academiaObj = await getAcademia(alunoObj.Academia)
+    console.log('alunoObj', alunoObj)
     console.log('academiaObj ', academiaObj)
     if (alunoObj !== null) {
       try {
         const storedEmail = await AsyncStorage.getItem('alunoLocal');
+
         const dadosAluno = JSON.parse(storedEmail)
+        
+        
+        console.log('dadosAluno', dadosAluno)
+
+        console.log("dadosAluno.endereco", dadosAluno.endereco)
         alunoLogado.setNome(dadosAluno.nome);
         alunoLogado.setEmail(dadosAluno.email);
         alunoLogado.setSenha(dadosAluno.senha)
@@ -193,6 +199,10 @@ export default ({ navigation }) => {
         enderecoAluno.setRua(dadosAluno.endereco.rua)
         enderecoAluno.setNumero(dadosAluno.endereco.numero)
         alunoLogado.setAcademia(dadosAluno.academia)
+
+
+        console.log("ACademiaOjb", academiaObj)
+
         enderecoAcademia.setBairro(academiaObj.endereco.bairro)
         enderecoAcademia.setRua(academiaObj.endereco.rua)
         enderecoAcademia.setCidade(academiaObj.endereco.cidade)
@@ -219,11 +229,10 @@ export default ({ navigation }) => {
   const fetchAlunoData = async () => {
     const firebaseBD = getFirestore()
    
-
   try {
     const alunosQuery = query(
       collectionGroup(firebaseBD, 'Alunos'),
-      where('email', '==', email)  // Replace 'email' with the email you want to query
+      where('email', '==', email) 
     );
 
     const querySnapshot = await getDocs(alunosQuery);
@@ -235,6 +244,8 @@ export default ({ navigation }) => {
       alunoLogado.setNome(alunoData.nome);
       const alunoString = JSON.stringify(alunoData);
       AsyncStorage.setItem('alunoLocal', alunoString);
+      academiaDoAluno = alunoData.Academia
+      
     });
   } catch (error) {
     console.log('Erro ao buscar os dados do aluno:', error);
@@ -243,6 +254,21 @@ export default ({ navigation }) => {
   }
 }
 
+const getAcademia = async (nomeAcademia) => {
+  const db = getFirestore()
+  let academiaObj = {}
+  try { 
+    const academiaRef = doc(db, 'Academias', nomeAcademia)
+    const queryAcademia = await getDoc(academiaRef)
+
+    academiaObj = queryAcademia.data()
+
+  } catch (error){
+    Alert.alert("Academia não encontrada", "Ocorreu um erro ao buscar pela academia. Tente novamente mais tarde.")
+    console.log(error)
+  }
+  return academiaObj
+}
   
   return (
     <SafeAreaView style={[Estilo.corLightMenos1]}>
