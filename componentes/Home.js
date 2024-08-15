@@ -158,8 +158,6 @@ export default ({ navigation, route }) => {
     }
   }
 
-  console.log("Oii")
-
 
 
   const handlePressAnalise = () => {
