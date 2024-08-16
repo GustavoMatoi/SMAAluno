@@ -280,7 +280,8 @@ export default ({ navigation }) => {
     <SafeAreaView style={[Estilo.corLightMenos1]}>
       <View style={style.container}>
         <View style={style.areaLogo}>
-          <Logo tamanho="grande"></Logo>
+          <Logo tamanho="grande" style={[Estilo.tituloH619px]}></Logo>
+          
         </View>
         <View style={style.areaLogin}>
           <Text style={[Estilo.tituloH619px]}> Email: </Text>
@@ -362,16 +363,13 @@ export default ({ navigation }) => {
 export { alunoLogado, enderecoAluno }
 
 const style = StyleSheet.create({
-  //Geral
   container: {
     marginBottom: '5%',
     height: '100%'
   },
-  //Logo
   areaLogo: {
     marginTop: '5%'
   },
-  //Area de login
   areaLogin: {
     marginTop: '30%',
     marginLeft: 'auto',
