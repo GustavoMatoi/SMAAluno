@@ -33,10 +33,14 @@ export default function Routes({ route, navigation }) {
       setConexao(state.type === 'wifi' || state.type === 'cellular')
       const keys = AsyncStorage.getAllKeys();
       const numberOfKeys = keys.length;
-
+      console.log(numberOfKeys)
       if (conexao !== '') {
         if (conexao) {
-          fetchDadosWifi()
+          if(numberOfKeys < 1){
+            fetchDadosWifi()
+          } else { 
+            fetchAlunosSemNet()
+          }
         } else {
           fetchAlunosSemNet()
         }
