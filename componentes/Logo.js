@@ -12,6 +12,7 @@ export default props => {
                 <View style={[Estilo.corPrimariaMais1, style.logoAluno]}>
                         <Text style={[Estilo.tituloH333px, Estilo.textoCorLight]}>ALUNO</Text>
                 </View>
+                <Text style={[Estilo.textoP16px, Estilo.textoCorDark, style.version ]}>Versao 2.1.1</Text>
             </View>
         )
     } else {
@@ -53,5 +54,8 @@ const style = StyleSheet.create({
         heigh: 40,
         marginLeft: 'auto',
         marginRight: 'auto'
+    },version: {
+        textAlign: 'center', 
+        marginTop: 10,
     },
 }   )
