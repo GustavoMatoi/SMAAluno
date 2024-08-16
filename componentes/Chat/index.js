@@ -79,7 +79,7 @@ export default ({navigation, route}) => {
           setCarregandoProfessores(false);
           console.log('newArrayProfessores', newArrayProfessores)
         } catch (error) {
-          console.log(error);
+          Alert.alert("Ocorreu um erro", error);
         }
       };
     
