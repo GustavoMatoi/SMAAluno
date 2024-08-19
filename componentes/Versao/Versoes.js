@@ -3,39 +3,23 @@ import {Text, View, SafeAreaView, StyleSheet, TouchableOpacity,Modal, ScrollView
 import estilo from '../estilo'
 import {useFonts} from 'expo-font'
 
-export default ({tipo,remetente, data, texto, titulo, pressando}) => {
+
+export default  ({versao}) => {
     const [fontsLoaded] = useFonts({
         'Montserrat': require('../../assets/Montserrat-Light.ttf'),
-    })
-    const [modalVisible, setModalVisible] = useState(false)
+    });
+    const [modalVisible, setModalVisible] = useState(false);
 
-    if (tipo == 'professor'){
-        return (
+    return ( 
+        <SafeAreaView>
             <TouchableOpacity style={[style.container, estilo.corPrimariaMenos1]}>
-                <Text style={[estilo.tituloH619px, estilo.textoCorSecundaria, style.alinhamentoTitulo]}>  
-                {data} - {titulo}
-                </Text>
                 <Text style={[style.alinhamentoTitulo, estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>
-                {texto} - {remetente}
+                    Versao: {versao}
                 </Text>
-
             </TouchableOpacity>
-)
-    } else {
-        return (
-            <TouchableOpacity style={[style.container, estilo.corDisabled]}>
-                <Text style={[estilo.tituloH619px, estilo.textoCorDarkMenos1, style.alinhamentoTitulo]}>  
-                  {data} - {titulo}
-                </Text>
-                <Text style={[style.alinhamentoTitulo, estilo.textoP16px, estilo.textoCorDarkMenos1, style.Montserrat]}>
-                    {texto} - {remetente}
-                </Text>
-
-            </TouchableOpacity>
-)
-    }
-
-}
+        </SafeAreaView>
+    );
+};
 
 const style = StyleSheet.create({
     container: {
