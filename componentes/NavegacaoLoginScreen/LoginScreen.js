@@ -115,22 +115,6 @@ export default ({ navigation }) => {
     }
   }, [])
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const keys = await AsyncStorage.getAllKeys();
-
-        for (const key of keys) {
-          const value = await AsyncStorage.getItem(key);
-          console.log(`Chave: ${key}, Valor: ${value}`);
-        }
-      } catch (error) {
-        console.error('Erro ao obter dados do AsyncStorage:', error);
-      }
-    };
-
-    fetchData();
-  }, [])
 
   const checkWifiConnection = () => {
     NetInfo.fetch().then((state) => {
@@ -165,21 +149,21 @@ export default ({ navigation }) => {
     }
   };
   const getValueFunction = async () => {
+    console.log("Chegou aqui ")
     const alunoLocalTeste = await AsyncStorage.getItem('alunoLocal')
-    const academiaLocal = await AsyncStorage.getItem('academia')
     const alunoObj = JSON.parse(alunoLocalTeste)
-    const academiaObj = await getAcademia(alunoObj.Academia)
+    const academiaObj = await getAcademia(alunoObj.Academia || 'Academia IFRP')
+
+    console.log("Chegou aqui 2")
+
     console.log('alunoObj', alunoObj)
-    console.log('academiaObj ', academiaObj)
+
+    console.log(academiaObj)
     if (alunoObj !== null) {
       try {
         const storedEmail = await AsyncStorage.getItem('alunoLocal');
-
         const dadosAluno = JSON.parse(storedEmail)
-        
-        
         console.log('dadosAluno', dadosAluno)
-
         console.log("dadosAluno.endereco", dadosAluno.endereco)
         alunoLogado.setNome(dadosAluno.nome);
         alunoLogado.setEmail(dadosAluno.email);
@@ -199,15 +183,12 @@ export default ({ navigation }) => {
         enderecoAluno.setRua(dadosAluno.endereco.rua)
         enderecoAluno.setNumero(dadosAluno.endereco.numero)
         alunoLogado.setAcademia(dadosAluno.academia)
-
-
         console.log("ACademiaOjb", academiaObj)
-
-        enderecoAcademia.setBairro(academiaObj.endereco.bairro)
-        enderecoAcademia.setRua(academiaObj.endereco.rua)
-        enderecoAcademia.setCidade(academiaObj.endereco.cidade)
-        enderecoAcademia.setEstado(academiaObj.endereco.estado)
-        enderecoAcademia.setNumero(academiaObj.endereco.numero)
+        enderecoAcademia.setBairro(academiaObj.endereco.bairro || 'Lindo Vale')
+        enderecoAcademia.setRua(academiaObj.endereco.rua || "Avenida  Dr. José Sebastião da Paixão")
+        enderecoAcademia.setCidade(academiaObj.endereco.cidade || 'Rio Pomba')
+        enderecoAcademia.setEstado(academiaObj.endereco.estado || 'MG')
+        enderecoAcademia.setNumero(academiaObj.endereco.numero || 150)
         const emailAluno = dadosAluno.email
         setEmail(emailAluno || '');
 
@@ -216,9 +197,9 @@ export default ({ navigation }) => {
 
         if (emailAluno && senhaAluno) {
           if (conexao) {
-            await firebase.auth().signInWithEmailAndPassword(emailAluno, senhaAluno);
+            navigation.navigate('Principal', { aluno: dadosAluno, academia: academiaObj });
+            //await firebase.auth().signInWithEmailAndPassword(emailAluno, senhaAluno);
           }
-         navigation.navigate('Principal', { aluno: dadosAluno, academia: academiaObj });
         }
       } catch (error) {
         console.error('Erro ao obter dados do AsyncStorage ou fazer login:', error);
@@ -227,49 +208,74 @@ export default ({ navigation }) => {
   };
 
   const fetchAlunoData = async () => {
-    const firebaseBD = getFirestore()
-   
-  try {
-    const alunosQuery = query(
-      collectionGroup(firebaseBD, 'Alunos'),
-      where('email', '==', email) 
-    );
+    const alunoLocalTeste = await AsyncStorage.getItem('alunoLocal')
+    console.log('alunoLocalTeste', alunoLocalTeste)
+    const keys = await AsyncStorage.getAllKeys();
+    const numberOfKeys = keys.length;
 
-    const querySnapshot = await getDocs(alunosQuery);
-    querySnapshot.forEach((doc) => {
-      const alunoData = doc.data();
-      console.log('Aluno encontrado:', alunoData);
-      
-      setAlunoData(alunoData);
-      alunoLogado.setNome(alunoData.nome);
-      const alunoString = JSON.stringify(alunoData);
-      AsyncStorage.setItem('alunoLocal', alunoString);
-      academiaDoAluno = alunoData.Academia
-      
-    });
-  } catch (error) {
-    console.log('Erro ao buscar os dados do aluno:', error);
-  } finally {
-    saveValueFunction()
+    console.log('numberOfKeys', numberOfKeys)
+    if (numberOfKeys < 1) {
+      const firebaseBD = getFirestore()
+
+      try {
+        const alunosQuery = query(
+          collectionGroup(firebaseBD, 'Alunos'),
+          where('email', '==', email)
+        );
+
+        const querySnapshot = await getDocs(alunosQuery);
+        querySnapshot.forEach((doc) => {
+          const alunoData = doc.data();
+          console.log('Aluno encontrado:', alunoData);
+
+          setAlunoData(alunoData);
+          alunoLogado.setNome(alunoData.nome);
+          const alunoString = JSON.stringify(alunoData);
+          AsyncStorage.setItem('alunoLocal', alunoString);
+          academiaDoAluno = alunoData.Academia
+          console.log("Chamou por aqui")
+        });
+      } catch (error) {
+        console.log('Erro ao buscar os dados do aluno:', error);
+      } finally {
+        saveValueFunction()
+      }
+
+    } else {
+      console.log("Chamou por aqui2")
+
+      saveValueFunction()
+    }
+
   }
-}
 
-const getAcademia = async (nomeAcademia) => {
-  const db = getFirestore()
-  let academiaObj = {}
-  try { 
-    const academiaRef = doc(db, 'Academias', nomeAcademia)
-    const queryAcademia = await getDoc(academiaRef)
+  const getAcademia = async (nomeAcademia) => {
+    let academiaObj = {}
 
-    academiaObj = queryAcademia.data()
+    try {
+      const db = getFirestore()
+      const academiaRef = doc(db, 'Academias', nomeAcademia)
+      const queryAcademia = await getDoc(academiaRef)
+      academiaObj = queryAcademia.data()
+    } catch {
+      Alert.alert("No momento, não foi possível encontrar sua academia.", "Usando a academia IFRP de padrão")
+      return {
+        endereco: {
+          bairro: 'Lindo Vale',
+          rua: 'Avenida  Dr. José Sebastião da Paixão',
+          cidade: 'Rio Pomba',
+          estado: 'MG',
+          numero: 150
+        }
 
-  } catch (error){
-    Alert.alert("Academia não encontrada", "Ocorreu um erro ao buscar pela academia. Tente novamente mais tarde.")
-    console.log(error)
+      }
+    }
+
+
+
+    return academiaObj
   }
-  return academiaObj
-}
-  
+
   return (
     <SafeAreaView style={[Estilo.corLightMenos1]}>
       <View style={style.container}>
@@ -354,7 +360,7 @@ const getAcademia = async (nomeAcademia) => {
     </SafeAreaView>
   )
 }
-export {alunoLogado, enderecoAluno}
+export { alunoLogado, enderecoAluno }
 
 const style = StyleSheet.create({
   container: {
