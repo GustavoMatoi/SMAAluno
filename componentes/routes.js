@@ -28,28 +28,38 @@ export default function Routes({ route, navigation }) {
   const { aluno, academia } = route.params
 
 
-  useEffect( () => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      setConexao(state.type === 'wifi' || state.type === 'cellular')
-      const keys = AsyncStorage.getAllKeys();
+  useEffect(() => {
+    const checkConnectionAndFetchData = async () => {
+      const netInfo = await NetInfo.fetch();
+      const isConnected = netInfo.type === 'wifi' || netInfo.type === 'cellular';
+      setConexao(isConnected);
+  
+      const keys = await AsyncStorage.getAllKeys();
       const numberOfKeys = keys.length;
-      console.log(numberOfKeys)
-      if (conexao !== '') {
-        if (conexao) {
-          if(numberOfKeys < 1){
-            fetchDadosWifi()
-          } else { 
-            fetchAlunosSemNet()
-          }
+      console.log(numberOfKeys);
+  
+      if (isConnected) {
+        if (!keys.includes('Ficha')) {
+          fetchDadosWifi();
         } else {
-          fetchAlunosSemNet()
+          fetchAlunosSemNet();
         }
+      } else {
+        fetchAlunosSemNet();
       }
-    })
+    };
+  
+    const unsubscribe = NetInfo.addEventListener(() => {
+      checkConnectionAndFetchData();
+    });
+  
+    checkConnectionAndFetchData(); 
+  
     return () => {
-      unsubscribe()
-    }
-  }, [conexao])
+      unsubscribe();
+    };
+  }, []);
+  
 
 
   const fetchDadosWifi = async () => {

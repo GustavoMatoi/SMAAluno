@@ -213,7 +213,7 @@ export default ({ navigation }) => {
     const keys = await AsyncStorage.getAllKeys();
     const numberOfKeys = keys.length;
 
-    console.log('numberOfKeys', numberOfKeys)
+    console.log('numberOfKeys', numberOfKeys, keys)
     if (numberOfKeys < 1) {
       const firebaseBD = getFirestore()
 
@@ -232,6 +232,7 @@ export default ({ navigation }) => {
           alunoLogado.setNome(alunoData.nome);
           const alunoString = JSON.stringify(alunoData);
           AsyncStorage.setItem('alunoLocal', alunoString);
+          console.log("alunoData.Academia", alunoData.Academia)
           academiaDoAluno = alunoData.Academia
           console.log("Chamou por aqui")
         });

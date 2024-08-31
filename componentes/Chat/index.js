@@ -31,7 +31,6 @@ export default ({navigation, route}) => {
       }
 
     }, [])
-    const [carregandoAlunos, setCarregandoAlunos] = useState(true)
     useEffect(() => {
       const fetchProfessores = async () => {
         try {
