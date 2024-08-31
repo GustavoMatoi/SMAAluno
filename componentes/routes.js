@@ -5,7 +5,7 @@ import { Alert, Text } from 'react-native'
 import Perfil from './Perfil/Perfil'
 import {View} from "react-native"
 import Home from './Home'
-import Versoes from './Versao/Versoes'
+import Versoes from './Versao/index'
 import { Ionicons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';

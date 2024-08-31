@@ -4,12 +4,12 @@ import Versao from "./Versoes";
 import estilo from "../estilo";
 import NetInfo from '@react-native-community/netinfo';
 import { AntDesign } from '@expo/vector-icons';
-import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { collection, getDoc, getFirestore } from "firebase/firestore";
 import Globais from "../../classes/Globais";
 
 export default ({ route }) => {
     const variavelGlobal = new Globais('2.3.1'); 
-    const [atVersao, setAtVersao] = useState('');
+    const [atVersao, setAtVersao] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [conexao, setConexao] = useState(true);
 
@@ -19,9 +19,9 @@ export default ({ route }) => {
             const VersoesRef = collection(db, "Versao", "versao");
             
             try {
-                const VersoesSnapshot = await getDocs(VersoesRef);
-                const VersoesData = VersoesSnapshot.docs.map((doc) => doc.data());
-                setVersaoBd(versaoData.aluno)
+                const docData = await getDoc(versaoRef).data();
+                 console.log('Versão firebase:')
+                console.log(docData)
             } catch (error) {
                 console.log("Error fetching version:", error);
             } finally {
@@ -29,8 +29,10 @@ export default ({ route }) => {
             }
         }
         getVersoes();
+        //console.log(atVersao)
     }, []);
 
+    
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener(state => {
             setConexao(state.type === 'wifi' || state.type === 'cellular');
@@ -41,11 +43,11 @@ export default ({ route }) => {
         };
     }, []);
     console.log('Versão atual:', variavelGlobal.versao);
-    console.log('Versão do Firebase:', atVersao);
+    //console.log('Versão do Firebase:', atVersao);
     return (
         <ScrollView>
             <SafeAreaView style={estilo.corLightMenos1}>
-                <Text style={[estilo.tituloH427px, estilo.textoCorSecundaria, style.alinhamentoTexto]}>Versões</Text>
+                <Text style={[estilo.tituloH427px, estilo.textoCorSecundaria]}>Versões</Text>
                 {conexao ? (
                     (variavelGlobal.versao === atVersao) ? (
                         <Versao versao={variavelGlobal.versao} />
@@ -56,8 +58,7 @@ export default ({ route }) => {
                                 "Por favor, atualize a versão do seu aplicativo."
                             );
                         }}
-                        style={[estilo.centralizado, { marginTop: '10%', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }]}
-                        >
+                        style={[estilo.centralizado, { marginTop: '10%', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }]}>
                             <Text style={[estilo.textoP16px, estilo.textoCorDisabled]}>VERSÃO INCORRETA - </Text>
                             <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
                         </TouchableOpacity>
@@ -75,6 +76,7 @@ export default ({ route }) => {
                         <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
                     </TouchableOpacity>
                 )}
+                
             </SafeAreaView>
         </ScrollView>
     );
