@@ -214,7 +214,7 @@ export default ({ navigation }) => {
     const numberOfKeys = keys.length;
 
     console.log('numberOfKeys', numberOfKeys, keys)
-    if (numberOfKeys < 1) {
+    if (!keys.includes('ficha')) {
       const firebaseBD = getFirestore()
 
       try {
@@ -222,8 +222,9 @@ export default ({ navigation }) => {
           collectionGroup(firebaseBD, 'Alunos'),
           where('email', '==', email)
         );
-
         const querySnapshot = await getDocs(alunosQuery);
+        console.log("VVVVVVVVV")
+
         querySnapshot.forEach((doc) => {
           const alunoData = doc.data();
           console.log('Aluno encontrado:', alunoData);
@@ -235,10 +236,14 @@ export default ({ navigation }) => {
           console.log("alunoData.Academia", alunoData.Academia)
           academiaDoAluno = alunoData.Academia
           console.log("Chamou por aqui")
+          console.log("VVVVVVVVV")
+
         });
       } catch (error) {
         console.log('Erro ao buscar os dados do aluno:', error);
       } finally {
+        console.log("AAAAAAAAAAAAAAAAAA")
+
         saveValueFunction()
       }
 

@@ -4,7 +4,7 @@ import Versao from "./Versoes";
 import estilo from "../estilo";
 import NetInfo from '@react-native-community/netinfo';
 import { AntDesign } from '@expo/vector-icons';
-import { collection, getDoc, getFirestore } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, getFirestore } from "firebase/firestore";
 import Globais from "../../classes/Globais";
 
 export default ({ route }) => {
@@ -16,12 +16,19 @@ export default ({ route }) => {
     useEffect(() => {
         async function getVersoes() {
             const db = getFirestore();
-            const VersoesRef = collection(db, "Versao", "versao");
-            
+            const versoesRef = doc(db, "Versao", "versao");
+            console.log("Chegou aqui 1");
             try {
-                const docData = await getDoc(versaoRef).data();
-                 console.log('Versão firebase:')
-                console.log(docData)
+                const docSnapshot = await getDoc(versoesRef);
+                if (docSnapshot.exists()) {
+                    const docData = docSnapshot.data();
+                    console.log("Chegou aqui 2");
+    
+                    console.log('Versão firebase:');
+                    console.log(docData);
+                } else {
+                    console.log("No such document!");
+                }
             } catch (error) {
                 console.log("Error fetching version:", error);
             } finally {
@@ -29,8 +36,8 @@ export default ({ route }) => {
             }
         }
         getVersoes();
-        //console.log(atVersao)
     }, []);
+    
 
     
     useEffect(() => {
