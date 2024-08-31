@@ -1,7 +1,10 @@
 import React from "react"
 import {Text, View, StyleSheet} from 'react-native'
 import Estilo from "./estilo"
+import Globais from "../classes/Globais"
 export default props => {
+    const variavelGlobal = new Globais('2.2.1');
+    
     if (props.tamanho == 'grande'){
         return (
             <View>
@@ -12,7 +15,7 @@ export default props => {
                 <View style={[Estilo.corPrimariaMais1, style.logoAluno]}>
                         <Text style={[Estilo.tituloH333px, Estilo.textoCorLight]}>ALUNO</Text>
                 </View>
-                <Text style={[Estilo.textoP16px, Estilo.textoCorDark, style.version ]}>Versao 2.3.1</Text>
+                <Text style={[Estilo.textoP16px, Estilo.textoCorDark, style.version ]}>Versao 2.1.1</Text>
             </View>
         )
     } else {

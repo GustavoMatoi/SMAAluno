@@ -5,10 +5,11 @@ import { Alert, Text } from 'react-native'
 import Perfil from './Perfil/Perfil'
 import {View} from "react-native"
 import Home from './Home'
-import Notificacoes from './Notificacoes'
+import Versoes from './Versao/Versoes'
 import { Ionicons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
+import { Octicons } from '@expo/vector-icons';
 import { enderecoAcademia, enderecoAluno, alunoLogado } from "./NavegacaoLoginScreen/LoginScreen";
 import NetInfo from "@react-native-community/netinfo"
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -289,11 +290,11 @@ export default function Routes({ route, navigation }) {
           tabBarIcon: ({ size, color }) => (<AntDesign name="user" size={size} color={color} />)
         }} />
       <Tab.Screen
-        name="Notificações"
+        name="Versoes"
         initialParams={{aluno}}
-        component={Notificacoes}
+        component={Versoes}
         options={{
-          tabBarIcon: ({ size, color }) => (<Ionicons name="notifications-outline" size={size} color={color} />)
+          tabBarIcon: ({ size, color }) => (<Octicons name="versions" size={size} color={color} />)
         }} />
     </Tab.Navigator>
   )
