@@ -143,7 +143,7 @@ export default ({ navigation, route }) => {
 
   const handlePressIniciarTreino = async () => {
     console.log(distanciaDaAcademia)
-    if (distanciaDaAcademia < 1000) {
+    if (distanciaDaAcademia < 10000) {
       navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
     }  else {
       Alert.alert(

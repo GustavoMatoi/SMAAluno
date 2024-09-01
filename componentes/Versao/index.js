@@ -22,10 +22,9 @@ export default ({ route }) => {
                 const docSnapshot = await getDoc(versoesRef);
                 if (docSnapshot.exists()) {
                     const docData = docSnapshot.data();
-                    console.log("Chegou aqui 2");
-    
+                    setAtVersao(docData.aluno)
                     console.log('Versão firebase:');
-                    console.log(docData);
+                    console.log(atVersao);
                 } else {
                     console.log("No such document!");
                 }
@@ -54,8 +53,10 @@ export default ({ route }) => {
     return (
         <ScrollView>
             <SafeAreaView style={estilo.corLightMenos1}>
-                <Text style={[estilo.tituloH427px, estilo.textoCorSecundaria]}>Versões</Text>
-                {conexao ? (
+                <Text style={[estilo.tituloH427px, estilo.textoCorSecundaria, style.Titulo, style.alinhamentoTexto]}>Versões</Text>
+                
+            </SafeAreaView>
+            {conexao ? (
                     (variavelGlobal.versao === atVersao) ? (
                         <Versao versao={variavelGlobal.versao} />
                     ) : (
@@ -83,8 +84,6 @@ export default ({ route }) => {
                         <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
                     </TouchableOpacity>
                 )}
-                
-            </SafeAreaView>
         </ScrollView>
     );
 }
@@ -92,5 +91,9 @@ export default ({ route }) => {
 const style = StyleSheet.create({
     alinhamentoTexto: {
         margin: 20
+    },
+    Titulo:{
+        marginTop: 25,
+        marginBotton: 20
     }
 });

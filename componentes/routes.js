@@ -87,7 +87,6 @@ export default function Routes({ route, navigation }) {
           const exercicioData = exercicioDoc.data()
           arrayFichaAux[index].Exercicios.push(exercicioData)
         }
-
         index++
       }
 

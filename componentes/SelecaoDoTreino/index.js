@@ -34,18 +34,36 @@ export default ({ navigation, route }) => {
 
 
   const handleNavegacaoFicha = () => {
-    diario.maneiraDeTreino = "Ficha"
-    navigation.navigate('Ficha', { diario: diario, ficha, aluno })
+    const fichaAExiste = ficha.Exercicios.some(exercicio => exercicio.ficha === "A");
+
+    if (fichaAExiste) {
+      diario.maneiraDeTreino = "Ficha"
+      navigation.navigate('Escolher Ficha', { diario: diario, ficha, aluno })
+    }else{
+      diario.maneiraDeTreino = "Ficha"
+      navigation.navigate('Ficha', { diario: diario, ficha, aluno })
+    }
   }
 
   const handleNavegacaoDiario = () => {
+    const fichaAExiste = ficha.Exercicios.some(exercicio => exercicio.ficha === "A");
 
-    diario.maneiraDeTreino = 'Diario'
     if (!detalhamento.Exercicios) detalhamento.Exercicios = []
-    console.log('Aa')
-    for (let i = 0; i < ficha.Exercicios.length; i++) {
-      detalhamento.Exercicios[i] = {}
-      navigation.navigate('Diario', { diario: diario, ficha, aluno, detalhamento });
+
+    if (fichaAExiste) {
+      diario.maneiraDeTreino = "Diario";
+      console.log('Aa')
+      for (let i = 0; i < ficha.Exercicios.length; i++) {
+        detalhamento.Exercicios[i] = {}
+        navigation.navigate('Escolher Ficha', { diario: diario, ficha, aluno, detalhamento });
+      }
+    } else{
+      diario.maneiraDeTreino = 'Diario'
+      console.log('Aa')
+      for (let i = 0; i < ficha.Exercicios.length; i++) {
+        detalhamento.Exercicios[i] = {}
+        navigation.navigate('Diario', { diario: diario, ficha, aluno, detalhamento });
+      }
     }
   }
 

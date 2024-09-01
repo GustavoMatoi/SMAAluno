@@ -5,6 +5,7 @@ import FichaDeTreino from "../Ficha/FichaDeTreino"
 import Caixinha from "./Caixinha"
 
 export default ({ route }) => {
+    
     const { ficha } = route.params
 
     console.log(ficha)
@@ -14,8 +15,7 @@ export default ({ route }) => {
                 <Text style={[estilo.textoCorLight, estilo.tituloH240px, estilo.centralizado]}>FICHA</Text>
 
             </SafeAreaView>
-            {
-                ficha ? 
+            {ficha ? 
                 <SafeAreaView style={[estilo.corLightMenos1, style.body]}>
                 <View style={[{ marginTop: -80, width: '90%', marginLeft: 'auto' }]}>
                     <Caixinha responsavel={ficha.responsavel} dataFim={ficha.dataFim} dataInicio={ficha.dataInicio} objetivoDoTreino={ficha.objetivoDoTreino} />

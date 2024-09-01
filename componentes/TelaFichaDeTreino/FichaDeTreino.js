@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import { Text, View, BackHandler, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native'
+import { Text, View, BackHandler, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, FlatList } from 'react-native'
 import estilo from "../estilo"
 import FichaDeTreino from "../Ficha/FichaDeTreino"
 import Caixinha from "./Caixinha"
@@ -7,7 +7,6 @@ import NetInfo from '@react-native-community/netinfo';
 import { Entypo } from '@expo/vector-icons';
 
 import { AntDesign } from '@expo/vector-icons';
-
 export default ({ navigation, route }) => {
     const backButtonRef = useRef(0)
     const [ultimaFicha, setUltimaFicha] = useState([]);

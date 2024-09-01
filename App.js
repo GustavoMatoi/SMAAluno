@@ -14,7 +14,8 @@ import PARQ from './componentes/Parq'
 import Anamnese from './componentes/Anamnese'
 import SelecaoDoTreino from './componentes/SelecaoDoTreino';
 import EvolucaoDoTreino from './componentes/EvolucaoDoTreino';
-import RecuperarSenhaTela2 from './componentes/recuperarSenha/RecuperarSenhaTela2'
+import EscolherFicha from './componentes/SelecaoDoTreino/EscolhaFichas';
+import RecuperarSenhaTela2 from './componentes/recuperarSenha/RecuperarSenhaTela2';
 import RecuperarSenhaTela3 from './componentes/recuperarSenha/RecuperarSenhaTela3';
 import RecuperarSenhaTela4 from './componentes/recuperarSenha/RecuperarSenhaTela4'
 import ModalSuccessSenha from './componentes/ModalSuccess/ModalSuccessRecuperarSenha';
@@ -103,6 +104,7 @@ export default function App() {
 
 
       <Stack.Screen name="Seleção do Treino" component={SelecaoDoTreino}/>
+      <Stack.Screen name="Escolher Ficha" component={EscolherFicha}/>
       <Stack.Screen name="Evolução do treino" component={EvolucaoDoTreino}/>
       <Stack.Screen name="EVOLUÇÃO CORPORAL" component={EvolucaoCorporal}/>
       <Stack.Screen name="EVOLUÇÃO DOS TESTES" component={EvolucaoDosTestes}/>
