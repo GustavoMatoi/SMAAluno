@@ -38,9 +38,13 @@ export default ({ navigation, route }) => {
     mes = `0${mes}`
   }
   const exercicios = [...ficha.Exercicios]
+
+
+  console.log("Detalhamento", detalhamento)
   const handleBackPress = () => {
     setBackPressedCount(backPressedCount + 1);
 
+    
     if (backPressedCount === 1) {
       Alert.alert('Atenção', 'Ao pressionar o botão de voltar novamente todos os dados que foram cadastrados serão perdidos. Se deseja continuar, aperte para voltar novamente.');
 

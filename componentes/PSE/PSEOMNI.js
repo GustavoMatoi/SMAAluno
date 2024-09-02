@@ -27,22 +27,28 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
   }
 
   const criarDetalhamento = () => {
-    const chave = `PSEdoExercicio${repeticao}`;
-
-    if (value == 0) {
-      setValue(0)
-      setResposta("0. Extremamente fácil")
+    const chave = `PSEdoExercicioSerie${repeticao}`;
+    
+    if (typeof detalhamento.Exercicios === 'undefined') {
+      detalhamento.Exercicios = [];
     }
+    
+    if (typeof detalhamento.Exercicios[index] === 'undefined') {
+      detalhamento.Exercicios[index] = {};
+    }
+  
+    if (value == 0) {
+      setValue(0);
+      setResposta("0 - 30. Normalidade");
+    }
+  
     const dados = {
       resposta: resposta,
       valor: value,
     };
-
-    detalhamento.Exercicios[index][chave] = dados
-
-
-    console.log('detalhamento.Exercicios[index][chave] = dados ', detalhamento.Exercicios[index])
-
+    
+    detalhamento.Exercicios[index][chave] = dados;
+    console.log('detalhamento.Exercicios[index][chave] = dados ', detalhamento.Exercicios[index][chave]);
   }
   return (
     <Modal animationType="slide" style={{ flex: 1, height: '100%' }}>

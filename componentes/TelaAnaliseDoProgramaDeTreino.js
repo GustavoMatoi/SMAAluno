@@ -59,7 +59,12 @@ export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
             <SafeAreaView style={[estilo.corLightMenos1, style.container]}>
 
                 <ScrollView>
+
+                    
                     <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, { margin: '2%' }]}>Obs: Caso fique confuso em relação as medidas, consulte as tabelas de classificação que estão disponíveis abaixo do Programa de Treino</Text>
+                    
+                    <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>Profesor responsável pela avaliação: {avaliacao.professorResponsavel || 'Lançada em versões anteriores.'}</Text>
+                    <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>Data da avaliação: {avaliacao.dia}/{avaliacao.mes}/{avaliacao.ano}</Text>
                     <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Resultados obtidos</Text>
 
                     <TabelaResultados
@@ -164,6 +169,11 @@ export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
         return (
             <SafeAreaView style={[estilo.corLightMenos1, style.container]}>
                 <ScrollView>
+
+                <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, { margin: '2%' }]}>Obs: Caso fique confuso em relação as medidas, consulte as tabelas de classificação que estão disponíveis abaixo do Programa de Treino</Text>
+                    
+                    <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>Profesor responsável pela avaliação: {avaliacao.professorResponsavel || 'Lançada em versões anteriores.'}</Text>
+                    <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>Data da avaliação: {avaliacao.dia}/{avaliacao.mes}/{avaliacao.ano}</Text>
                     <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Resultados obtidos</Text>
                     <TabelaResultados
                         massaCorporal={avaliacao.massaCorporal}

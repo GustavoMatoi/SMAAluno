@@ -20,34 +20,33 @@ export default ({options =[], tipoPSE, navigation, route}) => {
     console.log("Diario no detalhamento ", diario)
     const [value, setValue] = useState(0)
     const [resposta, setResposta] = useState('"0 - 30. Normalidade')
-    const data = new Date()
-    let dia = data.getDate()
-    let mes = data.getMonth() + 1
-    const ano = data.getFullYear()
-    const hora = data.getHours()
-      if (dia < 10){
-        dia = `0${dia}`
-      }
-      if (mes < 10){
-        mes = `0${mes}`
-      }
 
-      const criarDetalhamento = () => {
-        const chave = `PerflexDoExercicio${repeticao}`;
-      
-        if(value == 0){
-            setValue(0)
-            setResposta("0 - 30. Normalidade")
+
+    const criarDetalhamento = () => {
+        const chave = `PSEdoExercicioSerie${repeticao}`;
+        
+        if (typeof detalhamento.Exercicios === 'undefined') {
+          detalhamento.Exercicios = [];
         }
+        
+        if (typeof detalhamento.Exercicios[index] === 'undefined') {
+          detalhamento.Exercicios[index] = {};
+        }
+      
+        if (value == 0) {
+          setValue(0);
+          setResposta("0 - 30. Normalidade");
+        }
+      
         const dados = {
           resposta: resposta,
           valor: value,
         };
         
-        detalhamento.Exercicios[index][chave] = dados
-        console.log('detalhamento.Exercicios[index][chave] = dados ', detalhamento.Exercicios[index][chave])
-    }
-
+        detalhamento.Exercicios[index][chave] = dados;
+        console.log('detalhamento.Exercicios[index][chave] = dados ', detalhamento.Exercicios[index][chave]);
+      }
+    console.log(detalhamento.Exercicios)
     return (
         <Modal
         animationType="slide"

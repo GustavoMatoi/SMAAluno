@@ -30,22 +30,32 @@ export default ({options =[], tipoPSE, navigation, route}) => {
     if (mes < 10){
       mes = `0${mes}`
     }
+    console.log(detalhamento.Exercicios)
 
     const criarDetalhamento = () => {
       const chave = `PSEdoExercicioSerie${repeticao}`;
-    
-      if(value == 0){
-          setValue(0)
-          setResposta("0 - 30. Normalidade")
+      
+      if (typeof detalhamento.Exercicios === 'undefined') {
+        detalhamento.Exercicios = [];
       }
+      
+      if (typeof detalhamento.Exercicios[index] === 'undefined') {
+        detalhamento.Exercicios[index] = {};
+      }
+    
+      if (value == 0) {
+        setValue(0);
+        setResposta("0 - 30. Normalidade");
+      }
+    
       const dados = {
         resposta: resposta,
         valor: value,
       };
       
-      detalhamento.Exercicios[index][chave] = dados
-      console.log('detalhamento.Exercicios[index][chave] = dados ', detalhamento.Exercicios[index][chave])
-  }
+      detalhamento.Exercicios[index][chave] = dados;
+      console.log('detalhamento.Exercicios[index][chave] = dados ', detalhamento.Exercicios[index][chave]);
+    }
 
   return (
       <Modal

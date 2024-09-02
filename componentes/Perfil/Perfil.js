@@ -67,6 +67,8 @@ export default ({ navigation, route }) => {
           <Caixa aluno={aluno}></Caixa>
         </View>
         <View style={[style.informacoes]}>
+          <Text style={[estilo.textoCorSecundaria, estilo.tituloH619px, { marginVertical: 5 }]}>Academia:</Text>
+          <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>{aluno.Academia}</Text>
           <Text style={[estilo.textoCorSecundaria, estilo.tituloH619px, { marginVertical: 5 }]}>CPF:</Text>
           <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>{aluno.cpf}</Text>
           <Text style={[estilo.textoCorSecundaria, estilo.tituloH619px, { marginVertical: 5 }]}>Telefone:</Text>
