@@ -194,12 +194,14 @@ export default ({ navigation }) => {
 
         const senhaAluno = dadosAluno.senha
         setPassword(senhaAluno || '');
-
+        console.log('emailAluno', 'AAAAAAAAAAAAAAAAsenhaAluno')
         if (emailAluno && senhaAluno) {
-          if (conexao) {
+          console.log('emailAluno', 'senhaAlunAAAAAAAAAo')
+
+        
             navigation.navigate('Principal', { aluno: dadosAluno, academia: academiaObj });
             //await firebase.auth().signInWithEmailAndPassword(emailAluno, senhaAluno);
-          }
+          
         }
       } catch (error) {
         console.error('Erro ao obter dados do AsyncStorage ou fazer login:', error);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Component } from "react"
-import { Text, TouchableOpacity, View, SafeAreaView, Modal, StyleSheet, BackHandler, ToastAndroid, Alert, ActivityIndicator, Platform } from 'react-native'
+import { Text, TouchableOpacity, View, SafeAreaView, Modal, StyleSheet, BackHandler, Alert, ActivityIndicator, Platform } from 'react-native'
 import estilo from "./estilo"
 import Logo from "./Logo"
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -143,7 +143,7 @@ export default ({ navigation, route }) => {
 
   const handlePressIniciarTreino = async () => {
     console.log(distanciaDaAcademia)
-    if (distanciaDaAcademia < 10000) {
+    if (distanciaDaAcademia < 600) {
       navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
     }  else {
       Alert.alert(
