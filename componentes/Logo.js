@@ -15,7 +15,7 @@ export default props => {
                 <View style={[Estilo.corPrimariaMais1, style.logoAluno]}>
                         <Text style={[Estilo.tituloH333px, Estilo.textoCorLight]}>ALUNO</Text>
                 </View>
-                <Text style={[Estilo.textoP16px, Estilo.textoCorDark, style.version ]}>Versao 2.3.1</Text>
+                <Text style={[Estilo.textoP16px, Estilo.textoCorDark, style.version ]}>Versão 2.3.3</Text>
             </View>
         )
     } else {
@@ -28,6 +28,8 @@ export default props => {
                 <View style={[Estilo.corPrimariaMais1, style.logoAlunoSmall]}>
                         <Text style={[{fontSize:15, fontWeight: 'bold'}, Estilo.textoCorLight]}>ALUNO</Text>
                 </View>
+                <Text style={[Estilo.textoSmall12px, Estilo.textoCorDark, style.version ]}>Versão 2.3.3</Text>
+
             </View>            
         )
     }

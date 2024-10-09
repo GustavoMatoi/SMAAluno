@@ -88,6 +88,7 @@ export default ({navigation}) => {
     const handleSelectChange = (value) => {
         setSelectedOption(value);
         setAcademiaValida(true)
+        console.log('value', value)
       }
     const handleSelectChangeProfessor = (value) => {
         setSelectedOptionProfessor(value);
@@ -369,28 +370,32 @@ export default ({navigation}) => {
         const academiasRef = collection(db, "Academias");
         const academiaQuery = query(academiasRef, where("nome", "==", selectedOption));
         const academiaSnapshot = await getDocs(academiaQuery);
-    
         if (!academiaSnapshot.empty) {
           const academiaDoc = academiaSnapshot.docs[0];
           const professoresRef = collection(academiaDoc.ref, "Professores");
           const querySnapshot = await getDocs(professoresRef);
           const professores = [];
-          querySnapshot.forEach((doc) => {
-            const nome = doc.data().nome;
-            professores.push(nome);
-            console.log(nome);
           
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data && data.nome) {
+              professores.push(data.nome);
+              console.log(data.nome);
+            }
           });
-
-          const turmasRef = collection(academiaDoc.ref, "Turmas")
-          const turmas = []
-
-          const turmasSnapshot = await getDocs(turmasRef)
-
+        
+          const turmasRef = collection(academiaDoc.ref, "Turmas");
+          const turmas = [];
+          
+          const turmasSnapshot = await getDocs(turmasRef);
+          
           turmasSnapshot.forEach((doc) => {
-            const nome = doc.data().nome
-            turmas.push(nome)
-            console.log(nome)
+            const data = doc.data();
+            if (data && data.nome) {
+              turmas.push(data.nome);
+              console.log(data.nome);
+            }
+       
           })
           
           

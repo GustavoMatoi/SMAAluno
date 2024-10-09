@@ -4,7 +4,7 @@ import estilo from './estilo'
 import { AntDesign } from '@expo/vector-icons'; 
 import { useFonts } from 'expo-font';
 
-export default ({options=[], onChange , initialSelect=[], titulo = " ", max, selecionado}) => {
+export default ({options=[], onChange , initialSelect=[], titulo = " ", max, selecionado, select}) => {
     const [visible, setVisible] = useState(false)
     const [opcoesOriginais, setOpcoesOriginais] = useState([...options])
     const [data, setData] = useState([...options])
@@ -23,7 +23,7 @@ export default ({options=[], onChange , initialSelect=[], titulo = " ", max, sel
 
     useEffect(()=> {
         let arr = [...opcoesOriginais]
-        setData(arr.filter(i =>i.includes(termo.toLowerCase())))
+        setData(arr.filter(i =>i.includes(termo)))
     },[termo])
 
     function combinada(item){
@@ -59,7 +59,7 @@ export default ({options=[], onChange , initialSelect=[], titulo = " ", max, sel
         onPress={()=>setVisible(true)}
         seleciona={() => {return titulo}}
         >
-            <Text style={ selecionado ?[estilo.textoCorSecundaria, style.actions, estilo.textoP16px, style.Montserrat] :  [estilo.textoCorDanger, style.actions, estilo.textoP16px, style.Montserrat]}> {selected == '' ? 'Select' : selected}</Text>
+            <Text style={ selecionado ?[estilo.textoCorSecundaria, style.actions, estilo.textoP16px, style.Montserrat] :  [estilo.textoCorDanger, style.actions, estilo.textoP16px, style.Montserrat]}> {selected == '' ? select ? select : 'Select' : selected}</Text>
             <AntDesign name="downcircleo" size={24} color={selecionado ? 'black' : 'red'} />
             <Modal onRequestClose={() => setVisible(false)}
             visible={visible}
@@ -120,7 +120,7 @@ const style = StyleSheet.create({
         height: 35
     },
     Montserrat: {
-        fontFamily: 'Montserrat'
+        fontFamily: 'Roboto'
     },
     item: {
         width: '100%',

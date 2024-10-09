@@ -51,7 +51,6 @@ export default ({navigation}) => {
                         Para pessoas com idade entre 15 e 69 anos
                     </Text>                    
                 </View>
-
                 <View style={[style.blocoTexto, estilo.corLightMais1]}>
                     <Text style={[estilo.textoSmall12px, estilo.textoCorSecundaria, style.Montserrat, style.textosPARQ , estilo.centralizado]}>
                         A atividade física regular é divertida e saudável e cada vez mais pessoas 

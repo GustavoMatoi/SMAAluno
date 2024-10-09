@@ -1,13 +1,15 @@
-const { withExpo } = require('@expo/webpack-config');
+const webpack = require('webpack');
 
-module.exports = async function (env, argv) {
-  const config = await withExpo(env, argv);
-
-  // Adiciona o polyfill para o módulo 'crypto'
+module.exports = function (config, env) {
   config.resolve.fallback = {
-    crypto: require.resolve('crypto-browserify'),
-    // Adicione outros polyfills, se necessário
+    ...config.resolve.fallback,
+    stream: require.resolve('stream-browserify'),
   };
-
+  config.plugins = [
+    ...config.plugins,
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
+  ];
   return config;
 };
