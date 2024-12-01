@@ -200,7 +200,7 @@ export default ({ navigation }) => {
 
         
             navigation.navigate('Principal', { aluno: dadosAluno, academia: academiaObj });
-            //await firebase.auth().signInWithEmailAndPassword(emailAluno, senhaAluno);
+            await firebase.auth().signInWithEmailAndPassword(emailAluno, senhaAluno);
           
         }
       } catch (error) {
