@@ -7,7 +7,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { firebase, firebaseBD } from './configuracoes/firebaseconfig/config'
 import { Entypo } from '@expo/vector-icons';
-import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { collection, getDocs, getFirestore,query, orderBy  } from "firebase/firestore";
 import { Aluno } from "../classes/Aluno"
 import NetInfo from '@react-native-community/netinfo';
 import * as Location from 'expo-location'
@@ -30,6 +30,7 @@ export default ({ navigation, route }) => {
   const [carregador, setCarregador] = useState(true)
   const [locationPermissionRequested, setLocationPermissionRequested] = useState(false);
   const [distanciaCarregada, setDistanciaCarregada] = useState(false);
+  const [temMensagensPendentes, setTemMensagensPendentes] = useState(false);
 
 
 
@@ -55,6 +56,35 @@ export default ({ navigation, route }) => {
    
       }
     }
+    useEffect(() => {
+      const fetchMensagensPendentes = async () => {
+        try {
+          const mensagensRef = collection(
+            firebaseBD,
+            "Academias",
+            "nome_da_academia",
+            "Professores",
+            "professor_email",
+            "Mensagens",
+            "Mensagens aluno_email",
+            "todasAsMensagens"
+          );
+          const q = query(mensagensRef, orderBy("data", "asc"));
+          const mensagensSnapshot = await getDocs(q);
+  
+          // Verifica se há mensagens não visualizadas
+          const temMensagensPendentes = mensagensSnapshot.docs.some(
+            (doc) => doc.data().visualizado === false
+          );
+  
+          setTemMensagensPendentes(temMensagensPendentes);
+        } catch (error) {
+          console.error("Erro ao verificar mensagens pendentes:", error);
+        }
+      };
+  
+      fetchMensagensPendentes();
+    }, []);
 
     console.log(aluno.inativo)
     if(aluno.inativo === true){
@@ -271,14 +301,22 @@ export default ({ navigation, route }) => {
               <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}>EVOLUÇÃO DO TREINO {conexao ? "" : "OFFLINE"}</Text>
             </TouchableOpacity>
           </View>
-          <View style={[style.containerBotao]} >
-            <TouchableOpacity style={[conexao ? estilo.corPrimaria : estilo.corDisabled, style.botao]} onPress={() => navigation.navigate('Chat - Professores', { aluno: aluno })} disabled={!conexao}>
-              <View style={[style.iconeBotao]}>
-                <AntDesign name="wechat" size={120} color="white" />
-              </View>
-              <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}> MENSAGENS {conexao ? "" : "OFFLINE"}</Text>
-            </TouchableOpacity>
-          </View>
+          <View style={style.containerBotao}>
+            <TouchableOpacity
+              style={[
+                conexao ? estilo.corPrimaria : estilo.corDisabled,
+                temMensagensPendentes && conexao ? style.botaoComMensagem : style.botao,
+                ]}
+                onPress={() => navigation.navigate("Chat - Professores", { aluno: aluno })}
+                disabled={!conexao}>
+                <View style={[style.iconeBotao]}>
+                  <AntDesign name="wechat" size={120} color="white" />
+                </View>
+                <Text style={[estilo.textoSmall12px, estilo.textoCorLight, style.textoBotao]}>
+                  MENSAGENS {conexao ? "" : "OFFLINE"}
+                </Text>
+              </TouchableOpacity>
+            </View>
         </View>
 
       </>}

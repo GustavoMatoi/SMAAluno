@@ -1,5 +1,6 @@
 import React, {Component, useState, useEffect} from "react"
-import { Text, View, StyleSheet,ScrollView, SafeAreaView, TextInput, TouchableOpacity, Alert} from "react-native"
+import { Text, View, StyleSheet,ScrollView, SafeAreaView, TextInput, TouchableOpacity, Alert,Button } from "react-native";
+import {Picker} from '@react-native-picker/picker';
 import estilo from "../estilo"
 import { collection,setDoc,doc, getDocs, getFirestore, where , query, addDoc, querySnapshot, QueryStartAtConstraint} from "firebase/firestore";
 import {firebase, firebaseBD} from '../configuracoes/firebaseconfig/config'
@@ -13,6 +14,9 @@ import { Aluno } from "../../classes/Aluno"
 import { Endereco } from "../../classes/Endereco"
 import { TextInputMask } from 'react-native-masked-text';
 import NetInfo from '@react-native-community/netinfo';
+import axios from 'axios';
+import cep from 'cep-promise';
+
 
 let novoAluno = new Aluno('', '', '', '', '', '', '', '', '', '')
 let enderecoNovoAluno = new Endereco('', '', '', '', '', '')
@@ -42,7 +46,7 @@ export default ({navigation}) => {
     const [profissao, setProfissao] = useState('')
     const [profissaoInvalida, setProfissaoInvalida] = useState(false)
 
-    const [cep, setCep] = useState('')
+    const [cepp, setCepp] = useState('')
     const [cepInvalido, setCepInvalido] = useState(false)
 
     const [sexo, setSexo] = useState('')
@@ -53,9 +57,12 @@ export default ({navigation}) => {
 
     const [cidade, setCidade] = useState('')
     const [cidadeInvalida, setCidadeInvalida] = useState(false);
+    const [cidades, setCidades] = useState([]);
 
     const [bairro, setBairro] = useState('')
     const [bairroInvalido, setBairroInvalido] = useState(false)
+
+    const [loading, setLoading] = useState(false);
 
     const [rua, setRua] = useState('')
     const [ruaInvalida, setRuaInvalida] = useState(false)
@@ -114,7 +121,7 @@ export default ({navigation}) => {
     novoAluno.setEmail(email)
     novoAluno.setSenha(senha)
     enderecoNovoAluno.setRua(rua)
-    enderecoNovoAluno.setCep(cep)
+    enderecoNovoAluno.setCep(cepp)
     enderecoNovoAluno.setBairro(bairro)
     enderecoNovoAluno.setCidade(cidade)
     enderecoNovoAluno.setEstado(estado)
@@ -228,10 +235,34 @@ export default ({navigation}) => {
       };
     //Validação do estado
     const estadosBrasileiros = [
-        'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO',
-        'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI',
-        'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
-      ];
+      { label: 'Acre', value: 'AC' },
+      { label: 'Alagoas', value: 'AL' },
+      { label: 'Amapá', value: 'AP' },
+      { label: 'Amazonas', value: 'AM' },
+      { label: 'Bahia', value: 'BA' },
+      { label: 'Ceará', value: 'CE' },
+      { label: 'Distrito Federal', value: 'DF' },
+      { label: 'Espírito Santo', value: 'ES' },
+      { label: 'Goiás', value: 'GO' },
+      { label: 'Maranhão', value: 'MA' },
+      { label: 'Mato Grosso', value: 'MT' },
+      { label: 'Mato Grosso do Sul', value: 'MS' },
+      { label: 'Minas Gerais', value: 'MG' },
+      { label: 'Pará', value: 'PA' },
+      { label: 'Paraíba', value: 'PB' },
+      { label: 'Paraná', value: 'PR' },
+      { label: 'Pernambuco', value: 'PE' },
+      { label: 'Piauí', value: 'PI' },
+      { label: 'Rio de Janeiro', value: 'RJ' },
+      { label: 'Rio Grande do Norte', value: 'RN' },
+      { label: 'Rio Grande do Sul', value: 'RS' },
+      { label: 'Rondônia', value: 'RO' },
+      { label: 'Roraima', value: 'RR' },
+      { label: 'Santa Catarina', value: 'SC' },
+      { label: 'São Paulo', value: 'SP' },
+      { label: 'Sergipe', value: 'SE' },
+      { label: 'Tocantins', value: 'TO' },
+    ];
 
   const validaEstado = (text) => {
     const estadoUpper = text.toUpperCase();
@@ -242,16 +273,7 @@ export default ({navigation}) => {
     }
     setEstado(estadoUpper);
   };
-  //Validação do CEP
-  const validaCep = (text) => {
-    const cepRegex = /^\d{5}-\d{3}$/;
-    if (cepRegex.test(text)) {
-      setCepInvalido(false);
-    } else {
-      setCepInvalido(true);
-    }
-    setCep(text);
-  };
+
 
   //Validação do numero de telefone
   const validaTelefone = (text) => {
@@ -286,10 +308,6 @@ export default ({navigation}) => {
     setRuaInvalida(!ruaValida)
   }
 
-  //Validação do numero
-
-  //Validação do complemento
-
    //Validação do Email
    const validaEmail = (text) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -320,6 +338,109 @@ export default ({navigation}) => {
       unsubscribe()
     }
   }, [])
+  const validaCep = (text) => {
+    const cepRegex = /^\d{1,8}$/;
+    if (cepRegex.test(text)) {
+      setCepInvalido(false);
+    } else {
+      setCepInvalido(true);
+    }
+    setCepp(text);
+  };
+  const validaCep2 = async (text) => {
+
+      console.log('chegou aqui',text)
+      try {
+        console.log('chegou aqui com o cep:', text);
+
+        const response = await cep(text);
+  
+        if (response.data.erro) {
+          Alert.alert('Erro', 'CEP não encontrado.');
+          setCepInvalido(true);
+        } else {
+          setRua(response.data.street || '');
+          setBairro(response.data.neighborhood || '');
+          setCidade(response.data.city || '');
+          setEstado(response.data.state || '');
+          console.log('Dados recebidos:', response.data);
+          setCepInvalido(false);
+        }
+      } catch (error) {
+        console.error('Erro na busca do CEP:', error);
+        Alert.alert('Erro', `Erro ao buscar o CEP: ${error.message}`);
+        setCepInvalido(true);
+      }
+  };
+  /*const handleCepChange = async (text) => {
+    setCep(text);
+  
+    const cepRegex = /^\d{5}-?\d{3}$/;
+    if (cepRegex.test(text)) {
+      const debounceTimeout = setTimeout(async () => {
+        await validaCep(text);
+        clearTimeout(debounceTimeout);
+      }, 500);
+    }
+  };*/
+  const buscarCidadesPorEstado = async (estado) => {
+    try {
+      const response = await axios.get(
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado}/municipios`
+      );
+      const listaCidades = response.data.map((municipio) => municipio.nome);
+      setCidades(listaCidades);
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao buscar as cidades.');
+      setCidades([]);
+    }
+  };
+
+
+  useEffect(() => {
+    if (estado) {
+      buscarCidadesPorEstado(estado);
+    }
+  }, [estado]);
+
+/*
+  useEffect(() => {
+    const fetchCepData = async () => {
+      console.log('cep partido:', cep);
+      try {
+        console.log('chegou aqui com o cep:', cep);
+
+        const response = await cep(cep);
+  
+        if (response.data.erro) {
+          Alert.alert('Erro', 'CEP não encontrado.');
+          setCepInvalido(true);
+        } else {
+          setRua(response.data.street || '');
+          setBairro(response.data.neighborhood || '');
+          setCidade(response.data.city || '');
+          setEstado(response.data.state || '');
+          console.log('Dados recebidos:', response.data);
+          setCepInvalido(false);
+        }
+      } catch (error) {
+        console.error('Erro na busca do CEP:', error);
+        Alert.alert('Erro', `Erro ao buscar o CEP: ${error.message}`);
+        setCepInvalido(true);
+      }
+    };
+    if (cep.length == 9) {
+      fetchCepData();
+    }
+
+    console.log('Estado:', estado);
+    console.log('Cidade:', cidade);
+    console.log('Bairro:', bairro);
+    console.log('Rua:', rua);
+  }, [cep,estado,rua,cidade,bairro]);
+*/
+  
+  
 
   const checkWifiConnection = () => {
       NetInfo.fetch().then((state) => {
@@ -417,7 +538,7 @@ export default ({navigation}) => {
 
                     <Text style={[estilo.textoP16px, estilo.textoCorSecundaria,  style.titulos, style.Montserrat]}>Primeiramente, identifique-se</Text>
                     <View style={style.inputArea}>
-                        <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO:</Text>
+                        <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO ( * ) :</Text>
                         <View>
                         <TextInput 
                         placeholder={'Informe seu nome completo'} 
@@ -554,109 +675,130 @@ export default ({navigation}) => {
                         }
                     </View>
 
-                    <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.titulos, style.Montserrat]}>Agora, informe sua residência</Text>
+                    <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.titulos, style.Montserrat]}>
+                      Agora, informe sua residência
+                    </Text>
 
                     <View style={style.inputArea}>
-                        <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>INFORME SEU CEP:</Text>
-                        <TextInputMask 
-                            style={[
-                            style.inputText, 
-                            estilo.sombra, 
-                            estilo.corLight,
-                            cepInvalido ? { borderColor: 'red', borderWidth: 1 } : {}
-                            ]}
-                            placeholder="ex: 36180-000"
-                            value={cep}
-                            type={'zip-code'}
-                            onChangeText={(text) => validaCep(text)}
-                            keyboardType='numeric'
-                        ></TextInputMask>
+                    <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
+                      INFORME SEU CEP:
+                    </Text>
+                    <TextInput
+                      style={[
+                        style.inputText,
+                        estilo.sombra,
+                        estilo.corLight,
+                        cepInvalido ? { borderColor: 'red', borderWidth: 1 } : {},
+                      ]}
+                      placeholder="exemplo: 36180000"
+                      value={cepp}
+                      type="zip-code"
+                      onChangeText={validaCep}
+                      keyboardType="numeric"
+                    />
+                    <TouchableOpacity style={[style.botao, estilo.corPrimaria, estilo.sombra, estilo.centralizado]} onPress = {validaCep2} >
+                      <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>Buscar</Text>
+                    </TouchableOpacity>
+                    </View>
+                    <View style={style.inputArea}>
+                      <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
+                        ESTADO:
+                      </Text>
+                      {estado?                         
+                      <BotaoSelect     
+                      selecionado={true}
+                      onChange={handleSelectChangeTurma} 
+                      titulo={`Turmas da ${selectedOption}`} 
+                      max={1} 
+                      options={turmas}>
+                      </BotaoSelect> :
+                      <BotaoSelect
+                      options={estadosBrasileiros.map((e) => e.label)}
+                      onChange={(value) => {
+                        const estadoSelecionado = estadosBrasileiros.find((e) => e.label === value);
+                        setEstado(estadoSelecionado.value);
+                      }}
+                      titulo="Selecione o estado"
+                      max={1}
+                      selecionado={!!estado}
+                      select={estado ? estadosBrasileiros.find((e) => e.value === estado)?.label : ''}
+                    />
+                      }
                     </View>
 
-
                     <View style={style.inputArea}>
-                        <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>ESTADO:</Text>
-                        <TextInput 
-                            style={[
-                                style.inputText, 
-                                estilo.sombra, 
-                                estilo.corLight,
-                                estadoInvalido ? { borderColor: '#FF6262', borderWidth: 1 } : {}
-                            ]}
-                            placeholder="ex: MG"
-                            value={estado}
-                            onChangeText={(text) => validaEstado(text)}
-                            maxLength={2}
-                            ></TextInput>
-                        </View>
+                      <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
+                        CIDADE:
+                      </Text>
+                      <BotaoSelect
+                        options={cidades}
+                        onChange={setCidade}
+                        titulo="Selecione a cidade"
+                        max={1}
+                        selecionado={!!cidade}
+                        select={cidade ? validaCidade.find((e) => e.value === estado)?.label : ''}
+                      />
+                    </View>
 
-
+                    {/* Bairro Input */}
                     <View style={style.inputArea}>
-                    <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>CIDADE:</Text>
+                      <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
+                        BAIRRO:
+                      </Text>
                       <TextInput
                         style={[
                           style.inputText,
                           estilo.sombra,
                           estilo.corLight,
-                          cidadeInvalida ? { borderColor: 'red', borderWidth: 1 } : {}
-                        ]}
-                        placeholder="Informe sua cidade"
-                        value={cidade}
-                        onChangeText={(text) => validaCidade(text)}
-                      />
-                    </View>
-
-
-                    <View style={style.inputArea}>
-                        <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>BAIRRO:</Text>
-                        <TextInput
-                        style={[
-                          style.inputText,
-                          estilo.sombra,
-                          estilo.corLight,
-                          bairroInvalido ? { borderColor: 'red', borderWidth: 1 } : {}
+                          bairroInvalido ? { borderColor: 'red', borderWidth: 1 } : {},
                         ]}
                         placeholder="Informe seu bairro"
                         value={bairro}
-                        onChangeText={(text) => validaBairro(text)}
+                        onChangeText={(text) => setBairro(text)}
                       />
                     </View>
-
-
                     <View style={style.inputArea}>
-                        <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>RUA:</Text>
-                        <TextInput
+                      <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
+                        RUA:
+                      </Text>
+                      <TextInput
                         style={[
                           style.inputText,
                           estilo.sombra,
                           estilo.corLight,
-                          ruaInvalida ? { borderColor: 'red', borderWidth: 1 } : {}
                         ]}
                         placeholder="Informe sua rua"
                         value={rua}
-                        onChangeText={(text) => validaRua(text)}
+                        onChangeText={(text) => setRua(text)}
                       />
                     </View>
+    
 
                     <View style={style.alinhamentoBotoesPequenos}>
-                        <View style={[style.inputArea, style.campoPequeno]}>
-                            <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NÚMERO:</Text>
-                            <TextInput 
-                                style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido? {borderWidth: 1, borderColor: 'red'} : {}]} placeholder="Número da sua residência"
-                                value={numero}
-                                keyboardType='numeric'
-                                onChangeText={(text) => setNumero(text)}
-                                
-                                ></TextInput>
-                        </View>
-                        <View style={[style.inputArea, style.campoPequeno]}>
-                            <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>COMPLEMENTO:</Text>
-                            <TextInput 
-                                style={[style.inputText, estilo.sombra, estilo.corLight,  complementoInvalido? {borderWidth: 1, borderColor: 'red'} : {}]} placeholder="complemento"
-                                value={complemento}
-                                onChangeText={(text) => setComplemento(text)}
-                                ></TextInput>
-                        </View> 
+                      <View style={[style.inputArea, style.campoPequeno]}>
+                        <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
+                          NÚMERO:
+                        </Text>
+                        <TextInput 
+                          style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
+                          placeholder="Número da sua residência"
+                          value={numero}
+                          keyboardType="numeric"
+                          onChangeText={(text) => setNumero(text)}
+                        />
+                      </View>
+
+                      <View style={[style.inputArea, style.campoPequeno]}>
+                        <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
+                          COMPLEMENTO:
+                        </Text>
+                        <TextInput 
+                          style={[style.inputText, estilo.sombra, estilo.corLight, complementoInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
+                          placeholder="complemento"
+                          value={complemento}
+                          onChangeText={(text) => setComplemento(text)}
+                        />
+                      </View>
                     </View>
                     <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat , style.titulos]}>Por fim, seus dados de login:</Text>
                     <View style={style.inputArea}>
@@ -691,7 +833,7 @@ export default ({navigation}) => {
                     </View>
                     <TouchableOpacity onPress={() => {
                         {
-                            if ( nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' ||  cep == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == '' || !academiaValida || !professorValido){
+                            if ( nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' ||  cepp == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == '' || !academiaValida || !professorValido){
                               Alert.alert("Campos não preenchidos",`Há campos não preenchidos ou que foram preenchidos de maneira incorreta. Preencha-os e tente novamente.`)
 
                                 if (nome == ''){
@@ -712,7 +854,7 @@ export default ({navigation}) => {
                                 if (profissao == ''){
                                   setProfissaoInvalida(true)
                                 }
-                                if (cep == ''){
+                                if (cepp == ''){
                                   setCepInvalido(true)
                                 }
                                 if (estado == ''){
@@ -805,5 +947,12 @@ const style = StyleSheet.create({
     alinhamentoBotoesPequenos: {
         flexDirection: 'row',
         width: '100%'
+    },picker: {
+    marginBottom: 7,
+    padding: 7,
+    alignSelf: "stretch",
+    borderWidth: 1,
+    borderColor: '#bdc3c7',
+    borderRadius: 10 ,
     }
 })
