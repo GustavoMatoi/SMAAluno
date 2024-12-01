@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ficha from './TelaFichaDeTreino/FichaHeadOnly'
 import { Alert, Text } from 'react-native'
 import Perfil from './Perfil/Perfil'
-import {View} from "react-native"
+import {View,TouchableOpacity} from "react-native"
 import Home from './Home'
 import Versoes from './Versao/index'
 import { Ionicons } from '@expo/vector-icons';
@@ -15,8 +15,8 @@ import NetInfo from "@react-native-community/netinfo"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Progress from 'react-native-progress';
 import { collection, getDocs, getFirestore, setDoc, doc } from 'firebase/firestore'
-import estilo from './estilo'
-import { getAuth, signOut } from 'firebase/auth'
+import estilo from './estilo';
+import { getAuth, signOut } from 'firebase/auth';
 const Tab = createBottomTabNavigator()
 
 export default function Routes({ route, navigation }) {
@@ -155,7 +155,19 @@ export default function Routes({ route, navigation }) {
       setCarregando(false)
     }
   };
-
+  const handleLogout = () => {
+    const auth = getAuth()
+    signOut(auth)
+      .then(() => {
+        console.log("Usuário deslogado com sucesso!");
+        alert("Desconectado com sucesso!")
+        navigation.navigate('Login')
+        AsyncStorage.clear()
+      })
+      .catch((error) => {
+        console.error(error.message);
+      });
+  };
   const fetchAlunosSemNet = async () => {
     const fichasAux = []
     const avaliacoesAux = []
@@ -295,6 +307,7 @@ export default function Routes({ route, navigation }) {
         options={{
           tabBarIcon: ({ size, color }) => (<Octicons name="versions" size={size} color={color} />)
         }} />
+
     </Tab.Navigator>
   )
 }

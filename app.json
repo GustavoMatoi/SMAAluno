@@ -23,7 +23,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.gustavomatoi.SMAAluno"
+      "package": "com.gustavomatoi.SMAAluno",
+      "newArchEnabled": true
     },
     "web": {
       "output": "server",

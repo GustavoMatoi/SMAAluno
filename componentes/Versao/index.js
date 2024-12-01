@@ -6,9 +6,11 @@ import NetInfo from '@react-native-community/netinfo';
 import { AntDesign } from '@expo/vector-icons';
 import { collection, doc, getDoc, getDocs, getFirestore } from "firebase/firestore";
 import Globais from "../../classes/Globais";
+import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
+import { getAuth, signOut } from "firebase/auth";
 
-export default ({ route }) => {
-    const variavelGlobal = new Globais('2.3.1'); 
+export default ({ navigation,route }) => {
+    const variavelGlobal = new Globais('2.3.3'); 
     const [atVersao, setAtVersao] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [conexao, setConexao] = useState(true);
@@ -37,7 +39,19 @@ export default ({ route }) => {
         getVersoes();
     }, []);
     
-
+    const handleLogout = () => {
+        const auth = getAuth()
+        signOut(auth)
+          .then(() => {
+            console.log("Usuário deslogado com sucesso!");
+            alert("Desconectado com sucesso!")
+            navigation.navigate('Login')
+            AsyncStorage.clear()
+          })
+          .catch((error) => {
+            console.error(error.message);
+          });
+    };
     
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener(state => {
@@ -54,7 +68,25 @@ export default ({ route }) => {
         <ScrollView>
             <SafeAreaView style={estilo.corLightMenos1}>
                 <Text style={[estilo.tituloH427px, estilo.textoCorSecundaria, style.Titulo, style.alinhamentoTexto]}>Versões</Text>
-                
+                <TouchableOpacity
+        style={style.logoutButton}
+        onPress={() =>
+          Alert.alert(
+            "Confirmação",
+            "Tem certeza de que deseja sair?",
+            [
+              { text: "Cancelar", style: "cancel" },
+              {
+                text: "Sair",
+                style: "destructive",
+                onPress: handleLogout,
+              },
+            ]
+          )
+        }
+      >
+        <SimpleLineIcons name="logout" size={24} color="#FF6262" />
+      </TouchableOpacity>
             </SafeAreaView>
             {conexao ? (
                     (variavelGlobal.versao === atVersao) ? (
@@ -95,5 +127,10 @@ const style = StyleSheet.create({
     Titulo:{
         marginTop: 25,
         marginBotton: 20
-    }
+    },logoutButton: {
+        position: 'absolute',
+        top: 25,
+        right: 25,
+        padding: 10,
+      },
 });

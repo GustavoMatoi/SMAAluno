@@ -1,5 +1,4 @@
 # SMA-Aluno
-<!-- Copie e cole este código no seu arquivo README.md -->
 
 ## Desenvolvimento do ShapeMeApp
 

@@ -19,7 +19,7 @@ import { alunoLogado, enderecoAluno, enderecoAcademia } from "./NavegacaoLoginSc
 import { getAuth, signOut } from "firebase/auth";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from "moment";
-
+import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 
 export default ({ navigation, route }) => {
   const { fichas, avaliacoes, academia, aluno } = route.params
@@ -70,7 +70,19 @@ export default ({ navigation, route }) => {
           console.error(error.message);
         });
     }
-
+    const handleLogout = () => {
+      const auth = getAuth()
+      signOut(auth)
+        .then(() => {
+          console.log("Usuário deslogado com sucesso!");
+          alert("Desconectado com sucesso!")
+          navigation.navigate('Login')
+          AsyncStorage.clear()
+        })
+        .catch((error) => {
+          console.error(error.message);
+        });
+    };
   useEffect(() => {
     const fetchData = async () => {
       if (conexao) {
@@ -123,7 +135,7 @@ export default ({ navigation, route }) => {
     executarFuncoes();
   }, []);
 
-
+  
   const openAppSettings = () => {
     if (Platform.OS === 'android') {
       Linking.openSettings();
@@ -174,7 +186,25 @@ export default ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={[estilo.corLightMenos1, style.container]}>
-
+       <TouchableOpacity
+        style={style.logoutButton}
+        onPress={() =>
+          Alert.alert(
+            "Confirmação",
+            "Tem certeza de que deseja sair?",
+            [
+              { text: "Cancelar", style: "cancel" },
+              {
+                text: "Sair",
+                style: "destructive",
+                onPress: handleLogout,
+              },
+            ]
+          )
+        }
+      >
+        <SimpleLineIcons name="logout" size={24} color="#FF6262" />
+      </TouchableOpacity>
       <View style={style.areaLogo}>
         <Logo />
       </View>
@@ -318,6 +348,19 @@ const style = StyleSheet.create({
   },
   textoBotao: {
     textAlign: 'center'
+  },
+  logoutButton: {
+    position: 'absolute',
+    top: 40,
+    right: 25,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 30,
+    elevation: 3,
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   }
 
 })
