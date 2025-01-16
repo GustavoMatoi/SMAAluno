@@ -36,14 +36,17 @@ export default function Routes({ route, navigation }) {
       setConexao(isConnected);
   
       const keys = await AsyncStorage.getAllKeys();
+      console.log("chave",keys)
       const numberOfKeys = keys.length;
-      console.log(numberOfKeys);
+      console.log("as chave",numberOfKeys);
   
       if (isConnected) {
         if (!keys.includes('Ficha')) {
           fetchDadosWifi();
+          console.log("checando dados com wifi..");
         } else {
           fetchAlunosSemNet();
+          console.log("checando sem net");
         }
       } else {
         fetchAlunosSemNet();

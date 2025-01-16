@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Component } from "react"
-import { Text, TouchableOpacity, View, SafeAreaView, Modal, StyleSheet, BackHandler, Alert, ActivityIndicator, Platform } from 'react-native'
+import { Text, TouchableOpacity, View, SafeAreaView, Modal, StyleSheet, BackHandler, Alert, ActivityIndicator, Platform,ScrollView } from 'react-native'
 import estilo from "./estilo"
 import Logo from "./Logo"
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -320,7 +320,6 @@ export default ({ navigation, route }) => {
         </View>
 
       </>}
-
 
     </SafeAreaView>
   )

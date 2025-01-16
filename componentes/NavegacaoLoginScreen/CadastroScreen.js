@@ -8,6 +8,7 @@ import { FontAwesome } from "@expo/vector-icons"
 import InputTexto from "../InputTexto"
 import RadioBotao from "../RadioBotao"
 import { useFonts } from 'expo-font';
+import BotaoLight from "../BotaoLight"
 import BotaoSelect from "../BotaoSelect"
 import { Pessoa } from "../../classes/Pessoa"
 import { Aluno } from "../../classes/Aluno"
@@ -338,6 +339,8 @@ export default ({ navigation }) => {
       console.log('response', response)
       setCidade(response.city || '');
       setEstado(response.state || '');
+      setBairro(response.neighborhood || '');
+      setRua(response.street || '');
       console.log('Dados recebidos:', response.data);
       setCepInvalido(false);
     } catch (error) {
@@ -346,6 +349,24 @@ export default ({ navigation }) => {
       setCepInvalido(true);
     }
   };
+  const buscarCidadesPorEstado = async (estado) => {
+    try{
+    const response = await axios.get(
+      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado}/municipios`
+      );
+      const listaCidades = response.data.map((municipio) => municipio.nome);
+      setCidades(listaCidades);
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao buscar as cidades.');
+      setCidades([]);
+      }
+  };
+
+  useEffect(() => {
+    if (estado) {
+      buscarCidadesPorEstado(estado);
+    }
+  }, [estado]);
 
   const checkWifiConnection = () => {
     NetInfo.fetch().then((state) => {
@@ -443,7 +464,7 @@ export default ({ navigation }) => {
 
         <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.titulos, style.Montserrat]}>Primeiramente, identifique-se</Text>
         <View style={style.inputArea}>
-          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO ( * ) :</Text>
+          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
           <View>
             <TextInput
               placeholder={'Informe seu nome completo'}
@@ -596,46 +617,95 @@ export default ({ navigation }) => {
               estilo.corLight,
               cepInvalido ? { borderColor: 'red', borderWidth: 1 } : {},
             ]}
-            placeholder="exemplo: 36180000"
+            placeholder="exemplo: 36180000 Para Rio Pomba MG"
             type="zip-code"
             onChangeText={(text) => setCepEndereco(text)}
             keyboardType="numeric"
           />
-          <TouchableOpacity style={[style.botao, estilo.corPrimaria, estilo.sombra, estilo.centralizado]} onPress={() => encontrarEndereco()} >
-            <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>Buscar</Text>
+          <TouchableOpacity style={[estilo.corPrimaria, estilo.sombra,style.botao, estilo.botao, {left: '-5%'}]} onPress={() => encontrarEndereco()} >
+            <Text style={[estilo.tituloH523px, estilo.textoCorLight]}>Buscar</Text>
           </TouchableOpacity>
         </View>
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
-            ESTADO: {estado}
-          </Text>
+            ESTADO:
+            </Text>
+            {estado ?  <BotaoSelect
+                      options={estadosBrasileiros.map((e) => e.label)}
+                      onChange={(value) => {
+                        const estadoSelecionado = estadosBrasileiros.find((e) => e.label === value);
+                        setEstado(estadoSelecionado.value);
+                      }}
+                      titulo="Selecione o estado"
+                      max={1}
+                      selecionado={estado}
+                      select={estado}
+                    />: 
+                      <BotaoSelect
+                      options={estadosBrasileiros.map((e) => e.label)}
+                      onChange={(value) => {
+                        const estadoSelecionado = estadosBrasileiros.find((e) => e.label === value);
+                        setEstado(estadoSelecionado.value);
+                      }}
+                      titulo="Selecione o estado"
+                      max={1}
+                      selecionado={!!estado}
+                      select={estado}
+                    />}
+          
         </View>
 
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
-            CIDADE: {cidade}
-          </Text>
+            CIDADE: 
+            </Text>
+            {cidade ?<BotaoSelect
+                        options={cidades}
+                        onChange={setCidade}
+                        titulo="Selecione a cidade"
+                        max={1}
+                        selecionado={cidade}
+                        select={cidade}
+                      /> : 
+                        <BotaoSelect
+                        options={cidades}
+                        onChange={setCidade}
+                        titulo="Selecione a cidade"
+                        max={1}
+                        selecionado={!!cidade}
+                      />}
+          
         </View>
-
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
             BAIRRO:
           </Text>
-          <TextInput
+          {bairro?<TextInput
+            style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
+            placeholder="Informe seu bairro"
+            value= {bairro}
+            onChangeText={(text) => setBairro(text)}
+          />:<TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe seu bairro"
             onChangeText={(text) => setBairro(text)}
-          />
+          />}
         </View>
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
             RUA:
           </Text>
-          <TextInput
+          {rua ?<TextInput
+            style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
+            placeholder="Informe sua rua"
+            value ={rua}
+            onChangeText={(text) => setRua(text)}
+          />
+          :<TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe sua rua"
             onChangeText={(text) => setRua(text)}
-          />
+          />}
         </View>
 
 
@@ -698,7 +768,7 @@ export default ({ navigation }) => {
         </View>
         <TouchableOpacity onPress={() => {
           {
-            if (nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' || cepp == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == '' || !academiaValida || !professorValido) {
+            if (nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' || cepEndereco == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == '' || !academiaValida || !professorValido) {
               Alert.alert("Campos não preenchidos", `Há campos não preenchidos ou que foram preenchidos de maneira incorreta. Preencha-os e tente novamente.`)
 
               if (nome == '') {

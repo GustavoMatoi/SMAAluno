@@ -167,6 +167,9 @@ export default ({ navigation }) => {
   };
   console.log(novoAluno)
   const criarUsuario = () => {
+    if (novoAluno.getSexo() === 'Masculino') {
+      anamneseDoAluno.setGravida(false);
+    }
     setDoc(doc(firebaseBD, "Academias", `${novoAluno.getAcademia()}`, "Alunos", `${novoAluno.getEmail()}`), {
       nome: novoAluno.getNome(),
       cpf: novoAluno.getCpf(),
@@ -315,6 +318,12 @@ export default ({ navigation }) => {
     }
   }
 
+  useEffect(() => {
+    if (novoAluno.getSexo() === 'Masculino') {
+      anamneseDoAluno.setGravida('Não');
+    }
+  }, [novoAluno.sexo]);
+
   console.log("TIPO SANGUINEO " + anamneseDoAluno.getTipoSanguineo())
 
   return (
@@ -341,14 +350,24 @@ export default ({ navigation }) => {
         </SafeAreaView>
 
         <View style={[style.areaRadios, estilo.centralizado]}>
-          <Text style={[estilo.textoCorSecundaria, estilo.textoP16px, style.Montserrat]}>Está gravida?</Text>
-          <View style={[style.radiosEspacamento]}>
-            <RadioBotao horizontal options={['Sim', 'Não']}
-              selected={selected}
-              onChangeSelect={(opt, i) => {
-                setSelected(i)
-              }}></RadioBotao>
-          </View>
+          {novoAluno.getSexo() === 'Masculino' ? 
+            null : (
+            <>
+              <Text style={[estilo.textoCorSecundaria, estilo.textoP16px, style.Montserrat]}>
+                Está grávida?
+              </Text>
+              <View style={[style.radiosEspacamento]}>
+                <RadioBotao
+                  horizontal
+                  options={['Sim', 'Não']}
+                  selected={selected}
+                  onChangeSelect={(opt, i) => {
+                    setSelected(i);
+                  }}
+                />
+              </View>
+            </>
+          )}
 
           <Text style={[estilo.textoCorSecundaria, estilo.textoP16px, style.Montserrat]}>Pratica musculação atualmente?</Text>
           <View style={[style.radiosEspacamento]}>

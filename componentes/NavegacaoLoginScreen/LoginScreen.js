@@ -38,6 +38,7 @@ export default ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false)
   const [conexao, setConexao] = useState(true)
   const [alunoData, setAlunoData] = useState()
+  const [showPassword, setShowPassword] = useState(false);
 
 
   useEffect(() => {
@@ -130,24 +131,70 @@ export default ({ navigation }) => {
   useEffect(() => {
     checkWifiConnection();
   }, []);
+  useEffect(() => {
+    const fetchAndCheckFirebaseVersion = async () => {
+        try {
+            const db = getFirestore();
+            const firebaseRef = doc(db, "Versao", "versao");
 
+            const docSnapshot = await getDoc(firebaseRef);
+            if (docSnapshot.exists()) {
+                const docData = docSnapshot.data();
+                const firebaseVersion = docData.firebase; 
+                console.log('Versão do Firebase no Firestore:', firebaseVersion);
+
+                const storedVersion = await AsyncStorage.getItem('firebase');
+
+                if (storedVersion !== String(firebaseVersion)) {
+                    console.log(`Mudança detectada: ${storedVersion} => ${firebaseVersion}`);
+
+                    await AsyncStorage.clear();
+                    await AsyncStorage.setItem('firebase', String(firebaseVersion));
+
+                    Alert.alert('Aviso', 'Os dados locais foram atualizados devido à mudança de banco de dados.');
+                } else {
+                    console.log('Versão do banco de dados não mudou.');
+                }
+            } else {
+                console.error('Erro: Documento "versao" não encontrado na coleção "Versao".');
+            }
+        } catch (error) {
+            console.error('Erro ao verificar a versão do banco de dados:', error);
+        }
+    };
+
+    fetchAndCheckFirebaseVersion();
+    getValueFunction();
+}, []);
   const saveValueFunction = async () => {
     try {
-      if (email) {
-        await AsyncStorage.setItem('email', email);
-        setEmail('');
-      }
+        const db = getFirestore();
+        const firebaseRef = doc(db, "Versao", "versao");
+        const docSnapshot = await getDoc(firebaseRef);
 
-      if (password) {
-        await AsyncStorage.setItem('senha', password);
-        setPassword('');
-      }
+        if (docSnapshot.exists()) {
+            const docData = docSnapshot.data();
+            const firebaseVersion = docData.firebase; 
+            if (email) {
+                await AsyncStorage.setItem('email', email);
+                setEmail(''); 
+            }
+
+            if (password) {
+                await AsyncStorage.setItem('senha', password);
+                setPassword(''); 
+            }
+            await AsyncStorage.setItem('firebase', String(firebaseVersion));
+            console.log('Versão do Firebase salva:', firebaseVersion);
+        } else {
+            console.error('Erro: Documento "versao" não encontrado na coleção "Versao".');
+        }
+
+        await getValueFunction();
     } catch (error) {
-      console.error('Erro ao salvar dados no AsyncStorage:', error);
-    } finally {
-      getValueFunction()
+        console.error('Erro ao salvar dados no AsyncStorage:', error);
     }
-  };
+};
   const getValueFunction = async () => {
     console.log("Chegou aqui ")
     const alunoLocalTeste = await AsyncStorage.getItem('alunoLocal')
@@ -226,23 +273,40 @@ export default ({ navigation }) => {
         );
         const querySnapshot = await getDocs(alunosQuery);
         console.log("VVVVVVVVV")
+        let loginValido = false;
 
         querySnapshot.forEach((doc) => {
           const alunoData = doc.data();
           console.log('Aluno encontrado:', alunoData);
-
-          setAlunoData(alunoData);
-          alunoLogado.setNome(alunoData.nome);
-          const alunoString = JSON.stringify(alunoData);
-          AsyncStorage.setItem('alunoLocal', alunoString);
-          console.log("alunoData.Academia", alunoData.Academia)
-          academiaDoAluno = alunoData.Academia
-          console.log("Chamou por aqui")
-          console.log("VVVVVVVVV")
+          if(alunoData.senha == password){
+            loginValido = true;
+            setAlunoData(alunoData);
+            alunoLogado.setNome(alunoData.nome);
+            const alunoString = JSON.stringify(alunoData);
+            AsyncStorage.setItem('alunoLocal', alunoString);
+            console.log("alunoData.Academia", alunoData.Academia)
+            academiaDoAluno = alunoData.Academia
+            console.log("Chamou por aqui")
+            console.log("VVVVVVVVV")
+          }
 
         });
+        if (!loginValido) {
+          Alert.alert(
+              "Erro de Login",
+              "E-mail ou senha inválidos. Por favor, tente novamente."
+          );
+        } else {
+            console.log('Login válido!');
+
+            navigation.navigate('Principal', { aluno: alunoLogado });
+        }
       } catch (error) {
         console.log('Erro ao buscar os dados do aluno:', error);
+          Alert.alert(
+            "Erro",
+            "Ocorreu um erro ao tentar realizar o login. Tente novamente mais tarde."
+        );
       } finally {
         console.log("AAAAAAAAAAAAAAAAAA")
 
@@ -301,14 +365,26 @@ export default ({ navigation }) => {
           >
           </TextInput>
           <Text style={[Estilo.tituloH619px]}> Senha: </Text>
-          <TextInput
-            placeholder="Senha"
-            secureTextEntry={true}
-            value={password}
-            style={[style.inputText, Estilo.corLight, style.Montserrat]}
-            onChangeText={(text) => setPassword(text)}
-          >
-          </TextInput>
+          <View style={style.passwordContainer}>
+                    <TextInput
+                        placeholder="Senha"
+                        secureTextEntry={true}
+                        secureTextEntry={!showPassword}
+                        value={password}
+                        style={[style.inputText, Estilo.corLight, style.passwordInput]}
+                        onChangeText={(text) => setPassword(text)}
+                    />
+                    <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}
+                        style={style.showPasswordButton}>
+                        <FontAwesome5
+                        name={showPassword ? 'eye-slash' : 'eye'}
+                        size={20}
+                        color="#0066FF"
+                        style={[{}]}
+                        />
+                    </TouchableOpacity>
+          </View>
 
           <TouchableOpacity onPress={() => fetchAlunoData()}
             style={[Estilo.corPrimaria, style.botao, Estilo.sombra, Estilo.botao]}>
@@ -382,7 +458,7 @@ const style = StyleSheet.create({
     marginTop: '30%',
     marginLeft: 'auto',
     marginRight: 'auto',
-    width: '90%',
+    width: '80%',
   },
 
   textoLink: {
@@ -410,6 +486,18 @@ const style = StyleSheet.create({
   },
   ultimoLink: {
     top: 10
-  }
-
+  },passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 0,
+    paddingHorizontal: 0,
+    paddingBottom: 20,
+},
+  showPasswordButton: {
+    position: 'absolute',
+    right: 10,
+    top: '50%',
+    transform: [{ translateY: -10 }], 
+    zIndex: 1,
+}
 })
