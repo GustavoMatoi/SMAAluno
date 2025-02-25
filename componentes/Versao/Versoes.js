@@ -10,7 +10,7 @@ export default ({ versao }) => {
     const [modalVisible, setModalVisible] = useState(false);
 
     if (!fontsLoaded) {
-        return null; // Retorna null enquanto as fontes não estiverem carregadas
+        return null; 
     }
 
     return (
@@ -32,16 +32,10 @@ export default ({ versao }) => {
             >
                 <View style={style.modalContainer}>
                     <View style={style.modalContent}>
-                        <Text style={[style.modalTitle, style.montserrat]}>Detalhes da Versão {versao}</Text>
+                        <Text style={[style.modalTitle, style.montserrat]}>Detalhes da Versão 1.0.0</Text>
                         <ScrollView style={style.scrollView}>
                             <Text style={[style.modalText, style.montserrat]}>
-                                - Ficha ABC professor{"\n"}
-                                - Ficha ABC aluno{"\n"}
-                                - Corrigir erro na hora de olhar avaliações (reportado pelo José Ewerton){"\n"}
-                                - Tela de versões{"\n"}
-                                - Adicionar a explicação do pq de ter que relogar toda vez que lançar ficha / avaliação{"\n"}
-                                - Editar avaliação (apenas o prof que lançou){"\n"}
-                                - Adicionar Prof Responsável pela avaliação no BD{"\n"}
+                                Versão inicial do aplicativo
                             </Text>
                         </ScrollView>
                         <TouchableOpacity style={style.closeButton} onPress={() => setModalVisible(false)}>

@@ -10,7 +10,7 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import { getAuth, signOut } from "firebase/auth";
 
 export default ({ navigation,route }) => {
-    const variavelGlobal = new Globais('2.3.3'); 
+    const variavelGlobal = new Globais('1.0.0'); 
     const [atVersao, setAtVersao] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [conexao, setConexao] = useState(true);
@@ -69,23 +69,23 @@ export default ({ navigation,route }) => {
             <SafeAreaView style={estilo.corLightMenos1}>
                 <Text style={[estilo.tituloH427px, estilo.textoCorSecundaria, style.Titulo, style.alinhamentoTexto]}>Versões</Text>
                 <TouchableOpacity
-        style={style.logoutButton}
-        onPress={() =>
-          Alert.alert(
-            "Confirmação",
-            "Tem certeza de que deseja sair?",
-            [
-              { text: "Cancelar", style: "cancel" },
-              {
-                text: "Sair",
-                style: "destructive",
-                onPress: handleLogout,
-              },
-            ]
-          )
-        }
-      >
-        <SimpleLineIcons name="logout" size={24} color="#FF6262" />
+                        style={style.logoutButton}
+                        onPress={() =>
+                        Alert.alert(
+                            "Confirmação",
+                            "Tem certeza de que deseja sair?",
+                            [
+                            { text: "Cancelar", style: "cancel" },
+                            {
+                                text: "Sair",
+                                style: "destructive",
+                                onPress: handleLogout,
+                            },
+                            ]
+                        )
+                        }
+                    >
+                <SimpleLineIcons name="logout" size={24} color="#FF6262" />
       </TouchableOpacity>
             </SafeAreaView>
             {conexao ? (

@@ -14,11 +14,29 @@ export default ({ navigation, route }) => {
   const numAvaliacoes = avaliacoes.length
   const [conexao, setConexao] = useState(true);
   const [data, setData] = useState()
+  const [dadosProcessados, setDadosProcessados] = useState([]);
   function stringToDate(dateString) {
     const [day, month, year] = dateString.split('/');
     return new Date(year, month - 1, day);
   }
-
+  const processarDados = (avaliacoes, fichas) => {
+    const avaliacoesOrdenadas = [...avaliacoes].sort((a, b) => 
+      new Date(b.data) - new Date(a.data));
+    const fichasOrdenadas = [...fichas].sort((a, b) => 
+      new Date(b.dataInicio.split('/').reverse().join('-')) - 
+      new Date(a.dataInicio.split('/').reverse().join('-')));
+    return avaliacoesOrdenadas.map(avaliacao => {
+      const fichaCorrespondente = fichasOrdenadas.find(ficha => 
+        new Date(ficha.dataInicio.split('/').reverse().join('-')) <= 
+        new Date(avaliacao.data)
+      );
+      
+      return {
+        ...avaliacao,
+        ficha: fichaCorrespondente || null
+      };
+    });
+  };
   console.log('Fichas na tela de avaliações', fichas)
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -36,7 +54,7 @@ export default ({ navigation, route }) => {
 
 
   
-      return (
+  return (
         <ScrollView style={[style.container, estilo.corLightMenos1]} >
           {
           avaliacoes.length == 0 ? 
@@ -78,8 +96,6 @@ export default ({ navigation, route }) => {
         </ScrollView>
       );
     };
-
-
 const style = StyleSheet.create({
     container: {
         height: '100%',

@@ -16,10 +16,14 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
   const [pseResposta, setPseResposta] = useState<string>('0. Repouso')
   const [conexao, setConexao] = useState<boolean>(true)
   const [duracao, setDuracao] = useState<number>(0)
+  const [inicioTreino, setInicioTreino] = useState<string>('')
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setConexao(state.type === 'wifi' || state.type === 'cellular')
     })
+    console.log('diario', diario)
+    console.log('iniciotreino',diario.inicio)
 
     return () => {
       unsubscribe()
@@ -48,12 +52,15 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
       if (typeof detalhamento !== 'undefined') {
         tipoTreino = "Diario"
       }
-
+      if (inicioTreino == 0){
+        inicioTreino = diario.inicio;
+      }
+      console.log('inicioTreino', inicioTreino);
       if(isNaN(duracao)) return Alert.alert("Valor inválido.","Preencha a duração apenas com números.")
       const diarioSalvo: object = {
         fimDoTreino: fimDoTreino,
         duracao: duracao,
-        inicio: diario.inicio,
+        inicio: inicioTreino,
         mes: mes,
         ano: ano,
         dia: dia,
@@ -74,10 +81,13 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
           diarioSalvo
         );
         if(typeof detalhamento !== 'undefined'){
+          console.log("chegou aqui", detalhamento)
           detalhamento.Exercicios.forEach(element => {
             setDoc(doc(firebaseBD, 'Academias', aluno.Academia, 'Alunos', `${aluno.email}`, `Diarios`, `Diario${ano}|${mes}|${dia}`, 'Exercicio', element.Nome), {
               ...element
             })
+            console.log("element", element);
+            console.log("element.Nome", element.Nome);
           });
         }
 
@@ -138,6 +148,16 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
             keyboardType="numeric"
             placeholder="Informe o tempo de treino"
             style={[estilo.corLight, style.botaoInput, duracao === 0 ? { borderWidth: 1, borderColor: 'red' } : {}]}
+          />
+          <Text style={[estilo.tituloH619px, { marginVertical: '3%' }]}>
+            Horário de início do treino (opcional):
+          </Text>
+          <TextInput
+            onChangeText={text => setInicioTreino(text)}
+            placeholder="Formato HH:MM (ex: 8:50)"
+            keyboardType="numbers-and-punctuation"
+            style={[estilo.corLight, style.botaoInput]}
+            value={inicioTreino}
           />
           <View style={{ paddingTop: 20 }}>
             <TouchableOpacity

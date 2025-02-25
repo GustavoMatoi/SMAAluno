@@ -30,37 +30,81 @@ export default ({navigation, route}) => {
       }
     })
     const getExercicios = async () => {
-      const db = getFirestore()
-      const diariosRef = collection(db, "Academias", aluno.Academia, "Alunos",`${aluno.email}`, 'Diarios');
-
-      const querySnapshot = await getDocs(diariosRef);
+      const db = getFirestore();
+      
+      try {
+        // 1. Buscar a ficha mais recente
+        const fichasRef = collection(db, `Academias/${aluno.Academia}/Alunos/${aluno.email}/FichaDeExercicios`);
+        const fichasSnapshot = await getDocs(fichasRef);
+        
+        // Encontrar a ficha mais recente
+        const fichas = fichasSnapshot.docs.sort((a, b) => 
+          b.id.localeCompare(a.id)
+        );
+        
+        if (fichas.length === 0) {
+          setCarregandoDados(false);
+          return;
+        }
     
-      const promises = [];
-      querySnapshot.forEach((doc) => {
-        const exerciciosRef = collection(doc.ref, "Exercicios");
-        const promise = getDocs(exerciciosRef).then((exerciciosSnapshot) => {
-          const exercicios = exerciciosSnapshot.docs.map((exercicioDoc) => {
-            return {
-              nome: exercicioDoc.data().Nome.exercicio,
-              tipo: exercicioDoc.data().tipo
-            };
+        const fichaAtual = fichas[0];
+        
+        // 2. Buscar exercícios da ficha atual
+        const exerciciosFichaRef = collection(fichaAtual.ref, 'Exercicios');
+        const exerciciosFichaSnapshot = await getDocs(exerciciosFichaRef);
+        
+        // Mapear exercícios da ficha com nome correto
+        const exerciciosDaFicha = exerciciosFichaSnapshot.docs.map(doc => ({
+          nome: doc.data().Nome?.exercicio || doc.id, // Captura o nome correto da ficha
+          tipo: doc.data().tipo
+        }));
+    
+        console.log('Exercícios na ficha:', exerciciosDaFicha);
+    
+        // 3. Buscar diários que contêm PSE
+        const diariosRef = collection(db, `Academias/${aluno.Academia}/Alunos/${aluno.email}/Diarios`);
+        const diariosSnapshot = await getDocs(diariosRef);
+    
+        // 4. Coletar exercícios com PSE
+        const exerciciosComPSE = new Map();
+    
+        for (const diarioDoc of diariosSnapshot.docs) {
+          const exerciciosRef = collection(diarioDoc.ref, 'Exercicio');
+          const exerciciosSnapshot = await getDocs(exerciciosRef);
+          
+          exerciciosSnapshot.forEach(exercicioDoc => {
+            // Verificar se tem algum PSE registrado
+            const hasPSE = Object.keys(exercicioDoc.data()).some(key => 
+              key.startsWith('PSEdoExercicioSerie') && 
+              typeof exercicioDoc.get(key)?.valor === 'number'
+            );
+    
+            // Encontrar correspondência na ficha
+            const exercicioFicha = exerciciosDaFicha.find(e => 
+              e.nome === exercicioDoc.id // Comparação direta pelo ID do documento
+            );
+    
+            if (exercicioFicha && hasPSE) {
+              exerciciosComPSE.set(exercicioDoc.id, {
+                nome: exercicioDoc.id, // Usa o ID do documento como nome
+                tipo: exercicioFicha.tipo
+              });
+            }
           });
-          return exercicios;
-        });
-        promises.push(promise);
-      });
+        }
     
-      const arraysNomeExercicio = await Promise.all(promises);
-      const newArrayNomeExercicio = arraysNomeExercicio.flat();
+        console.log('Exercícios com PSE:', Array.from(exerciciosComPSE.values()));
+        setArrayExercicio(Array.from(exerciciosComPSE.values()));
+        setCarregandoDados(false);
     
-      setArrayExercicio(newArrayNomeExercicio);
-      setCarregandoDados(false);
+      } catch (error) {
+        console.error('Erro ao carregar exercícios:', error);
+        setCarregandoDados(false);
+      }
     };
     useEffect(() => {
       getExercicios();
     }, []);
-  
-    console.log('aluno ', aluno)
     return (
       <ScrollView style={[estilo.corLightMenos1, {height: '100%'} ]}>
         <SafeAreaView style={[estilo.container]}>
