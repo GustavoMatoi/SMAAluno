@@ -114,7 +114,7 @@ export default ({ navigation, route }) => {
           console.error(error.message);
         });
     };
-  useEffect(() => {
+  /*useEffect(() => {
     const fetchData = async () => {
       if (conexao) {
         try {
@@ -164,7 +164,7 @@ export default ({ navigation, route }) => {
     };
 
     executarFuncoes();
-  }, []);
+  }, []);*/
 
   
   const openAppSettings = () => {
@@ -252,8 +252,8 @@ export default ({ navigation, route }) => {
         <View style={style.areaBotoes}>
           <View style={style.containerBotao}>
 
-            {location ? (
-              distanciaCarregada ? (
+            {/*{location ? (
+              distanciaCarregada ? ( */}
                 <TouchableOpacity
                   style={[estilo.corPrimaria, style.botao]}
                   onPress={() => {
@@ -265,7 +265,7 @@ export default ({ navigation, route }) => {
                   </View>
                   <Text style={[estilo.textoSmall12px, estilo.textoCorLight]}>INICIAR TREINO</Text>
                 </TouchableOpacity>
-              ) : (
+              {/*) : (
                 <TouchableOpacity
                   disabled
                   style={[estilo.corDisabled, style.botao]}
@@ -282,7 +282,7 @@ export default ({ navigation, route }) => {
                 <MaterialIcons name="not-listed-location" size={120} color="white" />
                 <Text style={[estilo.textoSmall12px, estilo.textoCorLight, estilo.centralizado]}>PERMITA ACESSO E REINICIE O APP.</Text>
               </TouchableOpacity>
-            )}
+            )}*/}
 
           </View>
 

@@ -160,7 +160,6 @@ const handleLogout = async () => {
           <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>{aluno.profissao}</Text>
           <Text style={[estilo.textoCorSecundaria, estilo.tituloH619px, { marginVertical: 5 }]}>Endereço</Text>
           <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>{enderecoAluno.rua}, {enderecoAluno.numero} {enderecoAluno.bairro}, {enderecoAluno.cidade}, {enderecoAluno.estado}, {enderecoAluno.cep}</Text>
-          <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>{enderecoAluno.rua}, {enderecoAluno.numero} {enderecoAluno.bairro}, {enderecoAluno.cidade}, {enderecoAluno.estado}, {enderecoAluno.cep}</Text>
 
         </View>
         <TouchableOpacity style={[conexao ? estilo.corPrimaria : estilo.corDisabled, estilo.botao, { marginTop: '5%', marginBottom: '5%' }, estilo.sombra]} disabled={!conexao} onPress={() => navigation.navigate('Editar perfil', { aluno })}>

@@ -18,7 +18,7 @@ import NetInfo from '@react-native-community/netinfo';
 import axios from 'axios';
 import cep from 'cep-promise';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 let novoAluno = new Aluno('', '', '', '', '', '', '', '', '', '')
 let enderecoNovoAluno = new Endereco('', '', '', '', '', '')
@@ -40,7 +40,9 @@ export default ({ navigation }) => {
   const [cpf, setCpf] = useState('')
   const [cpfInvalido, setCpfInvalido] = useState(false);
 
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [senhasNaoConferem, setSenhasNaoConferem] = useState(false);
 
   const [diaNascimento, setDiaNascimento] = useState('')
   const [mesNascimento, setMesNascimento] = useState('')
@@ -476,7 +478,6 @@ export default ({ navigation }) => {
         <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.titulos, style.Montserrat]}>Primeiramente, identifique-se</Text>
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
-          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
           <View>
             <TextInput
               placeholder={'Informe seu nome completo'}
@@ -765,20 +766,65 @@ export default ({ navigation }) => {
         </View>
 
         <View style={style.inputArea}>
-          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>SENHA:</Text>
-          <TextInput
-            secureTextEntry={true}
-            style={[
-              style.inputText,
-              estilo.sombra,
-              estilo.corLight,
-              senhaInvalida ? { borderColor: 'red', borderWidth: 1 } : {}
-            ]}
-            placeholder="Informe sua senha"
-            value={senha}
-            onChangeText={(text) => validaSenha(text)}
-          ></TextInput>
-        </View>
+                    <Text style={[estilo.textoSmall12px,style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>SENHA:</Text>
+                    <View style={style.passwordContainer}>
+                        <TextInput 
+                            secureTextEntry={!showPassword}
+                            style={[
+                                style.inputText, 
+                                estilo.sombra, 
+                                estilo.corLight,
+                                senhaInvalida ? { borderColor: 'red', borderWidth: 1 } : {}
+                            ]}
+                            placeholder="Informe sua senha"
+                            value={senha}
+                            onChangeText={(text) => validaSenha(text)}
+                        />
+                        <TouchableOpacity
+                            onPress={() => setShowPassword(!showPassword)}
+                            style={style.showPasswordButton}>
+                            <FontAwesome5
+                                name={showPassword ? 'eye-slash' : 'eye'}
+                                size={20}
+                                color="#0066FF"
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={style.inputArea}>
+                    <Text style={[estilo.textoSmall12px,style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>CONFIRMAR SENHA:</Text>
+                    <View style={style.passwordContainer}>
+                        <TextInput 
+                            secureTextEntry={!showPassword}
+                            style={[
+                                style.inputText, 
+                                estilo.sombra, 
+                                estilo.corLight,
+                                senhasNaoConferem ? { borderColor: 'red', borderWidth: 1 } : {}
+                            ]}
+                            placeholder="Confirme sua senha"
+                            value={confirmarSenha}
+                            onChangeText={(text) => {
+                                setConfirmarSenha(text);
+                                setSenhasNaoConferem(text !== senha);
+                            }}
+                        />
+                        <TouchableOpacity
+                            onPress={() => setShowPassword(!showPassword)}
+                            style={style.showPasswordButton}>
+                            <FontAwesome5
+                                name={showPassword ? 'eye-slash' : 'eye'}
+                                size={20}
+                                color="#0066FF"
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    {senhasNaoConferem && (
+                        <Text style={[estilo.textoSmall12px, {color: 'red', marginTop: 5}]}>
+                            As senhas não coincidem!
+                        </Text>
+                    )}
+                </View>
         <TouchableOpacity onPress={() => {
           {
             
@@ -905,5 +951,21 @@ const style = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#bdc3c7',
     borderRadius: 10,
+  }, passwordContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 0,
+      paddingHorizontal: 0,
+      paddingBottom: 0,
+  },
+  showPasswordButton: {
+      position: 'absolute',
+      right: 50,
+      top: '50%',
+      transform: [{ translateY: -20 }],
+      zIndex: 1,
+  },
+  passwordInput: {
+      flex: 1,
   }
 })

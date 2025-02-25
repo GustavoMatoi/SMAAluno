@@ -134,7 +134,7 @@ export default function Routes({ route, navigation }) {
       setProgresso(0.6)
 
       setAvaliacoes(arrayAvaliacoes)
-      console.log("cu",avaliacoes.length);
+      console.log("avav",avaliacoes.length);
       arrayAvaliacoes.forEach(async (i, index) => {
         try {
           const avaliacaoString = JSON.stringify(i)
