@@ -9,6 +9,7 @@ import InputTexto from "../InputTexto"
 import RadioBotao from "../RadioBotao"
 import { useFonts } from 'expo-font';
 import BotaoLight from "../BotaoLight"
+import BotaoLight from "../BotaoLight"
 import BotaoSelect from "../BotaoSelect"
 import { Pessoa } from "../../classes/Pessoa"
 import { Aluno } from "../../classes/Aluno"
@@ -35,6 +36,16 @@ const clearAllData = async () => {
     console.error('Erro ao limpar dados:', error);
   }
 };
+const clearAllData = async () => {
+  try {
+    await AsyncStorage.clear();
+    console.log('Todos os dados foram apagados!');
+    const keys = await AsyncStorage.getAllKeys();
+    console.log("isso tudo aqui de chave",keys)
+  } catch (error) {
+    console.error('Erro ao limpar dados:', error);
+  }
+};
 export default ({ navigation }) => {
   const [nome, setNome] = useState('')
   const [nomeInvalido, setNomeInvalido] = useState(false);
@@ -42,6 +53,9 @@ export default ({ navigation }) => {
   const [cpf, setCpf] = useState('')
   const [cpfInvalido, setCpfInvalido] = useState(false);
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [senhasNaoConferem, setSenhasNaoConferem] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [senhasNaoConferem, setSenhasNaoConferem] = useState(false);
@@ -456,6 +470,10 @@ const handleCadastrar = async () => {
       setRua(response.street || '');
       setBairro(response.neighborhood || '');
       setRua(response.street || '');
+      setBairro(response.neighborhood || '');
+      setRua(response.street || '');
+      setBairro(response.neighborhood || '');
+      setRua(response.street || '');
       console.log('Dados recebidos:', response.data);
       setCepInvalido(false);
     } catch (error) {
@@ -464,6 +482,24 @@ const handleCadastrar = async () => {
       setCepInvalido(true);
     }
   };
+  const buscarCidadesPorEstado = async (estado) => {
+    try{
+    const response = await axios.get(
+      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado}/municipios`
+      );
+      const listaCidades = response.data.map((municipio) => municipio.nome);
+      setCidades(listaCidades);
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao buscar as cidades.');
+      setCidades([]);
+      }
+  };
+
+  useEffect(() => {
+    if (estado) {
+      buscarCidadesPorEstado(estado);
+    }
+  }, [estado]);
   const buscarCidadesPorEstado = async (estado) => {
     try{
     const response = await axios.get(
@@ -527,11 +563,13 @@ const handleCadastrar = async () => {
 
     const carregarProfessores = async () => {
       await carregarAcademias();
+      await carregarAcademias();
       try {
         const db = getFirestore();
         const academiasRef = collection(db, "Academias");
         const academiaQuery = query(academiasRef, where("nome", "==", selectedOption));
         const academiaSnapshot = await getDocs(academiaQuery);
+    
     
         if (!academiaSnapshot.empty) {
           const academiaDoc = academiaSnapshot.docs[0];
@@ -539,17 +577,21 @@ const handleCadastrar = async () => {
           const querySnapshot = await getDocs(professoresRef);
           const professores = [];
     
+    
           querySnapshot.forEach((doc) => {
             const data = doc.data();
+            if (data && data.nome && data.status !== "Pendente") {
             if (data && data.nome && data.status !== "Pendente") {
               professores.push(data.nome);
               console.log(data.nome);
             }
           });
     
+    
           const turmasRef = collection(academiaDoc.ref, "Turmas");
           const turmas = [];
           const turmasSnapshot = await getDocs(turmasRef);
+    
     
           turmasSnapshot.forEach((doc) => {
             const data = doc.data();
@@ -559,7 +601,11 @@ const handleCadastrar = async () => {
             }
           });
     
+          });
+    
           setProfessoresDaAcademia(professores);
+          setTurmas(turmas);
+          setCarregouProf(true);
           setTurmas(turmas);
           setCarregouProf(true);
         }
@@ -568,8 +614,11 @@ const handleCadastrar = async () => {
       }
     };
   
+  
     carregarAcademias();
     carregarProfessores();
+    }, [selectedOption]);
+    
     }, [selectedOption]);
     
   return (
@@ -578,6 +627,7 @@ const handleCadastrar = async () => {
 
         <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.titulos, style.Montserrat]}>Primeiramente, identifique-se</Text>
         <View style={style.inputArea}>
+          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
           <View>
             <TextInput
@@ -739,10 +789,37 @@ const handleCadastrar = async () => {
           />
           <TouchableOpacity style={[estilo.corPrimaria, estilo.sombra,style.botao, estilo.botao, {left: '-5%'}]} onPress={() => encontrarEndereco()} >
             <Text style={[estilo.tituloH523px, estilo.textoCorLight]}>Buscar</Text>
+          <TouchableOpacity style={[estilo.corPrimaria, estilo.sombra,style.botao, estilo.botao, {left: '-5%'}]} onPress={() => encontrarEndereco()} >
+            <Text style={[estilo.tituloH523px, estilo.textoCorLight]}>Buscar</Text>
           </TouchableOpacity>
         </View>
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
+            ESTADO:
+            </Text>
+            {estado ?  <BotaoSelect
+                      options={estadosBrasileiros.map((e) => e.label)}
+                      onChange={(value) => {
+                        const estadoSelecionado = estadosBrasileiros.find((e) => e.label === value);
+                        setEstado(estadoSelecionado.value);
+                      }}
+                      titulo="Selecione o estado"
+                      max={1}
+                      selecionado={estado}
+                      select={estado}
+                    />: 
+                      <BotaoSelect
+                      options={estadosBrasileiros.map((e) => e.label)}
+                      onChange={(value) => {
+                        const estadoSelecionado = estadosBrasileiros.find((e) => e.label === value);
+                        setEstado(estadoSelecionado.value);
+                      }}
+                      titulo="Selecione o estado"
+                      max={1}
+                      selecionado={!!estado}
+                      select={estado}
+                    />}
+          
             ESTADO:
             </Text>
             {estado ?  <BotaoSelect
@@ -789,16 +866,39 @@ const handleCadastrar = async () => {
                         max={1}
                         selecionado={!!cidade}
                       />}
+            CIDADE: 
+            </Text>
+            {cidade ?<BotaoSelect
+                        options={cidades}
+                        onChange={setCidade}
+                        titulo="Selecione a cidade"
+                        max={1}
+                        selecionado={cidade}
+                        select={cidade}
+                      /> : 
+                        <BotaoSelect
+                        options={cidades}
+                        onChange={setCidade}
+                        titulo="Selecione a cidade"
+                        max={1}
+                        selecionado={!!cidade}
+                      />}
         </View>
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
             BAIRRO:
           </Text>
           {bairro?<TextInput
+          {bairro?<TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe seu bairro"
             value= {bairro}
             onChangeText={(text) => setBairro(text)}
+          />:<TextInput
+            style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
+            placeholder="Informe seu bairro"
+            onChangeText={(text) => setBairro(text)}
+          />}
           />:<TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe seu bairro"
@@ -810,11 +910,18 @@ const handleCadastrar = async () => {
             RUA:
           </Text>
           {rua ?<TextInput
+          {rua ?<TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe sua rua"
             value ={rua}
+            value ={rua}
             onChangeText={(text) => setRua(text)}
           />
+          :<TextInput
+            style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
+            placeholder="Informe sua rua"
+            onChangeText={(text) => setRua(text)}
+          />}
           :<TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe sua rua"
@@ -994,6 +1101,22 @@ const style = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#bdc3c7',
     borderRadius: 10,
+  }, passwordContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 0,
+      paddingHorizontal: 0,
+      paddingBottom: 0,
+  },
+  showPasswordButton: {
+      position: 'absolute',
+      right: 50,
+      top: '50%',
+      transform: [{ translateY: -20 }],
+      zIndex: 1,
+  },
+  passwordInput: {
+      flex: 1,
   }, passwordContainer: {
       flexDirection: 'row',
       alignItems: 'center',

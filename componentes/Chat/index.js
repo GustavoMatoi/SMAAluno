@@ -48,11 +48,12 @@ export default ({navigation, route}) => {
                 'Professores'
               );
               const professoresSnapshot = await getDocs(professoresRef);
-
+              
               for (const professorDoc of professoresSnapshot.docs) {
-
+                
                 const professorData = professorDoc.data();
-                   const mensagensRef = collection(
+                console.log('aquiiiiiii', professorData);
+                  const mensagensRef = collection(
                   firebaseBD, 'Academias', aluno.Academia, 'Professores', professorData.email,
                   'Mensagens',
                   `Mensagens ${aluno.email}`,
@@ -76,9 +77,10 @@ export default ({navigation, route}) => {
 
             }
           }
+          console.log('chegouu');
           setProfessores(newArrayProfessores);
           setCarregandoProfessores(false);
-          console.log('newArrayProfessores', newArrayProfessores)
+          console.log('newArrayProfessores', newArrayProfessores);
         } catch (error) {
           console.log("deu erro e nao avisa", error)
           Alert.alert("Ocorreu um erro", error);

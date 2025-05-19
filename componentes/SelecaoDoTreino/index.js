@@ -14,6 +14,7 @@ const height = Dimensions.get('window').height
 export default ({ navigation, route }) => {
   const { diario, ficha, aluno } = route.params
   console.log("ficha desse bicho", ficha)
+  console.log("ficha desse bicho", ficha)
   console.log('Diario na seleção do treino ', diario)
   const [fontsLoaded] = useFonts({
     'Montserrat': require('../../assets/Montserrat-Light.ttf'),
@@ -124,6 +125,7 @@ export default ({ navigation, route }) => {
           :
           <>
                 <Text style={[estilo.textoP16px, style.textoEscolha, estilo.centralizado, style.Montserrat]}>Talvez sua ficha nao tenha sido lançada, caso tenha sido recarregue o aplicativo ou converse com o seu professor responsável.</Text>
+                <Text style={[estilo.textoP16px, style.textoEscolha, estilo.centralizado, style.Montserrat]}>Talvez sua ficha nao tenha sido lançada, caso tenha sido recarregue o aplicativo ou converse com o seu professor responsável.</Text>
       <View style={[style.areaBotoes, estilo.centralizado]}>
         <TouchableOpacity style={[estilo.corPrimaria, style.containerBotao]} onPress={() => { navigation.navigate('Home') }}>
           <View style={{ height: '80%' }}>
@@ -166,6 +168,34 @@ const style = StyleSheet.create({
   },
   Montserrat: {
     fontFamily: 'Montserrat'
+  },explicacaoContainer: {
+    marginHorizontal: 20,
+    marginTop: 15,
+    marginBottom: 25,
+  },
+  explicacaoBox: {
+    backgroundColor: '#F0F9FF',
+    borderRadius: 10,
+    padding: 15,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#B6E1FF',
+  },
+  infoIcon: {
+    marginRight: 10,
+    marginTop: 3,
+  },
+  explicacaoText: {
+    flex: 1,
+    color: '#2A2A2A',
+    lineHeight: 22,
+  },
+  psaText: {
+    marginTop: 15,
+    color: estilo.corLightMenos1,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },explicacaoContainer: {
     marginHorizontal: 20,
     marginTop: 15,

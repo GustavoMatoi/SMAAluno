@@ -39,7 +39,7 @@ export default function Routes({ route, navigation }) {
       const keys = await AsyncStorage.getAllKeys();
       console.log("isso tudo aqui",keys)
       const numberOfKeys = keys.length;
-      console.log(numberOfKeys);
+      console.log("as chave",numberOfKeys);
   
       if (isConnected) {
         if (dadosverif == !false){

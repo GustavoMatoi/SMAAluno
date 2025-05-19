@@ -237,6 +237,24 @@ export default ({ navigation }) => {
               </View>
             </>
           )}
+          {novoAluno.getSexo() === 'Masculino' ? 
+            null : (
+            <>
+              <Text style={[estilo.textoCorSecundaria, estilo.textoP16px, style.Montserrat]}>
+                Está grávida?
+              </Text>
+              <View style={[style.radiosEspacamento]}>
+                <RadioBotao
+                  horizontal
+                  options={['Sim', 'Não']}
+                  selected={selected}
+                  onChangeSelect={(opt, i) => {
+                    setSelected(i);
+                  }}
+                />
+              </View>
+            </>
+          )}
 
           <Text style={[estilo.textoCorSecundaria, estilo.textoP16px, style.Montserrat]}>Pratica musculação atualmente?</Text>
           <View style={[style.radiosEspacamento]}>
