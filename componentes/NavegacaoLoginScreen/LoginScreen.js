@@ -210,6 +210,63 @@ export default ({ navigation }) => {
     } catch (error) {
         console.error(`Erro ao verificar a versão de ${description}:`, error);
     }
+  };
+  const checkVersion = async () => {
+    try {
+        const db = getFirestore();
+        console.log("tentei chekar");
+        const alunoObj = JSON.parse(alunoLocalTeste)
+   
+        const firebaseRef = doc(db, "Versao", "versao");
+        const firebasedocSnapshot = await getDoc(firebaseRef);
+        console.log("checkando:",firebasedocSnapshot);
+
+        const academiaDocRef = doc(db, "Academias", alunoData.Academia.getAcademia());
+        const academiadocSnapshot = await getDoc(academiaDocRef);
+        console.log("checkando2:",academiadocSnapshot)
+
+
+
+        if (firebasedocSnapshot.exists() && academiadocSnapshot.exists()) {
+          console.log('existe esses ?')
+            const docData = firebasedocSnapshot.data();
+            const firebaseVersion = docData.firebase; 
+            const storedFirebaseVersion = await AsyncStorage.getItem('firebase');
+
+            const acadedocData = academiadocSnapshot.data();
+            const academialogada = acadedocData.nome;
+            const storedAcademiaLocal = await AsyncStorage.getItem('academia'); 
+            
+            console.log('Academia guardada salva:', academialogada);
+            console.log('Versão do Firebase salva:', firebaseVersion);
+
+            if (storedAcademiaLocal && storedAcademiaLocal !== academialogada) {
+                console.log(`Mudança de academia detectada: ${storedAcademiaLocal} => ${academialogada}`);
+                await AsyncStorage.clear();
+                await AsyncStorage.setItem('academia', String(academialogada));
+                Alert.alert('Aviso', 'Sua academia foi atualizada.');
+                dadosverif = false;
+                
+            }                                
+            if (firebaseVersion && firebaseVersion !== storedFirebaseVersion) {
+                console.log(`Mudança de firebase detectada: ${firebaseVersion} => ${storedFirebaseVersion}`);
+                await AsyncStorage.clear();
+                await AsyncStorage.setItem('firebase', String(storedFirebaseVersion));
+                Alert.alert('Aviso', 'Sua versao do firebase foi atualizada.');
+                dadosverif = false;
+                
+            }                                
+
+            //await checkVersion(storedFirebaseVersion, firebaseVersion, "firebase");
+            //await checkVersion(storedAcademiaLocal, academialogada, "academia");
+            await AsyncStorage.setItem('firebase', String(firebaseVersion));
+            await AsyncStorage.setItem('academia', String(academialogada));
+        } else {
+            console.error('Erro: Documento "versao" não encontrado na coleção "Versao" ou academia nao encontrada em Academias.');
+        }
+    } catch (error) {
+        console.error(`Erro ao verificar a versão de ${description}:`, error);
+    }
 };
   const getValueFunction = async () => {
     console.log("Chegou aqui ")
@@ -294,9 +351,21 @@ export default ({ navigation }) => {
         console.log("VVVVVVVVV")
         let loginValido = false;
 
+
         querySnapshot.forEach((doc) => {
           const alunoData = doc.data();
           console.log('Aluno encontrado:', alunoData);
+          if(alunoData.senha == password){
+            loginValido = true;
+            setAlunoData(alunoData);
+            alunoLogado.setNome(alunoData.nome);
+            const alunoString = JSON.stringify(alunoData);
+            AsyncStorage.setItem('alunoLocal', alunoString);
+            console.log("alunoData.Academia", alunoData.Academia)
+            academiaDoAluno = alunoData.Academia
+            console.log("Chamou por aqui")
+            console.log("VVVVVVVVV")
+          }
           if(alunoData.senha == password){
             loginValido = true;
             setAlunoData(alunoData);
@@ -482,6 +551,7 @@ const style = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 'auto',
     width: '80%',
+    width: '80%',
   },
 
   textoLink: {
@@ -509,6 +579,19 @@ const style = StyleSheet.create({
   },
   ultimoLink: {
     top: 10
+  },passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 0,
+    paddingHorizontal: 0,
+    paddingBottom: 20,
+},
+  showPasswordButton: {
+    position: 'absolute',
+    right: 10,
+    top: '50%',
+    transform: [{ translateY: -10 }], 
+    zIndex: 1,
   },passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',

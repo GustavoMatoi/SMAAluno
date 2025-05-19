@@ -110,6 +110,25 @@ const handleLogout = async () => {
                     >
                 <SimpleLineIcons name="logout" size={24} color="#FF6262" />
         </TouchableOpacity>
+          <TouchableOpacity
+                        style={style.logoutButton}
+                        onPress={() =>
+                        Alert.alert(
+                            "Confirmação",
+                            "Tem certeza de que deseja sair?",
+                            [
+                            { text: "Cancelar", style: "cancel" },
+                            {
+                                text: "Sair",
+                                style: "destructive",
+                                onPress: handleLogout,
+                            },
+                            ]
+                        )
+                        }
+                    >
+                <SimpleLineIcons name="logout" size={24} color="#FF6262" />
+        </TouchableOpacity>
           {!conexao ?
             <TouchableOpacity onPress={() => {
               Alert.alert(
@@ -140,6 +159,7 @@ const handleLogout = async () => {
           <Text style={[estilo.textoCorSecundaria, estilo.tituloH619px, { marginVertical: 5 }]}>Profissão</Text>
           <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>{aluno.profissao}</Text>
           <Text style={[estilo.textoCorSecundaria, estilo.tituloH619px, { marginVertical: 5 }]}>Endereço</Text>
+          <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>{enderecoAluno.rua}, {enderecoAluno.numero} {enderecoAluno.bairro}, {enderecoAluno.cidade}, {enderecoAluno.estado}, {enderecoAluno.cep}</Text>
           <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>{enderecoAluno.rua}, {enderecoAluno.numero} {enderecoAluno.bairro}, {enderecoAluno.cidade}, {enderecoAluno.estado}, {enderecoAluno.cep}</Text>
 
         </View>
@@ -183,6 +203,20 @@ const style = StyleSheet.create({
     width: '100%',
     marginLeft: '5%',
     marginTop: '10%'
+  },logoutButton: {
+    position: 'absolute',
+    top: 85,
+    right: 25,
+    backgroundColor: '#0066FF',
+    padding: 10,
+    bordercolor: '#000',
+    borderRadius: 30,
+    borderWidth: 0.2,
+    elevation: 3,
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },logoutButton: {
     position: 'absolute',
     top: 85,

@@ -184,7 +184,7 @@ export default ({ navigation, route }) => {
     }
   }, [])
 
-  const handlePressIniciarTreino = async () => {
+/*  const handlePressIniciarTreino = async () => {
     console.log(distanciaDaAcademia)
     if (distanciaDaAcademia < 2500) {
       navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
@@ -199,8 +199,10 @@ export default ({ navigation, route }) => {
 
       );
     }
+  }*/
+  const handlePressIniciarTreino = async () => {
+      navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
   }
-
 
 
   const handlePressAnalise = () => {

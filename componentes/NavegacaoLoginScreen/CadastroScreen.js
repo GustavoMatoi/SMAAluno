@@ -351,6 +351,8 @@ export default ({ navigation }) => {
       setEstado(response.state || '');
       setBairro(response.neighborhood || '');
       setRua(response.street || '');
+      setBairro(response.neighborhood || '');
+      setRua(response.street || '');
       console.log('Dados recebidos:', response.data);
       setCepInvalido(false);
     } catch (error) {
@@ -473,6 +475,7 @@ export default ({ navigation }) => {
 
         <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.titulos, style.Montserrat]}>Primeiramente, identifique-se</Text>
         <View style={style.inputArea}>
+          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
           <View>
             <TextInput
@@ -627,6 +630,7 @@ export default ({ navigation }) => {
               cepInvalido ? { borderColor: 'red', borderWidth: 1 } : {},
             ]}
             placeholder="exemplo: 36180000 Para Rio Pomba MG"
+            placeholder="exemplo: 36180000 Para Rio Pomba MG"
             type="zip-code"
             onChangeText={(text) => setCepEndereco(text)}
             keyboardType="numeric"
@@ -683,7 +687,6 @@ export default ({ navigation }) => {
                         max={1}
                         selecionado={!!cidade}
                       />}
-          
         </View>
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
@@ -692,6 +695,7 @@ export default ({ navigation }) => {
           {bairro?<TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe seu bairro"
+            value= {bairro}
             value= {bairro}
             onChangeText={(text) => setBairro(text)}
           />:<TextInput
