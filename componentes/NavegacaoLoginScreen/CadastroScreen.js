@@ -17,12 +17,22 @@ import { TextInputMask } from 'react-native-masked-text';
 import NetInfo from '@react-native-community/netinfo';
 import axios from 'axios';
 import cep from 'cep-promise';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 let novoAluno = new Aluno('', '', '', '', '', '', '', '', '', '')
 let enderecoNovoAluno = new Endereco('', '', '', '', '', '')
 
-
+const clearAllData = async () => {
+  try {
+    await AsyncStorage.clear();
+    console.log('Todos os dados foram apagados!');
+    const keys = await AsyncStorage.getAllKeys();
+    console.log("isso tudo aqui de chave",keys)
+  } catch (error) {
+    console.error('Erro ao limpar dados:', error);
+  }
+};
 export default ({ navigation }) => {
   const [nome, setNome] = useState('')
   const [nomeInvalido, setNomeInvalido] = useState(false);
@@ -341,6 +351,8 @@ export default ({ navigation }) => {
       setEstado(response.state || '');
       setBairro(response.neighborhood || '');
       setRua(response.street || '');
+      setBairro(response.neighborhood || '');
+      setRua(response.street || '');
       console.log('Dados recebidos:', response.data);
       setCepInvalido(false);
     } catch (error) {
@@ -411,59 +423,59 @@ export default ({ navigation }) => {
     };
 
     const carregarProfessores = async () => {
-      await carregarAcademias()
+      await carregarAcademias();
       try {
         const db = getFirestore();
         const academiasRef = collection(db, "Academias");
         const academiaQuery = query(academiasRef, where("nome", "==", selectedOption));
         const academiaSnapshot = await getDocs(academiaQuery);
+    
         if (!academiaSnapshot.empty) {
           const academiaDoc = academiaSnapshot.docs[0];
           const professoresRef = collection(academiaDoc.ref, "Professores");
           const querySnapshot = await getDocs(professoresRef);
           const professores = [];
-
+    
           querySnapshot.forEach((doc) => {
             const data = doc.data();
-            if (data && data.nome) {
+            if (data && data.nome && data.status !== "Pendente") {
               professores.push(data.nome);
               console.log(data.nome);
             }
           });
-
+    
           const turmasRef = collection(academiaDoc.ref, "Turmas");
           const turmas = [];
-
           const turmasSnapshot = await getDocs(turmasRef);
-
+    
           turmasSnapshot.forEach((doc) => {
             const data = doc.data();
             if (data && data.nome) {
               turmas.push(data.nome);
               console.log(data.nome);
             }
-
-          })
-
-
+          });
+    
           setProfessoresDaAcademia(professores);
-          setTurmas(turmas)
-          setCarregouProf(true)
+          setTurmas(turmas);
+          setCarregouProf(true);
         }
       } catch (error) {
         console.log(error);
       }
     };
-
+  
     carregarAcademias();
     carregarProfessores();
-  }, [selectedOption])
+    }, [selectedOption]);
+    
   return (
     <ScrollView alwaysBounceVertical={true} style={estilo.corLightMenos1}>
       <SafeAreaView style={style.container}>
 
         <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.titulos, style.Montserrat]}>Primeiramente, identifique-se</Text>
         <View style={style.inputArea}>
+          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
           <View>
             <TextInput
@@ -618,6 +630,7 @@ export default ({ navigation }) => {
               cepInvalido ? { borderColor: 'red', borderWidth: 1 } : {},
             ]}
             placeholder="exemplo: 36180000 Para Rio Pomba MG"
+            placeholder="exemplo: 36180000 Para Rio Pomba MG"
             type="zip-code"
             onChangeText={(text) => setCepEndereco(text)}
             keyboardType="numeric"
@@ -674,7 +687,6 @@ export default ({ navigation }) => {
                         max={1}
                         selecionado={!!cidade}
                       />}
-          
         </View>
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
@@ -683,6 +695,7 @@ export default ({ navigation }) => {
           {bairro?<TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe seu bairro"
+            value= {bairro}
             value= {bairro}
             onChangeText={(text) => setBairro(text)}
           />:<TextInput
@@ -768,9 +781,10 @@ export default ({ navigation }) => {
         </View>
         <TouchableOpacity onPress={() => {
           {
+            
             if (nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' || cepEndereco == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == '' || !academiaValida || !professorValido) {
               Alert.alert("Campos não preenchidos", `Há campos não preenchidos ou que foram preenchidos de maneira incorreta. Preencha-os e tente novamente.`)
-
+              
               if (nome == '') {
                 setNomeInvalido(true)
               }
@@ -817,6 +831,8 @@ export default ({ navigation }) => {
                 Alert.alert("Professor inválido.", "Selecione algum professor para concluir seu cadastro.")
               }
             } else {
+              clearAllData();
+              
               handleNavegacao()
             }
           }

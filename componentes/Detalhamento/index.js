@@ -257,13 +257,42 @@ descanso: descanso
             */
 
     }
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress', 
+            () => {
+                navigation.goBack()
+                return true
+            }
+        )
+        return () => backHandler.remove()
+    }, [])
 
+    const Header = () => (
+        <View style={style.header}>
+            <TouchableOpacity 
+                onPress={() => navigation.goBack()}
+                style={style.backButton}
+            >
+                <MaterialCommunityIcons 
+                    name="arrow-left" 
+                    size={28} 
+                    color={estilo.corPrimaria.color} 
+                />
+            </TouchableOpacity>
+            <Text style={[estilo.tituloH427px, style.headerTitle]}>
+                Detalhes do exercício
+            </Text>
+        </View>
+    )
     return (
-        <ScrollView>
+<ScrollView>
             <SafeAreaView style={[estilo.textoCorLightMenos1, style.container, estilo.corLightMenos1]}>
-                <SafeAreaView style={[style.conteudo, { marginTop: '10%' }]}>
+                <Header /> 
+                
+                <SafeAreaView style={style.conteudo}>
 
-                    <Text style={[estilo.tituloH427px]}>Detalhes do exercício: {nomeExercicio}</Text>
+                    <Text style={[estilo.tituloH523px]}>{nomeExercicio}</Text>
                     {tipoExercicio == 'força' || tipoExercicio == 'cardio' ?
 
                         <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Série</Text> :
@@ -489,22 +518,23 @@ descanso: descanso
                         </View>
                     </ScrollView>
                     <View style={style.botaoResponder}>
-                        <TouchableOpacity
+                    <TouchableOpacity
                             disabled={
                                 (numSeries.length !== 2 || numRepeticoes.length !== 2)
                                     ? (contadorPse2 !== numSeries.length - 1 && contadorPse2 !== numRepeticoes.length - 1)
                                     : (contadorPse2 !== numSeries.length - 2 && contadorPse2 !== numRepeticoes.length - 2)
                             }
                             style={[style.botaoResponderPSE, estilo.botao, estilo.corPrimaria]}
-                            onPress={() => { updateDocumento(); navigation.goBack() }}>
-
+                            onPress={() => { 
+                                updateDocumento(); 
+                                navigation.goBack() 
+                            }}>
                             <Text style={[estilo.textoCorLight, estilo.tituloH523px]}>ENVIAR</Text>
                         </TouchableOpacity>
                     </View>
                 </SafeAreaView>
             </SafeAreaView>
         </ScrollView>
-
     )
 }
 
@@ -513,9 +543,27 @@ const style = StyleSheet.create({
         height: windowHeight + 250,
         width: '100%',
     },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        backgroundColor: estilo.corLightMenos1.backgroundColor,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee'
+    },
+    backButton: {
+        marginRight: 15,
+        padding: 5
+    },
+    headerTitle: {
+        flex: 1,
+        color: estilo.corPrimaria.color,
+        fontSize: 20
+    },
     conteudo: {
         width: '95%',
-        marginLeft: '5%'
+        marginLeft: '5%',
+        marginTop: 15
     },
     camposColuna: {
         flexDirection: 'row',

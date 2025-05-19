@@ -23,6 +23,7 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 
 export default ({ navigation, route }) => {
   const { fichas, avaliacoes, academia, aluno } = route.params
+  console.log('fichas na home', fichas)
   const [conexao, setConexao] = useState(true)
   const [location, setLocation] = useState()
   const [locationAcademia, setLocationAcademia] = useState([0])
@@ -32,7 +33,7 @@ export default ({ navigation, route }) => {
   const [distanciaCarregada, setDistanciaCarregada] = useState(false);
   const [temMensagensPendentes, setTemMensagensPendentes] = useState(false);
 
-
+  
 
   const comparaDataVencimento = (date1, date2) => {
     const momentDate1 = moment(date1, 'DD/MM/YY');
@@ -177,15 +178,15 @@ export default ({ navigation, route }) => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setConexao(state.type === 'wifi' || state.type === 'cellular')
     })
-
+    
     return () => {
       unsubscribe()
     }
   }, [])
 
-  const handlePressIniciarTreino = async () => {
+/*  const handlePressIniciarTreino = async () => {
     console.log(distanciaDaAcademia)
-    if (distanciaDaAcademia < 600) {
+    if (distanciaDaAcademia < 2500) {
       navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
     }  else {
       Alert.alert(
@@ -198,11 +199,15 @@ export default ({ navigation, route }) => {
 
       );
     }
+  }*/
+  const handlePressIniciarTreino = async () => {
+      navigation.navigate('QTR', { ficha: fichas[fichas.length - 1], aluno: aluno })
   }
 
 
-
   const handlePressAnalise = () => {
+    console.log("fichas",fichas);
+    console.log("avaliacoes",avaliacoes);
     navigation.navigate('Avaliações', { avaliacoes, fichas });
 
   }

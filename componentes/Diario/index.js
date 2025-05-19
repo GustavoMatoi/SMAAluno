@@ -20,7 +20,7 @@ import { Entypo } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
 
 const largura = Dimensions.get('window').width
-
+let contador = 0;
 export default ({ navigation, route }) => {
   const {dadosIniciaisDoDiario, ficha, aluno, detalhamento, diario} = route.params
   const [verificador, setVerificador] = useState(false)
@@ -102,11 +102,19 @@ export default ({ navigation, route }) => {
       navigation.navigate('Detalhamento', { series: exercicioNaFicha.series, tipoExercicio: 'alongamento', nomeExercicio: exercicioNaFicha.Nome, duracao: exercicioNaFicha.duracao, diario: diario, index: contador, detalhamento});
   }
   const handleNavegacaoPse = () => {
-      confereDetalhamento()
-      navigation.navigate('PSE', {diario: diario, aluno: aluno, detalhamento: detalhamento})
+    console.log("exercicio na ficha: ",ficha.Exercicios.length)
+    console.log("contador: ",contador)
+    console.log("esse diario aqui que vai pro bd", detalhamento.Exercicios)
+      if (ficha.Exercicios.length === contador) {
+        setVerificador(true)
+      }
+      if(verificador == true){
+        confereDetalhamento()
+        navigation.navigate('PSE', {diario: diario, aluno: aluno, detalhamento: detalhamento})
+      }else{
+        alert("Você ainda não respondeu todos os detalhamentos dos exercícios.");
+      }
   }
-
-  let contador = 0
 
   const confereDetalhamento = () => {
     if (ficha.Exercicios.length === contador) {
@@ -186,8 +194,7 @@ export default ({ navigation, route }) => {
         </View>
           )) }
       {exercicios.length !== 0 ?
-        <TouchableOpacity style={verificador ? [estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado] : [estilo.corDisabled, style.botaoResponderPSE, estilo.centralizado]}
-          disabled={!verificador}
+        <TouchableOpacity style={[estilo.corPrimaria, style.botaoResponderPSE, estilo.centralizado]}
           onPress={() => { handleNavegacaoPse() }}>
           <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>RESPONDER PSE</Text>
         </TouchableOpacity>

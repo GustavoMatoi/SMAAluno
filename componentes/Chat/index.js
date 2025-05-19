@@ -34,7 +34,7 @@ export default ({navigation, route}) => {
     useEffect(() => {
       const fetchProfessores = async () => {
         try {
-          console.log('aquiiiiiiiiii', aluno)
+          console.log("ta chamando isso mesmo?")
           const academiaRef = collection(firebaseBD, 'Academias');
           const querySnapshot = await getDocs(academiaRef);
     
@@ -63,7 +63,8 @@ export default ({navigation, route}) => {
                 const q = query(mensagensRef, orderBy('data', 'asc'));
                 const mensagensSnapshot = await getDocs(q);
       
-                console.log(q._query.he.ce)
+                console.log("Query construída com sucesso:", q);
+                //console.log(q._query.he.ce)
                 const lastMessageDoc = mensagensSnapshot.docs[mensagensSnapshot.docs.length - 1];
                 if (lastMessageDoc) {
                   const remetente = lastMessageDoc.get('remetente');
@@ -81,6 +82,7 @@ export default ({navigation, route}) => {
           setCarregandoProfessores(false);
           console.log('newArrayProfessores', newArrayProfessores);
         } catch (error) {
+          console.log("deu erro e nao avisa", error)
           Alert.alert("Ocorreu um erro", error);
         }
       };

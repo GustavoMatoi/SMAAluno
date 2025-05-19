@@ -18,7 +18,9 @@ export default props => {
             <Text style={[estilo.textoCorSecundaria,{fontWeight: 'bold'}]}>Data:</Text> {dia}/{mes}/{ano}
             </Text>
             <Text style={[estilo.textoCorSecundaria, estilo.textoP16px]}>Não se esqueça de responder o detalhamento do exercício. <AntDesign name="smileo" size={16 } color="black" />
+            
             </Text>
+            <Text style={[estilo.textoCorSecundaria,estilo.textoP16px]}>Obs: caso o botão para detalhes nao estiver visivel arraste para a direita.</Text>
     
         </View>
     )
@@ -27,7 +29,7 @@ export default props => {
 const style = StyleSheet.create({
     container: {
         width: '80%',
-        height: 100,
+        height: 120,
         justifyContent: 'center',
         borderRadius: 20,
         paddingVertical: 12,

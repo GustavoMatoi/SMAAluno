@@ -25,7 +25,7 @@ import { Endereco } from '../../classes/Endereco'
 const alunoLogado = new Aluno()
 const enderecoAluno = new Endereco()
 const enderecoAcademia = new Endereco()
-
+const dadosverif = true;
 
 
 export default ({ navigation }) => {
@@ -65,9 +65,14 @@ export default ({ navigation }) => {
     if (!conexao) {
       navigation.navigate('Modal sem conexão');
     } else {
+      checkVersion();
       firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-          navigation.navigate('Principal');
+          navigation.navigate('Principal', { 
+            aluno: dadosAluno, 
+            academia: academiaObj,
+            dadosverif: dadosverif 
+          });
         })
         .catch((error) => {
           let mensagemDeErro = ''
@@ -194,18 +199,74 @@ export default ({ navigation }) => {
     } catch (error) {
         console.error('Erro ao salvar dados no AsyncStorage:', error);
     }
+  };
+  const checkVersion = async () => {
+    try {
+        const db = getFirestore();
+        console.log("tentei chekar");
+        const alunoObj = JSON.parse(alunoLocalTeste)
+   
+        const firebaseRef = doc(db, "Versao", "versao");
+        const firebasedocSnapshot = await getDoc(firebaseRef);
+        console.log("checkando:",firebasedocSnapshot);
+
+        const academiaDocRef = doc(db, "Academias", alunoData.Academia.getAcademia());
+        const academiadocSnapshot = await getDoc(academiaDocRef);
+        console.log("checkando2:",academiadocSnapshot)
+
+
+
+        if (firebasedocSnapshot.exists() && academiadocSnapshot.exists()) {
+          console.log('existe esses ?')
+            const docData = firebasedocSnapshot.data();
+            const firebaseVersion = docData.firebase; 
+            const storedFirebaseVersion = await AsyncStorage.getItem('firebase');
+
+            const acadedocData = academiadocSnapshot.data();
+            const academialogada = acadedocData.nome;
+            const storedAcademiaLocal = await AsyncStorage.getItem('academia'); 
+            
+            console.log('Academia guardada salva:', academialogada);
+            console.log('Versão do Firebase salva:', firebaseVersion);
+
+            if (storedAcademiaLocal && storedAcademiaLocal !== academialogada) {
+                console.log(`Mudança de academia detectada: ${storedAcademiaLocal} => ${academialogada}`);
+                await AsyncStorage.clear();
+                await AsyncStorage.setItem('academia', String(academialogada));
+                Alert.alert('Aviso', 'Sua academia foi atualizada.');
+                dadosverif = false;
+                
+            }                                
+            if (firebaseVersion && firebaseVersion !== storedFirebaseVersion) {
+                console.log(`Mudança de firebase detectada: ${firebaseVersion} => ${storedFirebaseVersion}`);
+                await AsyncStorage.clear();
+                await AsyncStorage.setItem('firebase', String(storedFirebaseVersion));
+                Alert.alert('Aviso', 'Sua versao do firebase foi atualizada.');
+                dadosverif = false;
+                
+            }                                
+
+            //await checkVersion(storedFirebaseVersion, firebaseVersion, "firebase");
+            //await checkVersion(storedAcademiaLocal, academialogada, "academia");
+            await AsyncStorage.setItem('firebase', String(firebaseVersion));
+            await AsyncStorage.setItem('academia', String(academialogada));
+        } else {
+            console.error('Erro: Documento "versao" não encontrado na coleção "Versao" ou academia nao encontrada em Academias.');
+        }
+    } catch (error) {
+        console.error(`Erro ao verificar a versão de ${description}:`, error);
+    }
 };
   const getValueFunction = async () => {
     console.log("Chegou aqui ")
     const alunoLocalTeste = await AsyncStorage.getItem('alunoLocal')
     const alunoObj = JSON.parse(alunoLocalTeste)
     const academiaObj = await getAcademia(alunoObj.Academia || 'Academia IFRP')
-
     console.log("Chegou aqui 2")
 
     console.log('alunoObj', alunoObj)
 
-    console.log(academiaObj)
+    console.log("academiaobj",academiaObj)
     if (alunoObj !== null) {
       try {
         const storedEmail = await AsyncStorage.getItem('alunoLocal');
@@ -245,8 +306,12 @@ export default ({ navigation }) => {
         if (emailAluno && senhaAluno) {
           console.log('emailAluno', 'senhaAlunAAAAAAAAAo')
 
-        
-            navigation.navigate('Principal', { aluno: dadosAluno, academia: academiaObj });
+            checkVersion();
+            navigation.navigate('Principal', { 
+              aluno: dadosAluno, 
+              academia: academiaObj,
+              dadosverif: dadosverif 
+            });
             await firebase.auth().signInWithEmailAndPassword(emailAluno, senhaAluno);
           
         }
@@ -275,9 +340,21 @@ export default ({ navigation }) => {
         console.log("VVVVVVVVV")
         let loginValido = false;
 
+
         querySnapshot.forEach((doc) => {
           const alunoData = doc.data();
           console.log('Aluno encontrado:', alunoData);
+          if(alunoData.senha == password){
+            loginValido = true;
+            setAlunoData(alunoData);
+            alunoLogado.setNome(alunoData.nome);
+            const alunoString = JSON.stringify(alunoData);
+            AsyncStorage.setItem('alunoLocal', alunoString);
+            console.log("alunoData.Academia", alunoData.Academia)
+            academiaDoAluno = alunoData.Academia
+            console.log("Chamou por aqui")
+            console.log("VVVVVVVVV")
+          }
           if(alunoData.senha == password){
             loginValido = true;
             setAlunoData(alunoData);
@@ -294,18 +371,22 @@ export default ({ navigation }) => {
         if (!loginValido) {
           Alert.alert(
               "Erro de Login",
-              "E-mail ou senha inválidos. Por favor, tente novamente."
+              "Pode ter ocorrido erro a respeito de E-mail ou senha inválidos. Caso tenha logado ignore esta mensagem."
           );
         } else {
             console.log('Login válido!');
-
-            navigation.navigate('Principal', { aluno: alunoLogado });
+            checkVersion();
+            navigation.navigate('Principal', { 
+              aluno: dadosAluno, 
+              academia: academiaObj,
+              dadosverif: dadosverif 
+            });
         }
       } catch (error) {
         console.log('Erro ao buscar os dados do aluno:', error);
           Alert.alert(
             "Erro",
-            "Ocorreu um erro ao tentar realizar o login. Tente novamente mais tarde."
+            "Pode ter ocorrido um erro ao tentar realizar o login. Caso tenha logado ignore esta mensagem."
         );
       } finally {
         console.log("AAAAAAAAAAAAAAAAAA")
@@ -420,7 +501,7 @@ export default ({ navigation }) => {
                   <Text style={[Estilo.tituloH619px, Estilo.textoCorLight, { textAlign: 'center' }]}>Digite seu email abaixo. Enviaremos um email para recuperação de senha.</Text>
                   <FontAwesome5 name="user-lock" size={90} color="#0066FF" />
                   <TextInput
-                    placeholder="Senha"
+                    placeholder="Email"
                     value={emailRecuperacao}
                     style={[style.inputText, Estilo.corLight]}
                     onChangeText={(text) => setEmailRecuperacao(text)}
@@ -459,6 +540,7 @@ const style = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 'auto',
     width: '80%',
+    width: '80%',
   },
 
   textoLink: {
@@ -486,6 +568,19 @@ const style = StyleSheet.create({
   },
   ultimoLink: {
     top: 10
+  },passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 0,
+    paddingHorizontal: 0,
+    paddingBottom: 20,
+},
+  showPasswordButton: {
+    position: 'absolute',
+    right: 10,
+    top: '50%',
+    transform: [{ translateY: -10 }], 
+    zIndex: 1,
   },passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -3,6 +3,7 @@ import { Pessoa } from "./Pessoa"
 class Aluno extends Pessoa {
     constructor (nome, academia, endereco, cpf, diaNascimento, mesNascimento, anoNascimento, telefone, sexo, email, senha, tipoSanguineo, profissao){
         super(nome, academia ,endereco, cpf, diaNascimento, mesNascimento, anoNascimento, telefone, sexo, email, senha)
+        this.academia = null
         this.tipoSanguineo = tipoSanguineo
         this.profissao = profissao
         this.diarios = []
@@ -18,7 +19,7 @@ class Aluno extends Pessoa {
 
     setTipoSanguineo = (tipoSanguineo) => this.tipoSanguineo = tipoSanguineo
 
-
+    getAcademia = () => {return this.academia}
 
     getTipoSanguineo = () => {return this.tipoSanguineo}
 

@@ -22,66 +22,79 @@ export default ({route}) => {
     console.log("tipo", tipo)
     console.log('nome', nome.exercicio)
     const getPse = async () => {
-        const db = getFirestore();
-        const diariosRef = collection(db, "Academias", aluno.Academia, "Alunos",`${aluno.email}`, 'Diarios');
-        const querySnapshot = await getDocs(diariosRef);
-      
+  const db = getFirestore();
+  const diariosRef = collection(db, "Academias", aluno.Academia, "Alunos", `${aluno.email}`, 'Diarios');
+  const querySnapshot = await getDocs(diariosRef);
+
+  const newPseArray = [];
+  const newArraySegundoParametro = [];
+  const sessionDates = [];
+
+  for (const doc of querySnapshot.docs) {
+    if (doc.get('tipoDeTreino') === 'Diario') {
+      const exerciciosRef = collection(doc.ref, 'Exercicio');
+      const exerciciosSnapshot = await getDocs(exerciciosRef);
+
+      for (const exercicioDoc of exerciciosSnapshot.docs) {
+        const exercicio = exercicioDoc.data();
         
-        const newArrayDatas = [];
-        const newPseArray = [];
-        const newArraySegundoParametro = [];
+        if (exercicioDoc.get('Nome.exercicio') === nome.exercicio) {
+          // Registrar data da sessão
+          sessionDates.push(new Date(
+            doc.get('ano'), 
+            doc.get('mes') - 1, 
+            doc.get('dia')
+          ));
 
-        const promises = querySnapshot.docs.map(async (doc) => {
-          if (doc.get('tipoDeTreino') === 'Diario') {
-            const exerciciosRef = collection(doc.ref, 'Exercicio');
-            const exerciciosSnapshot = await getDocs(exerciciosRef);
-
-            exerciciosSnapshot.forEach((exercicioDoc) => {
-              const exercicio = exercicioDoc.data();
-              let nomeAux = nome.exercicio
-                if (nomeAux === exercicioDoc.get('Nome')) {
-                    
-                    if(tipo == 'força'){                    
-                        let somador = 0;
-                        const atributosDoExercicio = exercicio.pesoLevantado ?? [];
-                            for(let i =0; i < atributosDoExercicio.length; i++){
-                            newPseArray.push(atributosDoExercicio[i])
-                            somador += atributosDoExercicio[i]
-                            }
-                newArraySegundoParametro.push(somador)
-
+          // Processar por tipo
+          if (tipo === 'força') {
+            // Cálculo de volume total (peso * repetições)
+            const volume = (exercicio.pesoLevantado || [])
+              .reduce((total, peso, index) => {
+                return total + (peso || 0) * ((exercicio.repeticoes || [])[index] || 0);
+              }, 0);
+              
+            newPseArray.push(volume);
             
-            }else {
-                if(tipo == 'aerobico'){    
+            // Média de peso
+            const pesos = exercicio.pesoLevantado || [];
+            newArraySegundoParametro.push(
+              pesos.length > 0 
+                ? pesos.reduce((a, b) => a + b) / pesos.length 
+                : 0
+            );
+          } 
+          else if (tipo === 'aerobico') {
+            // Duração total
+            const duracaoTotal = (exercicio.duracao || [])
+              .reduce((total, d) => total + (d || 0), 0);
+              
+            newPseArray.push(duracaoTotal);
+            
+            // Média de intensidade
+            const intensidades = exercicio.intensidade || [];
+            newArraySegundoParametro.push(
+              intensidades.length > 0 
+                ? intensidades.reduce((a, b) => a + b) / intensidades.length 
+                : 0
+            );
+          }
+        }
+      }
+    }
+  }
 
-                    
-                    const atributosDoExercicio = exercicio.intensidade ?? [];
-                        for(let i =0; i < atributosDoExercicio.length; i++){
-                        newPseArray.push(atributosDoExercicio[i])
-                        }
-                    const atributosDoExercicio2 = exercicio.duracao ?? [];
-                        for(let i =0; i < atributosDoExercicio2.length; i++){
-                        newArraySegundoParametro.push(atributosDoExercicio2[i])
-                }
-              } else {
-                const atributosDoExercicio = exercicio.duracao ?? [];
-                for(let i =0; i < atributosDoExercicio.length; i++){
-                newPseArray.push(atributosDoExercicio[i])
-                }
-                for(let i =0; i < atributosDoExercicio.length; i++){
-                newArraySegundoParametro.push(exercicioDoc.get(`PerflexDoExercicio${i+1}.valor`))
-            }
-          
-            }}}});}});
-      
-        await Promise.all(promises); // esperar todas as promessas do forEach terminarem
-        setArrayPrimeiroParametro(newPseArray);
-        console.log(newPseArray);
-        console.log(newPseArray.length);
-        setCarregandoDados(false);
-        setArrayDatas(newArrayDatas)
-        setArraySegundoParametro(newArraySegundoParametro)
-    };
+  // Ordenar por data
+  const sortedData = sessionDates
+    .map((date, index) => ({ date, index }))
+    .sort((a, b) => a.date - b.date)
+    .map(({ index }) => index);
+
+  setArrayPrimeiroParametro(sortedData.map(i => newPseArray[i]));
+  setArraySegundoParametro(sortedData.map(i => newArraySegundoParametro[i]));
+  setArrayDatas(sortedData.map(i => sessionDates[i]));
+  setCarregandoDados(false);
+};
       
       useEffect(() => {
         getPse();

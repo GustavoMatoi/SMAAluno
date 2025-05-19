@@ -243,6 +243,18 @@ export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
 
                         pressaoArterial={getPressaoArterial(avaliacao.PressaoDiastolica, avaliacao.PressaoSistolica)}
                     >
+                    {ficha ? (
+                        <>
+                            <Text style={estilo.tituloH427px}>
+                            Ficha Vinculada: {ficha.dataInicio} - {ficha.objetivoDoTreino}
+                            </Text>
+                            <FichaDeTreinoAnalise exercicios={ficha.Exercicios} />
+                        </>
+                        ) : (
+                        <Text style={estilo.textoP16px}>
+                            Nenhuma ficha vinculada a esta avaliação
+                        </Text>
+                        )}
                     </TabelaResultados>
                     <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%', textAlign: 'center' }]}>Resultados obtidos(em relação a avaliação anterior)</Text>
                     <TabelaResultados

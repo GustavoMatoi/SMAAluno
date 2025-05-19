@@ -26,29 +26,36 @@ export default function Routes({ route, navigation }) {
   const [diarios, setDiarios] = useState([])
   const [conexao, setConexao] = useState('')
   const [progresso, setProgresso] = useState(0.0)
-  const { aluno, academia } = route.params
+  const { aluno, academia,dadosverif } = route.params
 
 
   useEffect(() => {
+    
     const checkConnectionAndFetchData = async () => {
       const netInfo = await NetInfo.fetch();
       const isConnected = netInfo.type === 'wifi' || netInfo.type === 'cellular';
       setConexao(isConnected);
-  
+      console.log("endereco aluno", enderecoAluno.cep)
       const keys = await AsyncStorage.getAllKeys();
-      console.log("chave",keys)
+      console.log("isso tudo aqui",keys)
       const numberOfKeys = keys.length;
       console.log("as chave",numberOfKeys);
   
       if (isConnected) {
-        if (!keys.includes('Ficha')) {
-          fetchDadosWifi();
-          console.log("checando dados com wifi..");
-        } else {
-          fetchAlunosSemNet();
-          console.log("checando sem net");
+        if (dadosverif == !false){
+          if (!keys.includes('Ficha')) {
+            console.log('fetchDadosWifi');
+            fetchDadosWifi();
+          } else {
+            console.log("fetchAlunosSemNet");
+            fetchAlunosSemNet();
+          }
+        }else{
+          console.log('fetchDadosWifi');
+            fetchDadosWifi();
         }
       } else {
+        console.log("fetchAlunosSemNet");
         fetchAlunosSemNet();
       }
     };
@@ -68,17 +75,20 @@ export default function Routes({ route, navigation }) {
 
   const fetchDadosWifi = async () => {
     setProgresso(0)
+        
 
     console.log('alUNO', aluno)
     try {
+      console.log("chamou?", aluno.Academia)
       const bd = getFirestore()
-      const fichasRef = collection(bd, "Academias", aluno.Academia, "Alunos", `${aluno.email}`, 'FichaDeExercicios')
-
+      const fichasRef = collection(bd, "Academias", `${aluno.Academia}`, "Alunos", `${aluno.email}`, 'FichaDeExercicios')
+      console.log("chamou?1", fichasRef.path)
       const fichasSnaspshot = await getDocs(fichasRef)
       const arrayFichaAux = []
       let index = 0
-
+      console.log('Documentos encontrados:', fichasSnaspshot.docs.length);
       for (const fichaDoc of fichasSnaspshot.docs) {
+        console.log("chamou?2")
         const fichaData = fichaDoc.data()
         arrayFichaAux.push(fichaData)
         arrayFichaAux[index].Exercicios = []
@@ -91,6 +101,7 @@ export default function Routes({ route, navigation }) {
           arrayFichaAux[index].Exercicios.push(exercicioData)
         }
         index++
+        console.log("essa ficha", arrayFichaAux[index]);
       }
 
 
@@ -98,11 +109,18 @@ export default function Routes({ route, navigation }) {
       setFichas(arrayFichaAux)
       const avaliacoesRef = collection(bd, "Academias", aluno.Academia, "Alunos", `${aluno.email}`, 'Avaliações')
       const avaliacoesSnapshot = await getDocs(avaliacoesRef)
-      const arrayAvaliacoes = []
+      console.log('Documentos encontrados de avaliacoes:', avaliacoesSnapshot.docs.length);
+      avaliacoesSnapshot.docs.forEach((doc) => {
+        console.log('Conteúdo do documento:', doc.data());
+      });
+      
+      const arrayAvaliacoes = [];
       for (const avaliacaoDoc of avaliacoesSnapshot.docs) {
-        const avaliacaoData = avaliacaoDoc.data()
-        arrayAvaliacoes.push(avaliacaoData)
+        const avaliacaoData = avaliacaoDoc.data();
+        arrayAvaliacoes.push(avaliacaoData);
       }
+      console.log('Array final de avaliações:', arrayAvaliacoes);
+
 
       arrayFichaAux.forEach(async (i, index) => {
         try {
@@ -116,7 +134,7 @@ export default function Routes({ route, navigation }) {
       setProgresso(0.6)
 
       setAvaliacoes(arrayAvaliacoes)
-
+      console.log("cu",avaliacoes.length);
       arrayAvaliacoes.forEach(async (i, index) => {
         try {
           const avaliacaoString = JSON.stringify(i)
@@ -197,6 +215,7 @@ export default function Routes({ route, navigation }) {
       }
 
       setAvaliacoes(avaliacoesAux)
+      console.log("tamanho disso",avaliacoes.length)
       setFichas(fichasAux)
     } catch (error) {
       console.log("Erro no Async Storage")
