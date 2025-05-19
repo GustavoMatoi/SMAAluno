@@ -97,11 +97,7 @@ export default ({ navigation, route }) => {
                 {"\n\n"}
                 <Text style={estilo.textoNegrito}>Ficha:</Text> Acompanhamento simplificado do treino.
                 {"\n\n"}
-<<<<<<< HEAD
-                <Text style={estilo.textoNegrito}>Atenção:</Text> Treinar novamente substituirá os dados da ficha atual!
-=======
-                <Text style={estilo.textoNegrito}>Atenção:</Text> Treinar novamente no mesmo dia substituirá os dados da ficha atual!
->>>>>>> 27bd01c (Fix: correção de bugs no caminho na navegação das telas(variaveis,objetos...), verificação de senha correta no cadastro, modo teste do aplicativo. feat: manter a tela de CSV em manutenção, firebase teste, textos informativos para o usuario.)
+              <Text style={estilo.textoNegrito}>Atenção:</Text> Treinar novamente no mesmo dia substituirá os dados da ficha atual!
               </Text>
             </View>
             

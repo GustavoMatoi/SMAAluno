@@ -25,7 +25,7 @@ import { Endereco } from '../../classes/Endereco'
 const alunoLogado = new Aluno()
 const enderecoAluno = new Endereco()
 const enderecoAcademia = new Endereco()
-const dadosverif = true;
+let dadosverif = true;
 
 
 export default ({ navigation }) => {
@@ -61,36 +61,20 @@ export default ({ navigation }) => {
   }
 
 
-  const handleLogin = () => {
-    if (!conexao) {
-      navigation.navigate('Modal sem conexão');
-    } else {
-      checkVersion();
-      firebase.auth().signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          navigation.navigate('Principal', { 
-            aluno: dadosAluno, 
-            academia: academiaObj,
-            dadosverif: dadosverif 
-          });
-        })
-        .catch((error) => {
-          let mensagemDeErro = ''
-          switch (error.code) {
-            case 'auth/invalid-email':
-              mensagemDeErro = 'Email inválido. Tente novamente.'
-              break;
-            case 'auth/wrong-password':
-              mensagemDeErro = 'Senha incorreta.'
-              break;
-            case 'auth/user-not-found':
-              mensagemDeErro = 'Usuário não encontrado. Tente novamente.'
-              break;
-            default:
-              mensagemDeErro = "Erro desconhecido. Tente novamente mais tarde."
-          }
-          alert(mensagemDeErro)
-        });
+  const handleLogin = async () => {
+    if (!conexao) return navigation.navigate('Modal sem conexão');
+  
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      await fetchAlunoData(); 
+    } catch (error) {
+      const errorMessages = {
+        'auth/invalid-email': 'Email inválido',
+        'auth/wrong-password': 'Senha incorreta',
+        'auth/user-not-found': 'Usuário não encontrado'
+      };
+  
+      Alert.alert('Erro', errorMessages[error.code] || 'Erro desconhecido');
     }
   };
   const [emailRecuperacao, setEmailRecuperacao] = useState('')
@@ -136,137 +120,99 @@ export default ({ navigation }) => {
   useEffect(() => {
     checkWifiConnection();
   }, []);
+  useEffect(() => {
+    const fetchAndCheckFirebaseVersion = async () => {
+        try {
+            const db = getFirestore();
+            const firebaseRef = doc(db, "Versao", "versao");
 
+            const docSnapshot = await getDoc(firebaseRef);
+            if (docSnapshot.exists()) {
+                const docData = docSnapshot.data();
+                const firebaseVersion = docData.firebase; 
+                console.log('Versão do Firebase no Firestore:', firebaseVersion);
+
+                const storedVersion = await AsyncStorage.getItem('firebase');
+
+                if (storedVersion !== String(firebaseVersion)) {
+                    console.log(`Mudança detectada: ${storedVersion} => ${firebaseVersion}`);
+
+                    await AsyncStorage.clear();
+                    await AsyncStorage.setItem('firebase', String(firebaseVersion));
+
+                    Alert.alert('Aviso', 'Os dados locais foram atualizados devido à mudança de banco de dados.');
+                } else {
+                    console.log('Versão do banco de dados não mudou.');
+                }
+            } else {
+                console.error('Erro: Documento "versao" não encontrado na coleção "Versao".');
+            }
+        } catch (error) {
+            console.error('Erro ao verificar a versão do banco de dados:', error);
+        }
+    };
+
+    fetchAndCheckFirebaseVersion();
+}, []);
   const saveValueFunction = async () => {
     try {
-      if (email) {
-        await AsyncStorage.setItem('email', email);
-        setEmail('');
-      }
+        const db = getFirestore();
+        const firebaseRef = doc(db, "Versao", "versao");
+        const docSnapshot = await getDoc(firebaseRef);
 
-      if (password) {
-        await AsyncStorage.setItem('senha', password);
-        setPassword('');
-      }
+        if (docSnapshot.exists()) {
+            const docData = docSnapshot.data();
+            const firebaseVersion = docData.firebase; 
+            if (email) {
+                await AsyncStorage.setItem('email', email);
+                setEmail(''); 
+            }
+
+            if (password) {
+                await AsyncStorage.setItem('senha', password);
+                setPassword(''); 
+            }
+            await AsyncStorage.setItem('firebase', String(firebaseVersion));
+            console.log('Versão do Firebase salva:', firebaseVersion);
+        } else {
+            console.error('Erro: Documento "versao" não encontrado na coleção "Versao".');
+        }
+
+        //await getValueFunction();
     } catch (error) {
-      console.error('Erro ao salvar dados no AsyncStorage:', error);
-    } finally {
-      getValueFunction()
+        console.error('Erro ao salvar dados no AsyncStorage:', error);
     }
   };
-  const checkVersion = async () => {
-    try {
-        const db = getFirestore();
-        console.log("tentei chekar");
-        const alunoObj = JSON.parse(alunoLocalTeste)
-   
-        const firebaseRef = doc(db, "Versao", "versao");
-        const firebasedocSnapshot = await getDoc(firebaseRef);
-        console.log("checkando:",firebasedocSnapshot);
 
-        const academiaDocRef = doc(db, "Academias", alunoData.Academia.getAcademia());
-        const academiadocSnapshot = await getDoc(academiaDocRef);
-        console.log("checkando2:",academiadocSnapshot)
+const checkVersion = async () => {
+  try {
+    const db = getFirestore();
+    const [firebaseSnapshot, academiaSnapshot] = await Promise.all([
+      getDoc(doc(db, "Versao", "versao")),
+      getDoc(doc(db, "Academias", alunoData?.Academia || 'Academia IFRP'))
+    ]);
 
+    if (!firebaseSnapshot.exists() || !academiaSnapshot.exists()) return;
 
+    const { firebase: firebaseVersion } = firebaseSnapshot.data();
+    const { nome: academiaNome } = academiaSnapshot.data();
+    
+    const [storedFirebase, storedAcademia] = await Promise.all([
+      AsyncStorage.getItem('firebase'),
+      AsyncStorage.getItem('academia')
+    ]);
 
-        if (firebasedocSnapshot.exists() && academiadocSnapshot.exists()) {
-          console.log('existe esses ?')
-            const docData = firebasedocSnapshot.data();
-            const firebaseVersion = docData.firebase; 
-            const storedFirebaseVersion = await AsyncStorage.getItem('firebase');
-
-            const acadedocData = academiadocSnapshot.data();
-            const academialogada = acadedocData.nome;
-            const storedAcademiaLocal = await AsyncStorage.getItem('academia'); 
-            
-            console.log('Academia guardada salva:', academialogada);
-            console.log('Versão do Firebase salva:', firebaseVersion);
-
-            if (storedAcademiaLocal && storedAcademiaLocal !== academialogada) {
-                console.log(`Mudança de academia detectada: ${storedAcademiaLocal} => ${academialogada}`);
-                await AsyncStorage.clear();
-                await AsyncStorage.setItem('academia', String(academialogada));
-                Alert.alert('Aviso', 'Sua academia foi atualizada.');
-                dadosverif = false;
-                
-            }                                
-            if (firebaseVersion && firebaseVersion !== storedFirebaseVersion) {
-                console.log(`Mudança de firebase detectada: ${firebaseVersion} => ${storedFirebaseVersion}`);
-                await AsyncStorage.clear();
-                await AsyncStorage.setItem('firebase', String(storedFirebaseVersion));
-                Alert.alert('Aviso', 'Sua versao do firebase foi atualizada.');
-                dadosverif = false;
-                
-            }                                
-
-            //await checkVersion(storedFirebaseVersion, firebaseVersion, "firebase");
-            //await checkVersion(storedAcademiaLocal, academialogada, "academia");
-            await AsyncStorage.setItem('firebase', String(firebaseVersion));
-            await AsyncStorage.setItem('academia', String(academialogada));
-        } else {
-            console.error('Erro: Documento "versao" não encontrado na coleção "Versao" ou academia nao encontrada em Academias.');
-        }
-    } catch (error) {
-        console.error(`Erro ao verificar a versão de ${description}:`, error);
+    if (storedAcademia !== academiaNome || storedFirebase !== String(firebaseVersion)) {
+      await AsyncStorage.clear();
+      await AsyncStorage.multiSet([
+        ['firebase', String(firebaseVersion)],
+        ['academia', academiaNome]
+      ]);
+      Alert.alert('Aviso', 'Dados locais atualizados com sucesso.');
     }
-  };
-  const checkVersion = async () => {
-    try {
-        const db = getFirestore();
-        console.log("tentei chekar");
-        const alunoObj = JSON.parse(alunoLocalTeste)
-   
-        const firebaseRef = doc(db, "Versao", "versao");
-        const firebasedocSnapshot = await getDoc(firebaseRef);
-        console.log("checkando:",firebasedocSnapshot);
-
-        const academiaDocRef = doc(db, "Academias", alunoData.Academia.getAcademia());
-        const academiadocSnapshot = await getDoc(academiaDocRef);
-        console.log("checkando2:",academiadocSnapshot)
-
-
-
-        if (firebasedocSnapshot.exists() && academiadocSnapshot.exists()) {
-          console.log('existe esses ?')
-            const docData = firebasedocSnapshot.data();
-            const firebaseVersion = docData.firebase; 
-            const storedFirebaseVersion = await AsyncStorage.getItem('firebase');
-
-            const acadedocData = academiadocSnapshot.data();
-            const academialogada = acadedocData.nome;
-            const storedAcademiaLocal = await AsyncStorage.getItem('academia'); 
-            
-            console.log('Academia guardada salva:', academialogada);
-            console.log('Versão do Firebase salva:', firebaseVersion);
-
-            if (storedAcademiaLocal && storedAcademiaLocal !== academialogada) {
-                console.log(`Mudança de academia detectada: ${storedAcademiaLocal} => ${academialogada}`);
-                await AsyncStorage.clear();
-                await AsyncStorage.setItem('academia', String(academialogada));
-                Alert.alert('Aviso', 'Sua academia foi atualizada.');
-                dadosverif = false;
-                
-            }                                
-            if (firebaseVersion && firebaseVersion !== storedFirebaseVersion) {
-                console.log(`Mudança de firebase detectada: ${firebaseVersion} => ${storedFirebaseVersion}`);
-                await AsyncStorage.clear();
-                await AsyncStorage.setItem('firebase', String(storedFirebaseVersion));
-                Alert.alert('Aviso', 'Sua versao do firebase foi atualizada.');
-                dadosverif = false;
-                
-            }                                
-
-            //await checkVersion(storedFirebaseVersion, firebaseVersion, "firebase");
-            //await checkVersion(storedAcademiaLocal, academialogada, "academia");
-            await AsyncStorage.setItem('firebase', String(firebaseVersion));
-            await AsyncStorage.setItem('academia', String(academialogada));
-        } else {
-            console.error('Erro: Documento "versao" não encontrado na coleção "Versao" ou academia nao encontrada em Academias.');
-        }
-    } catch (error) {
-        console.error(`Erro ao verificar a versão de ${description}:`, error);
-    }
+  } catch (error) {
+    console.error('Erro na verificação:', error);
+  }
 };
   const getValueFunction = async () => {
     console.log("Chegou aqui ")
@@ -332,7 +278,7 @@ export default ({ navigation }) => {
     }
   };
 
-  const fetchAlunoData = async () => {
+  /*const fetchAlunoData = async () => {
     const alunoLocalTeste = await AsyncStorage.getItem('alunoLocal')
     console.log('alunoLocalTeste', alunoLocalTeste)
     const keys = await AsyncStorage.getAllKeys();
@@ -386,7 +332,7 @@ export default ({ navigation }) => {
           );
         } else {
             console.log('Login válido!');
-            checkVersion();
+            await checkVersion();
             navigation.navigate('Principal', { 
               aluno: dadosAluno, 
               academia: academiaObj,
@@ -412,7 +358,57 @@ export default ({ navigation }) => {
     }
 
   }
-
+*/
+const fetchAlunoData = async () => {
+  try {
+      const firebaseBD = getFirestore();
+      
+      // Correção: Usar collection se for coleção raiz
+      const alunosQuery = query(
+        collectionGroup(firebaseBD, 'Alunos'),
+        where('email', '==', email)
+      );
+  
+      const querySnapshot = await getDocs(alunosQuery);
+  
+      if (querySnapshot.empty) throw new Error('Usuário não encontrado');
+      
+      const alunoDoc = querySnapshot.docs[0];
+      const alunoData = alunoDoc.data();
+  
+      if (alunoData.senha !== password) throw new Error('Senha incorreta');
+  
+      // Atualiza estados com os dados do primeiro registro
+      const endereco = alunoData.endereco;
+      enderecoAluno.setBairro(endereco.bairro);
+      enderecoAluno.setCep(endereco.cep);
+      enderecoAluno.setCidade(endereco.cidade);
+      enderecoAluno.setEstado(endereco.estado);
+      enderecoAluno.setRua(endereco.rua);
+      enderecoAluno.setNumero(endereco.numero);
+  
+      alunoLogado.setNome(alunoData.nome);
+      alunoLogado.setEmail(alunoData.email);
+          alunoLogado.setSenha(alunoData.senha)
+          alunoLogado.setDiaNascimento(alunoData.diaNascimento);
+          alunoLogado.setMesNascimento(alunoData.mesNascimento);
+          alunoLogado.setAnoNascimento(alunoData.anoNascimento);
+          alunoLogado.setSexo(alunoData.sexo);
+          alunoLogado.setProfissao(alunoData.profissao);
+          alunoLogado.setCpf(alunoData.cpf);
+          alunoLogado.setProfessor(alunoData.professorResponsavel)
+          alunoLogado.setTelefone(alunoData.telefone);
+          alunoLogado.setAcademia(alunoData.academia);
+          await checkVersion();
+          navigation.navigate('Principal', { 
+            aluno: alunoData,
+            academia: await getAcademia(alunoData.Academia),
+            dadosverif: true
+          });
+    } catch (error) {
+    Alert.alert('Erro', error.message);
+  }
+};
   const getAcademia = async (nomeAcademia) => {
     let academiaObj = {}
 
@@ -460,7 +456,6 @@ export default ({ navigation }) => {
           <View style={style.passwordContainer}>
                     <TextInput
                         placeholder="Senha"
-                        secureTextEntry={true}
                         secureTextEntry={!showPassword}
                         value={password}
                         style={[style.inputText, Estilo.corLight, style.passwordInput]}

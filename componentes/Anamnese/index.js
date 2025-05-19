@@ -1,176 +1,82 @@
-import React, { useState, useEffect } from "react"
-import { Text, View, SafeAreaView, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from "react-native"
-import RadioBotao from "../RadioBotao"
-import estilo from "../estilo"
-import { useFonts } from 'expo-font'
-import { CheckboxUmPorVez, CheckMultiplos, CheckboxIndividual } from "../Checkbox"
-import BotaoSelect from "../BotaoSelect"
-import { Anamnese } from "../../classes/Anamnese"
-import { novoAluno, enderecoNovoAluno } from "../NavegacaoLoginScreen/CadastroScreen"
-import { parqDoAluno } from "../Parq"
-import { doc, setDoc, collection, addDoc } from "firebase/firestore";
-import { firebase, firebaseBD } from "../configuracoes/firebaseconfig/config"
+import React, { useState, useEffect } from "react";
+import { Text, View, SafeAreaView, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from "react-native";
+import RadioBotao from "../RadioBotao";
+import estilo from "../estilo";
+import { useFonts } from 'expo-font';
+import { CheckMultiplos } from "../Checkbox";
+import BotaoSelect from "../BotaoSelect";
+import { Anamnese } from "../../classes/Anamnese";
+import { novoAluno, enderecoNovoAluno } from "../NavegacaoLoginScreen/CadastroScreen";
+import { parqDoAluno } from "../Parq";
+import { doc, setDoc } from "firebase/firestore";
+import { firebase, firebaseBD } from "../configuracoes/firebaseconfig/config";
 import NetInfo from '@react-native-community/netinfo';
 
-const anamneseDoAluno = new Anamnese('', '', '', '', '', '', '', '', '', '', '', '', '', false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, '')
+const anamneseDoAluno = new Anamnese('', '', '', '', '', '', '', '', '', '', '', '', '', false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, '');
 
 export default ({ navigation }) => {
-  const [selectedSangue, setSelectedSangue] = useState(0)
-  const [selected, setSelected] = useState(0)
-  const [selected1, setSelected1] = useState(0)
-  const [selected2, setSelected2] = useState(0)
-  const [selected3, setSelected3] = useState(0)
+  const [selectedSangue, setSelectedSangue] = useState(0);
+  const [selected, setSelected] = useState(0);
+  const [selected1, setSelected1] = useState(0);
+  const [selected2, setSelected2] = useState(0);
 
-  const [tempoQuePraticaMusculacao, setTempoQuePraticaMusculacao] = useState('')
-  const [tempoPraticaValido, setTempoPraticaValido] = useState(true);
-
-  const [tempoQueParouDePraticarMusculacao, setTempoQueParouDePraticarMusculacao] = useState('')
-  const [tempoParouPraticaValido, setTempoParouPraticaValido] = useState(true);
-
-  const [usoDeMedicamento, setUsoDeMedicamento] = useState('')
-  const [medicamentoValido, setMedicamentoValido] = useState(true);
-
-  const [alergia, setAlergia] = useState('')
-  const [alergiaValida, setAlergiaValida] = useState(true);
-
-  const [cancer, setCancer] = useState('')
-  const [cancerValido, setCancerValido] = useState(true);
-
-  const [lesao, setLesao] = useState('')
-  const [lesaoValida, setLesaoValida] = useState(true);
-
-  const [comentarios, setComentarios] = useState('')
-  const [comentariosValidos, setComentariosValidos] = useState(true);
+  const [tempoQuePraticaMusculacao, setTempoQuePraticaMusculacao] = useState('');
+  const [tempoQueParouDePraticarMusculacao, setTempoQueParouDePraticarMusculacao] = useState('');
+  const [usoDeMedicamento, setUsoDeMedicamento] = useState('');
+  const [alergia, setAlergia] = useState('');
+  const [cancer, setCancer] = useState('');
+  const [lesao, setLesao] = useState('');
+  const [comentarios, setComentarios] = useState('');
 
   const [selectedOption, setSelectedOption] = useState('');
   const [selectedOption2, setSelectedOption2] = useState('');
-  const [selectedAtaqueCardiaco, setSelectedAtaqueCardiaco] = useState(false);
-
-  const [fontsLoaded] = useFonts({
-    'Montserrat': require('../../assets/Montserrat-Light.ttf'),
-  })
+  const [mostrarOutro, setMostrarOutro] = useState(false);
+  const [outraDoenca, setOutraDoenca] = useState('');
 
   const [conexao, setConexao] = useState(true);
+  const [fontsLoaded] = useFonts({ 'Montserrat': require('../../assets/Montserrat-Light.ttf'), });
 
-  //Validar tempo que pratica musculacao
-  const validaTempoPratica = (text) => {
-    const isValid = text === 'Nenhum' || !isNaN(text);
-    setTempoPraticaValido(isValid);
-    setTempoQuePraticaMusculacao(text);
+  // Opcões de checkbox
+  const opcaoAtaqueCardiaco = [{ text: 'Um ataque cardíaco?', id: 1 }];
+  const opcaoDoencaDasValvulasCardiacas = [{ text: 'Doença das válvulas cardíacas', id: 1 }];
+  const opcaoCirurgiaCardiaca = [{ text: 'Cirurgia cardíaca', id: 1 }];
+  const opcaoCateterismoCardiaco = [{ text: 'Cateterismo cardíaco', id: 1 }];
+  const opcaoAngioplastiaCoronaria = [{ text: 'Angioplastia coronária', id: 1 }];
+  const opcaoMarcaPasso = [{ text: 'Marca-passo', id: 1 }];
+  const desfibriladorCardiacoImplantavel = [{ text: 'Desfibrilador cardíaco implantável', id: 1 }];
+  const disturbioDoRitmoCardiaco = [{ text: 'Distúrbio do ritmo cardíaco', id: 1 }];
+  const insuficienciaCardiaca = [{ text: 'Insuficiência cardíaca', id: 1 }];
+  const opcaoCardiopatiaCongenita = [{ text: 'Cardiopatia congênita', id: 1 }];
+  const opcaoTransplanteDeCoracao = [{ text: 'Transplante de coração', id: 1 }];
+  const opcaoDoencaRenal = [{ text: 'Doença renal', id: 1 }];
+  const opcaoDiabetes = [{ text: 'Diabetes', id: 1 }];
+  const opcaoAsma = [{ text: 'Asma', id: 1 }];
+  const opcaoDoencaPulmonar = [{ text: 'Doença pulmonar', id: 1 }];
+  const outro = [{ text: 'Outro: ', id: 1 }];
+
+  const handleSelectChange = (value) => {
+    setSelectedOption(value);
+    anamneseDoAluno.setTipoSanguineo(value);
   };
+  const handleSelectChange2 = (value) => setSelectedOption2(value);
 
-  const validaTempoParouPratica = (text) => {
-    const isValid = text === 'Nenhum' || !isNaN(text);
-    setTempoParouPraticaValido(isValid);
-    setTempoQueParouDePraticarMusculacao(text);
-  };
-  //Validar uso de medicamento
-  const validaMedicamento = (text) => {
-    const isValid = text === 'Nenhum' || text.trim().length > 1;
-    setMedicamentoValido(isValid);
-    setUsoDeMedicamento(text);
-  };
-  //Validar alergia
-  const validaAlergia = (text) => {
-    const isValid = text === 'Nenhum' || text.trim().length > 1;
-    setAlergiaValida(isValid);
-    setAlergia(text);
-  };
-  //Validar comentarios 
-  const validaCancer = (text) => {
-    const isValid = text === 'Nenhum' || text.trim().length > 1;
-    setCancerValido(isValid);
-    setCancer(text);
-  };
-
-  const validaLesao = (text) => {
-    const isValid = text === 'Nenhum' || text.trim().length > 1;
-    setLesaoValida(isValid);
-    setLesao(text);
-  };
-
-  const validaComentarios = (text) => {
-    const isValid = text === 'Nenhum' || text.trim().length > 1;
-    setComentariosValidos(isValid);
-    setComentarios(text);
-  };
-
-
-
-  const opcaoAtaqueCardiaco = [{ text: 'Um ataque cardíaco?', id: 1 }]
-  const opcaoDoencaDasValvulasCardiacas = [{ text: 'Doença das válvulas cardíacas', id: 1 }]
-  const opcaoCirurgiaCardiaca = [{ text: 'Cirurgia cardíaca', id: 1 }]
-  const opcaoCateterismoCardiaco = [{ text: 'Cateterismo cardíaco', id: 1 }]
-  const opcaoAngioplastiaCoronaria = [{ text: 'Angioplastia coronária', id: 1 }]
-  const opcaoMarcaPasso = [{ text: 'Marca-passo', id: 1 }]
-  const desfibriladorCardiacoImplantavel = [{ text: 'Desfibrilador cardíaco implantável', id: 1 }]
-  const disturbioDoRitmoCardiaco = [{ text: 'Distúrbio do ritmo cardíaco', id: 1 }]
-  const insuficienciaCardiaca = [{ text: 'Insuficiência cardíaca', id: 1 }]
-  const opcaoCardiopatiaCongenita = [{ text: 'Cardiopatia congênita', id: 1 }]
-  const opcaoTransplanteDeCoracao = [{ text: 'Transplante de coração', id: 1 }]
-  const opcaoDoencaRenal = [{ text: 'Doença renal', id: 1 }]
-  const opcaoDiabetes = [{ text: 'Diabetes', id: 1 }]
-  const opcaoAsma = [{ text: 'Asma', id: 1 }]
-  const opcaoDoencaPulmonar = [{ text: 'Doença pulmonar', id: 1 }]
-    const outro = [{ text: 'Outro: ', id: 1 }]
-
-  const [mostrarOutro, setMostrarOutro] = useState(false)
-  const [outraDoenca, setOutraDoenca] = useState('')
-  function handleSelectChange(value) {
-    console.log('valor' + value)
-    setSelectedOption(value)
-    anamneseDoAluno.setTipoSanguineo(value)
-    console.log('----')
-    console.log(anamneseDoAluno.getTipoSanguineo())
-    console.log('----')
-
-  }
-  function handleSelectChange2(value) {
-    setSelectedOption2(value);
-  }
-
-  function handleSelectAtaqueCardiaco() {
-    setSelectedAtaqueCardiaco(true);
-  }
-
-  function handleDeselectAtaqueCardiaco() {
-    setSelectedAtaqueCardiaco(true);
-  }
-
-  const handleSignup = () => {
-    firebase.auth().createUserWithEmailAndPassword(novoAluno.getEmail(), novoAluno.getSenha())
-      .then((userCredential) => {
-        criarUsuario()
-        navigation.navigate("Concluir cadastro")
-
-        console.log(userCredential);
-      })
-      .catch(error => {
-        let errorMessage = '';
-        switch (error.code) {
-          case 'auth/email-already-in-use':
-            errorMessage = 'O email fornecido já está em uso por outra conta.';
-            break;
-          case 'auth/invalid-email':
-            errorMessage = 'O email fornecido é inválido.';
-            break;
-          case 'auth/weak-password':
-            errorMessage = 'A senha fornecida é muito fraca. Escolha uma senha mais forte.';
-            break;
-          default:
-            errorMessage = 'Ocorreu um erro ao cadastrar o usuário. Tente novamente.';
-        }
-
-        Alert.alert('Erro no cadastro', errorMessage);
-        console.log(error);
-      });
-  };
-  console.log(novoAluno)
   const criarUsuario = () => {
+    const auth = firebase.auth();
+    const user = auth.currentUser;
+    if (!user) return Promise.reject(new Error('Usuário não autenticado'));
+
     if (novoAluno.getSexo() === 'Masculino') {
       anamneseDoAluno.setGravida(false);
     }
-    setDoc(doc(firebaseBD, "Academias", `${novoAluno.getAcademia()}`, "Alunos", `${novoAluno.getEmail()}`), {
+    const data = new Date();
+    const dia = data.getDate();
+    const mes = data.getMonth() + 1;
+    const ano = data.getFullYear();
+
+    const alunoRef = doc(firebaseBD, "Academias", novoAluno.getAcademia(), "Alunos", user.email);
+    const notifRef = doc(firebaseBD, "Academias", novoAluno.getAcademia(), "Alunos", user.email, "Notificações", `Notificação${dia}|${mes}|${ano}`);
+
+    const dadosAluno = {
       nome: novoAluno.getNome(),
       cpf: novoAluno.getCpf(),
       diaNascimento: novoAluno.getDiaNascimento(),
@@ -201,7 +107,7 @@ export default ({ navigation }) => {
         pergunta4: parqDoAluno.getRespostaPercaEquilibrio(),
         pergunta5: parqDoAluno.getRespostaProblemaOsseo(),
         pergunta6: parqDoAluno.getRespostaMedicamentoPressaoArterial(),
-        pergunta7: parqDoAluno.getRespostaUltimaPergunta()
+        pergunta7: parqDoAluno.getRespostaUltimaPergunta(),
       },
       Anamnese: {
         tipoSanguineo: anamneseDoAluno.getTipoSanguineo(),
@@ -232,99 +138,62 @@ export default ({ navigation }) => {
         asma: anamneseDoAluno.getAsma(),
         doencaPulmonar: anamneseDoAluno.getDoencaPulmonar(),
         objetivo: anamneseDoAluno.getObjetivo(),
-        outro: outraDoenca
-      }
-    }).then(() => {
-      console.log('Novo documento criado com sucesso!');
-    })
-      .catch((erro) => {
-        console.error('Erro ao criar novo documento:', erro);
-      });
-    setDoc(doc(firebaseBD, "Academias", `${novoAluno.getAcademia()}`, "Alunos", `${novoAluno.getEmail()}`, "Notificações", `Notificação${ano}|${mes}|${dia}`), {
+        outro: outraDoenca,
+      },
+    };
+
+    const notificacao = {
       data: `${dia}/${mes}/${ano}`,
       nova: false,
-      remetente: 'Gustavo & cia',
-      texto: "É um prazer recebê-lo em nosso aplicativo. Desenvolvido por Gustavo Vaz Teixeira, João Bastista, Mateus Novaes, Sérgio Muinhos e Marcelo Patrício, em parceria com o Instituto Federal do Sudeste de Minas Gerais, o ShapeMeApp foi criado para proporcionar a você uma experiência interativa e personalizada durante seus treinos.",
-      tipo: "sistema",
-      titulo: "Bem-vindo ao ShapeMeApp!"
-    })
+      remetente: 'ShapeMeApp',
+      texto: 'É um prazer recebê-lo em nosso aplicativo...',
+      tipo: 'sistema',
+      titulo: 'Bem-vindo ao ShapeMeApp!',
+    };
 
-  }
-
-
-
-  const data = new Date()
-
-  const dia = data.getDate()
-  const mes = data.getMonth() + 1
-  const ano = data.getFullYear()
-  const minuto = data.getMinutes()
-  const hora = data.getHours()
-
-  const dataAnamnese = `${dia}/${mes}/${ano}`
-
-
-
-  anamneseDoAluno.setData(dataAnamnese)
-  anamneseDoAluno.setTipoSanguineo(selectedOption)
-  anamneseDoAluno.setTempoQuePraticaMusculacao(tempoQuePraticaMusculacao)
-  anamneseDoAluno.setJaPraticouMusculacao(selected2)
-  anamneseDoAluno.setTempoQueParouDePraticarMusculacao(tempoQueParouDePraticarMusculacao)
-  anamneseDoAluno.setUsaMedicamento(usoDeMedicamento)
-  anamneseDoAluno.setPossuiAlergiaMedicamento(alergia)
-  anamneseDoAluno.setTipoCancer(cancer)
-  anamneseDoAluno.setLesao(lesao)
-  anamneseDoAluno.setComentarios(comentarios)
-  anamneseDoAluno.setObjetivo(selectedOption2)
-
-  //Recuperando e formatando os valores dos Radiobutton
-  selectedSangue == 0 ? anamneseDoAluno.setFatorRH(' + ') : anamneseDoAluno.setFatorRH(' - ')
-  selected == 0 ? anamneseDoAluno.setGravida('Sim') : anamneseDoAluno.setGravida('Não')
-  selected1 == 0 ? anamneseDoAluno.setPraticaMusculacao('Sim') : anamneseDoAluno.setPraticaMusculacao('Não')
-  selected2 == 0 ? anamneseDoAluno.setJaPraticouMusculacao('Sim') : anamneseDoAluno.setJaPraticouMusculacao('Não')
-  novoAluno.setAnamnese(anamneseDoAluno)
-
-
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      setConexao(state.type === 'wifi' || state.type === 'cellular')
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [])
-
-  const checkWifiConnection = () => {
-    NetInfo.fetch().then((state) => {
-      if (state.type === 'wifi' || state.type === 'cellular') {
-        console.log('Conectado ao Wi-Fi');
-        setConexao(true)
-      } else {
-        console.log('Não conectado ao Wi-Fi');
-        setConexao(false)
-      }
-    });
+    return Promise.all([
+      setDoc(alunoRef, dadosAluno),
+      setDoc(notifRef, notificacao),
+    ]);
   };
+
+  const handleResponderAnamnese = () => {
+    if (!anamneseDoAluno.getTipoSanguineo() || !anamneseDoAluno.getFatorRH() || !anamneseDoAluno.getObjetivo()) {
+      Alert.alert('Campos não preenchidos', 'Há campos não preenchidos ou com formato incorreto. Preencha-os e tente novamente.');
+      return;
+    }
+    criarUsuario()
+      .then(() => navigation.navigate('Concluir cadastro'))
+      .catch(err => { console.error(err); Alert.alert('Erro', 'Não foi possível salvar seus dados.'); });
+  };
+
   useEffect(() => {
-    checkWifiConnection();
+    const unsubscribe = NetInfo.addEventListener(state => setConexao(state.type === 'wifi' || state.type === 'cellular'));
+    return () => unsubscribe();
   }, []);
 
-  const handleNavegacao = () => {
-    if (!conexao) {
-      navigation.navigate('Modal sem conexão');
-    } else {
-      handleSignup(novoAluno.getEmail(), novoAluno.getSenha());
-    }
-  }
+  const data = new Date();
+  const dia = data.getDate();
+  const mes = data.getMonth() + 1;
+  const ano = data.getFullYear();
+  const hora = data.getHours();
+  const minuto = data.getMinutes();
 
-  useEffect(() => {
-    if (novoAluno.getSexo() === 'Masculino') {
-      anamneseDoAluno.setGravida('Não');
-    }
-  }, [novoAluno.sexo]);
-
-  console.log("TIPO SANGUINEO " + anamneseDoAluno.getTipoSanguineo())
+  anamneseDoAluno.setData(`${dia}/${mes}/${ano}`);
+  anamneseDoAluno.setTipoSanguineo(selectedOption);
+  anamneseDoAluno.setTempoQuePraticaMusculacao(tempoQuePraticaMusculacao);
+  anamneseDoAluno.setJaPraticouMusculacao(selected2);
+  anamneseDoAluno.setTempoQueParouDePraticarMusculacao(tempoQueParouDePraticarMusculacao);
+  anamneseDoAluno.setUsaMedicamento(usoDeMedicamento);
+  anamneseDoAluno.setPossuiAlergiaMedicamento(alergia);
+  anamneseDoAluno.setTipoCancer(cancer);
+  anamneseDoAluno.setLesao(lesao);
+  anamneseDoAluno.setComentarios(comentarios);
+  anamneseDoAluno.setObjetivo(selectedOption2);
+  selectedSangue === 0 ? anamneseDoAluno.setFatorRH(' + ') : anamneseDoAluno.setFatorRH(' - ');
+  selected === 0 ? anamneseDoAluno.setGravida('Sim') : anamneseDoAluno.setGravida('Não');
+  selected1 === 0 ? anamneseDoAluno.setPraticaMusculacao('Sim') : anamneseDoAluno.setPraticaMusculacao('Não');
+  selected2 === 0 ? anamneseDoAluno.setJaPraticouMusculacao('Sim') : anamneseDoAluno.setJaPraticouMusculacao('Não');
 
   return (
     <ScrollView style={[estilo.corLightMenos1]}>
@@ -539,19 +408,8 @@ export default ({ navigation }) => {
           <View style={{ marginTop: 30 }}>
             <TouchableOpacity
               style={[estilo.botao, estilo.corPrimaria]}
-              onPress={() => {
-                if (
-                  anamneseDoAluno.getTipoSanguineo() == '' ||
-                  anamneseDoAluno.getFatorRH() == '' ||
-                  anamneseDoAluno.getObjetivo() == ''
-                ) {
-                  alert(
-                    'Há campos não preenchidos ou que foram preenchidos de maneira incorreta. Preencha-os e tente novamente.',
-                  );
-                } else {
-                  handleNavegacao()
-                }
-              }}>
+              onPress={
+                  handleResponderAnamnese}>
               <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>RESPONDER ANAMNESE</Text>
             </TouchableOpacity>
           </View>
@@ -561,50 +419,17 @@ export default ({ navigation }) => {
 
   )
 }
-export { anamneseDoAluno }
+
+export { anamneseDoAluno };
 
 const style = StyleSheet.create({
-  container: {
-    width: '100%',
-    marginVertical: '5%'
-  },
-  areaRadios: {
-    width: '90%',
-  },
-  radiosEspacamento: {
-    flexDirection: 'row',
-    marginVertical: 20
-  },
-  Montserrat: {
-    fontFamily: 'Montserrat'
-  },
-  inputText: {
-    width: '100%',
-    padding: 10,
-    height: 50,
-    borderRadius: 10,
-    marginVertical: 25,
-    elevation: 10
-  },
-  ultimoRadio: {
-    flexDirection: 'column',
-    width: '60%'
-  },
-  containerTipoSanguineo: {
-    width: '100%',
-    height: 100,
-    padding: 15,
-    flexDirection: 'row'
-
-  },
-  campoInput: {
-    width: '37%',
-
-  },
-  campoRadio: {
-    width: '28%',
-  },
-  selectedObjetivo: {
-    width: '100%'
-  }
-})
+  container: { width: '100%', marginVertical: '5%' },
+  Montserrat: { fontFamily: 'Montserrat' },
+  inputText: { width: '100%', padding: 10, height: 50, borderRadius: 10, marginVertical: 25, elevation: 10 },
+  containerTipoSanguineo: { width: '100%', height: 100, padding: 15, flexDirection: 'row' },
+  campoInput: { width: '37%' },
+  campoRadio: { width: '28%' },
+  selectedObjetivo: { width: '100%' },
+  areaRadios: { width: '90%' },
+  radiosEspacamento: { flexDirection: 'row', marginVertical: 20 },
+});

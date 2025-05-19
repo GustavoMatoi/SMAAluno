@@ -52,6 +52,7 @@ function comparaValores(avaliacaoAtual, avaliacaoAnterior) {
 
 export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
     const { avaliacao, posicaoDoArray, aluno, avaliacaoAnterior, ficha } = route.params
+    
 
 
     if (posicaoDoArray == 0) {

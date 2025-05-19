@@ -18,8 +18,10 @@ import NetInfo from '@react-native-community/netinfo';
 import axios from 'axios';
 import cep from 'cep-promise';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
-
+const auth = getAuth();
 let novoAluno = new Aluno('', '', '', '', '', '', '', '', '', '')
 let enderecoNovoAluno = new Endereco('', '', '', '', '', '')
 
@@ -40,7 +42,9 @@ export default ({ navigation }) => {
   const [cpf, setCpf] = useState('')
   const [cpfInvalido, setCpfInvalido] = useState(false);
 
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [senhasNaoConferem, setSenhasNaoConferem] = useState(false);
 
   const [diaNascimento, setDiaNascimento] = useState('')
   const [mesNascimento, setMesNascimento] = useState('')
@@ -86,6 +90,9 @@ export default ({ navigation }) => {
 
   const [email, setEmail] = useState('')
   const [emailInvalido, setEmailInvalido] = useState(false)
+  const [emailInvalidoRegex, setEmailInvalidoRegex] = useState(false);
+  const [emailInvalidoBanco, setEmailInvalidoBanco] = useState(false);
+
 
   const [senha, setSenha] = useState('')
   const [senhaInvalida, setSenhaInvalida] = useState(false)
@@ -310,18 +317,43 @@ export default ({ navigation }) => {
     setRuaInvalida(!ruaValida)
   }
 
-  //Validação do Email
-  const validaEmail = (text) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (emailRegex.test(text)) {
-      setEmailInvalido(false);
-    } else {
-      setEmailInvalido(true);
-    }
-    setEmail(text);
-  };
 
-  //Validação da senha
+const debounceTimeout = React.useRef(null);
+
+const validaEmail = async (text) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  console.log("chegou aqui func");
+  setEmail(text);
+  if (!emailRegex.test(text)) {
+    setEmailInvalido(true);
+    setEmailInvalidoRegex(true);
+    setEmailInvalidoBanco(false); 
+    return;
+  } else {
+    setEmailInvalidoRegex(false);
+  }
+  try {
+    console.log("chegou aquitry", emailInvalidoRegex)
+    const methods = await firebase.auth().fetchSignInMethodsForEmail(text);
+    if (methods.length > 0) {
+      setEmailInvalido(true);
+      setEmailInvalidoBanco(true);
+      Alert.alert("Email em uso", "Este email já está sendo usado por outra conta");
+    } else {
+      setEmailInvalidoBanco(false);
+    }
+    console.log("chegou aquitry banco", emailInvalidoBanco)
+  } catch (error) {
+    console.error("Erro ao verificar email:", error);
+    setEmailInvalido(true);
+    setEmailInvalidoBanco(true);
+  }
+  if(emailInvalidoBanco==false && emailInvalidoRegex==false){
+    setEmailInvalido(false);
+  }
+
+}
+
   const validaSenha = (text) => {
     if (text.length >= 6) {
       setSenhaInvalida(false);
@@ -330,7 +362,78 @@ export default ({ navigation }) => {
     }
     setSenha(text);
   };
-
+const handleCadastrar = async () => {
+  console.log("regex",emailInvalidoRegex)
+            console.log("no banco",emailInvalidoBanco)
+            console.log("normal",emailInvalido)
+            if (nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' || cepEndereco == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == '' || !academiaValida || !professorValido) {
+              Alert.alert("Campos não preenchidos", `Há campos não preenchidos ou que foram preenchidos de maneira incorreta. Preencha-os e tente novamente.`)
+              
+              if (nome == '') {
+                setNomeInvalido(true)
+              }
+              if (cpf == '') {
+                setCpfInvalido(true)
+              }
+              if (numero == '') {
+                setNumeroInvalido(true)
+              }
+              if (complemento == '') {
+                setComplementoInvalido(true)
+              }
+              if (telefone == '') {
+                setTelefoneValido(false)
+              }
+              if (profissao == '') {
+                setProfissaoInvalida(true)
+              }
+              if (cepEndereco == '') {
+                setCepInvalido(true)
+              }
+              if (estado == '') {
+                setEstadoInvalido(true)
+              }
+              if (cidade == '') {
+                setCidadeInvalida(true)
+              }
+              if (bairro == '') {
+                setBairroInvalido(true)
+              }
+              if (rua == '') {
+                setRuaInvalida(true)
+              }
+              if (email == '') {
+                setEmailInvalido(true)
+              }
+              if (senha == '') {
+                setSenhaInvalida(true)
+              }
+              if (!academiaValida) {
+                Alert.alert("Academia inválida.", "Selecione alguma academia para concluir seu cadastro.")
+              }
+              if (!professorValido) {
+                Alert.alert("Professor inválido.", "Selecione algum professor para concluir seu cadastro.")
+              }
+              if (emailInvalidoRegex == true || emailInvalidoBanco == true) {
+                Alert.alert("Problema com o e-mail",emailInvalidoRegex? "Formato de e-mail inválido.": "Este e-mail já está cadastrado.");
+              }
+            } else {
+              try {
+                await createUserWithEmailAndPassword(auth, email, senha);
+                clearAllData();
+                handleNavegacao();
+              } catch (error) {
+                if (error.code === 'auth/email-already-in-use') {
+                  Alert.alert("Email em uso", "Este email já está cadastrado.");
+                } else if (error.code === 'auth/invalid-email') {
+                  Alert.alert("Email inválido", "Formato de email incorreto.");
+                } else {
+                  console.error(error);
+                  Alert.alert("Erro", "Não foi possível cadastrar. Tente novamente mais tarde.");
+                }
+              }
+            }
+};
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setConexao(state.type === 'wifi' || state.type === 'cellular')
@@ -475,7 +578,6 @@ export default ({ navigation }) => {
 
         <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.titulos, style.Montserrat]}>Primeiramente, identifique-se</Text>
         <View style={style.inputArea}>
-          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>NOME COMPLETO :</Text>
           <View>
             <TextInput
@@ -630,7 +732,7 @@ export default ({ navigation }) => {
               cepInvalido ? { borderColor: 'red', borderWidth: 1 } : {},
             ]}
             placeholder="exemplo: 36180000 Para Rio Pomba MG"
-            placeholder="exemplo: 36180000 Para Rio Pomba MG"
+
             type="zip-code"
             onChangeText={(text) => setCepEndereco(text)}
             keyboardType="numeric"
@@ -695,7 +797,6 @@ export default ({ navigation }) => {
           {bairro?<TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe seu bairro"
-            value= {bairro}
             value= {bairro}
             onChangeText={(text) => setBairro(text)}
           />:<TextInput
@@ -765,78 +866,66 @@ export default ({ navigation }) => {
         </View>
 
         <View style={style.inputArea}>
-          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>SENHA:</Text>
-          <TextInput
-            secureTextEntry={true}
-            style={[
-              style.inputText,
-              estilo.sombra,
-              estilo.corLight,
-              senhaInvalida ? { borderColor: 'red', borderWidth: 1 } : {}
-            ]}
-            placeholder="Informe sua senha"
-            value={senha}
-            onChangeText={(text) => validaSenha(text)}
-          ></TextInput>
-        </View>
-        <TouchableOpacity onPress={() => {
-          {
-            
-            if (nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' || cepEndereco == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == '' || !academiaValida || !professorValido) {
-              Alert.alert("Campos não preenchidos", `Há campos não preenchidos ou que foram preenchidos de maneira incorreta. Preencha-os e tente novamente.`)
-              
-              if (nome == '') {
-                setNomeInvalido(true)
-              }
-              if (cpf == '') {
-                setCpfInvalido(true)
-              }
-              if (numero == '') {
-                setNumeroInvalido(true)
-              }
-              if (complemento == '') {
-                setComplementoInvalido(true)
-              }
-              if (telefone == '') {
-                setTelefoneValido(false)
-              }
-              if (profissao == '') {
-                setProfissaoInvalida(true)
-              }
-              if (cepEndereco == '') {
-                setCepInvalido(true)
-              }
-              if (estado == '') {
-                setEstadoInvalido(true)
-              }
-              if (cidade == '') {
-                setCidadeInvalida(true)
-              }
-              if (bairro == '') {
-                setBairroInvalido(true)
-              }
-              if (rua == '') {
-                setRuaInvalida(true)
-              }
-              if (email == '') {
-                setEmailInvalido(true)
-              }
-              if (senha == '') {
-                setSenhaInvalida(true)
-              }
-              if (!academiaValida) {
-                Alert.alert("Academia inválida.", "Selecione alguma academia para concluir seu cadastro.")
-              }
-              if (!professorValido) {
-                Alert.alert("Professor inválido.", "Selecione algum professor para concluir seu cadastro.")
-              }
-            } else {
-              clearAllData();
-              
-              handleNavegacao()
-            }
-          }
-        }}
+                    <Text style={[estilo.textoSmall12px,style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>SENHA:</Text>
+                    <View style={style.passwordContainer}>
+                        <TextInput 
+                            secureTextEntry={!showPassword}
+                            style={[
+                                style.inputText, 
+                                estilo.sombra, 
+                                estilo.corLight,
+                                senhaInvalida ? { borderColor: 'red', borderWidth: 1 } : {}
+                            ]}
+                            placeholder="Informe sua senha"
+                            value={senha}
+                            onChangeText={(text) => validaSenha(text)}
+                        />
+                        <TouchableOpacity
+                            onPress={() => setShowPassword(!showPassword)}
+                            style={style.showPasswordButton}>
+                            <FontAwesome5
+                                name={showPassword ? 'eye-slash' : 'eye'}
+                                size={20}
+                                color="#0066FF"
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={style.inputArea}>
+                    <Text style={[estilo.textoSmall12px,style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>CONFIRMAR SENHA:</Text>
+                    <View style={style.passwordContainer}>
+                        <TextInput 
+                            secureTextEntry={!showPassword}
+                            style={[
+                                style.inputText, 
+                                estilo.sombra, 
+                                estilo.corLight,
+                                senhasNaoConferem ? { borderColor: 'red', borderWidth: 1 } : {}
+                            ]}
+                            placeholder="Confirme sua senha"
+                            value={confirmarSenha}
+                            onChangeText={(text) => {
+                                setConfirmarSenha(text);
+                                setSenhasNaoConferem(text !== senha);
+                            }}
+                        />
+                        <TouchableOpacity
+                            onPress={() => setShowPassword(!showPassword)}
+                            style={style.showPasswordButton}>
+                            <FontAwesome5
+                                name={showPassword ? 'eye-slash' : 'eye'}
+                                size={20}
+                                color="#0066FF"
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    {senhasNaoConferem && (
+                        <Text style={[estilo.textoSmall12px, {color: 'red', marginTop: 5}]}>
+                            As senhas não coincidem!
+                        </Text>
+                    )}
+                </View>
+        <TouchableOpacity onPress={handleCadastrar}
           style={[estilo.corPrimaria, style.botao, estilo.sombra, estilo.botao]}>
           <Text
             style={[estilo.tituloH523px, estilo.textoCorLight]}>CADASTRAR-SE</Text>
@@ -905,5 +994,21 @@ const style = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#bdc3c7',
     borderRadius: 10,
+  }, passwordContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 0,
+      paddingHorizontal: 0,
+      paddingBottom: 0,
+  },
+  showPasswordButton: {
+      position: 'absolute',
+      right: 50,
+      top: '50%',
+      transform: [{ translateY: -20 }],
+      zIndex: 1,
+  },
+  passwordInput: {
+      flex: 1,
   }
 })

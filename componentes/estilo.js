@@ -20,6 +20,9 @@ export default StyleSheet.create ({
     textoCorDisabled: {
         color: '#CFCDCD'
     },
+    corWarning: {
+        backgroundColor: '#F2D64E',
+    },
     textoCorLight: {
         color: '#FFFFFF'
     },
