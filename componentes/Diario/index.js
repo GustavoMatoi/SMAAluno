@@ -26,6 +26,9 @@ export default ({ navigation, route }) => {
   const [verificador, setVerificador] = useState(false)
   const [conexao, setConexao] = useState(true);
   const [backPressedCount, setBackPressedCount] = useState(0);
+  const [exerciciosDetalhados, setExerciciosDetalhados] = useState(
+    new Array(ficha.Exercicios.length).fill(false)
+  );
   const data = new Date()
   let dia = data.getDate()
   let mes = data.getMonth() + 1
@@ -39,7 +42,8 @@ export default ({ navigation, route }) => {
   }
   const exercicios = [...ficha.Exercicios]
 
-
+  console.log("Exercicios", exercicios)
+  console.log("Exercicios Detalhados", exerciciosDetalhados)
   console.log("Detalhamento", detalhamento)
   const handleBackPress = () => {
     setBackPressedCount(backPressedCount + 1);
@@ -67,7 +71,46 @@ export default ({ navigation, route }) => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
     return () => backHandler.remove();
   }, [backPressedCount]);
+  useEffect(() => {
+    if (!detalhamento || !detalhamento.Exercicios) return;
+    const novoArray = ficha.Exercicios.map((ex, idx) => {
+      const det = detalhamento.Exercicios[idx] || {};
 
+      if (!det) return false;
+
+      switch (ex.tipo) {
+        case 'força':
+          return (
+            Array.isArray(det.pesoLevantado) &&
+            det.pesoLevantado.length > 0 &&
+            Array.isArray(det.repeticoes) &&
+            det.repeticoes.length > 0
+          );
+        case 'alongamento':
+          return (
+            Array.isArray(det.duracao) &&
+            det.duracao.length > 0 &&
+            Array.isArray(det.descanso) &&
+            det.descanso.length > 0
+          );
+        case 'cardio':
+          return (
+            Array.isArray(det.intensidade) &&
+            det.intensidade.length > 0 &&
+            Array.isArray(det.duracao) &&
+            det.duracao.length > 0 &&
+            Array.isArray(det.descanso) &&
+            det.descanso.length > 0 &&
+            Array.isArray(det.intensidadeDoRepouso) &&
+            det.intensidadeDoRepouso.length > 0
+          );
+        default:
+          return false;
+      }
+    });
+
+    setExerciciosDetalhados(novoArray);
+  }, [detalhamento.Exercicios]);
 
 
   let i = 0;
@@ -85,36 +128,46 @@ export default ({ navigation, route }) => {
   }, [])
 
   const handleNavegacaoForca = (exercicioNaFicha) => {
+    console.log("numero de series", exercicioNaFicha.series)
       contador++
       confereDetalhamento()
-      navigation.navigate('Detalhamento', { numeroDeSeries: exercicioNaFicha.series, repeticoes: exercicioNaFicha.repeticoes, descanso: exercicioNaFicha.descanso, tipoExercicio: 'força', nomeExercicio: exercicioNaFicha.Nome.exercicio, diario: diario, index: contador, detalhamento});
+      navigation.navigate('Detalhamento', {index: contador, numeroDeSeries: exercicioNaFicha.series, repeticoes: exercicioNaFicha.repeticoes, descanso: exercicioNaFicha.descanso, tipoExercicio: 'força', nomeExercicio: exercicioNaFicha.Nome.exercicio, diario: diario, index: contador, detalhamento});
     }
   const handleNavegacaoAerobico = (exercicioNaFicha) => {
+      console.log("numero de series", exercicioNaFicha.series)
       contador++
       confereDetalhamento()
-      navigation.navigate('Detalhamento', { numeroDeSeries: exercicioNaFicha.series, tipoExercicio: 'cardio', nomeExercicio: exercicioNaFicha.Nome.exercicio, diario: diario, index: contador, detalhamento })
+      navigation.navigate('Detalhamento', {index: contador, numeroDeSeries: exercicioNaFicha.series, tipoExercicio: 'cardio', nomeExercicio: exercicioNaFicha.Nome.exercicio, diario: diario, index: contador, detalhamento })
     
   }
   const handleNavegacaoAlongamento = (exercicioNaFicha) => {
+      console.log("numero de series", exercicioNaFicha.series)
       contador++
       confereDetalhamento()
 
-      navigation.navigate('Detalhamento', { series: exercicioNaFicha.series, tipoExercicio: 'alongamento', nomeExercicio: exercicioNaFicha.Nome, duracao: exercicioNaFicha.duracao, diario: diario, index: contador, detalhamento});
+      navigation.navigate('Detalhamento', {index: contador, series: exercicioNaFicha.series, tipoExercicio: 'alongamento', nomeExercicio: exercicioNaFicha.Nome, duracao: exercicioNaFicha.duracao, diario: diario, index: contador, detalhamento});
   }
   const handleNavegacaoPse = () => {
-    console.log("exercicio na ficha: ",ficha.Exercicios.length)
-    console.log("contador: ",contador)
-    console.log("esse diario aqui que vai pro bd", detalhamento.Exercicios)
-      if (ficha.Exercicios.length === contador) {
-        setVerificador(true)
-      }
-      if(verificador == true){
-        confereDetalhamento()
-        navigation.navigate('PSE', {diario: diario, aluno: aluno, detalhamento: detalhamento})
-      }else{
-        alert("Você ainda não respondeu todos os detalhamentos dos exercícios.");
-      }
-  }
+  const todosDetalhados = exerciciosDetalhados.every(valor => valor === true);
+  console.log("Contador", contador)
+  console.log("Exercicios", exercicios) 
+  console.log("Exercicios detalhados", exerciciosDetalhados)
+  console.log("Detalhamento", detalhamento)
+  
+  console.log("Todos detalhados?", todosDetalhados)
+  
+
+  //if (todosDetalhados) {
+    navigation.navigate('PSE', { diario, aluno, detalhamento });
+  {/*} else {
+    Alert.alert(
+      "Detalhamento Incompleto",
+      "Você precisa preencher todos os detalhes dos exercícios antes de responder o PSE.",
+      [{ text: "OK" }]
+    );
+  }*/}
+};
+
 
   const confereDetalhamento = () => {
     if (ficha.Exercicios.length === contador) {
@@ -160,7 +213,7 @@ export default ({ navigation, route }) => {
 
                   />
                 </View>
-                <BotaoDetalhamento onPress={() => { handleNavegacaoForca(exercicioNaFicha) }} />
+                <BotaoDetalhamento jaDetalhado={exerciciosDetalhados[index]} onPress={() => { handleNavegacaoForca(exercicioNaFicha) }} />
               </Text>
               : exercicioNaFicha.tipo == 'alongamento' ?
                 <Text style={[{ marginTop: 20 }]}>
@@ -173,7 +226,7 @@ export default ({ navigation, route }) => {
                       imagem={exercicioNaFicha.imagem}
                     />
                   </View>
-                  <BotaoDetalhamento onPress={() => { handleNavegacaoAlongamento(exercicioNaFicha) }} />
+                  <BotaoDetalhamento jaDetalhado={exerciciosDetalhados[index]} onPress={() => { handleNavegacaoAlongamento(exercicioNaFicha) }} />
                 </Text>
                 : exercicioNaFicha.tipo == 'aerobico' ?
                   <Text style={[{ marginTop: 20 }]}>
@@ -186,7 +239,7 @@ export default ({ navigation, route }) => {
                         descansoDoExercicio={exercicioNaFicha.descanso}
                       />
                     </View>
-                    <BotaoDetalhamento onPress={() => { handleNavegacaoAerobico(exercicioNaFicha) }} />
+                    <BotaoDetalhamento jaDetalhado={exerciciosDetalhados[index]} onPress={() => { handleNavegacaoAerobico(exercicioNaFicha) }} />
                   </Text>
                   : null
             }

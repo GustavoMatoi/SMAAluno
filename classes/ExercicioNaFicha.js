@@ -13,6 +13,7 @@ class ExercicioNaFicha {
         this.intensidadeDoRepouso = null
         this.peso = null
         this.cadencia = null
+        this.observacao = null
     }
 
     setExercicio = (exercicio) => {this.exercicio = exercicio}
@@ -40,6 +41,9 @@ class ExercicioNaFicha {
 
     setConjugado = (exercicioConjugado) => {this.conjugado = exercicioConjugado}
     getConjugado = () => {return this.conjugado}
+
+    setObservacao = (observacao) => {this.observacao = observacao}
+    getObservacao = () => {return this.observacao}
 
     setIntensidade = (intensidade) => {this.intensidade = intensidade}
     getIntensidade = () => {return this.intensidade}

@@ -10,6 +10,9 @@ export default ({ navigation, route }) => {
     const fichasUnicas = [...new Set(exercicios.map(item => item.ficha))];
     const [fichaSelecionada, setFichaSelecionada] = useState('')
     const [selecionado, setSelecionado] = useState(-1)
+    const detalhamentoInicial = {
+    Exercicios: Array(ficha.Exercicios.length).fill({})
+    };
 
     const handleSelecaoFicha = (fichaSelecionada) => {
         const fichaFiltrada = { ...ficha, Exercicios: exercicios.filter(item => item.ficha === fichaSelecionada) };
@@ -19,7 +22,7 @@ export default ({ navigation, route }) => {
         if (diario.maneiraDeTreino === "Ficha") {
             navigation.navigate('Ficha', { diario, ficha: fichaFiltrada, aluno });
         } else {
-            navigation.navigate('Diario', { diario, ficha: fichaFiltrada, aluno, detalhamento: {} });
+            navigation.navigate('Diario', { detalhamento: detalhamentoInicial, diario, ficha: fichaFiltrada, aluno, detalhamento: {} });
         }
     };
 

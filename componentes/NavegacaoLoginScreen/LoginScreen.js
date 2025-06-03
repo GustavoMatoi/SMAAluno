@@ -453,14 +453,25 @@ const fetchAlunoData = async () => {
           >
           </TextInput>
           <Text style={[Estilo.tituloH619px]}> Senha: </Text>
-          <TextInput
-            placeholder="Senha"
-            secureTextEntry={true}
-            value={password}
-            style={[style.inputText, Estilo.corLight, style.Montserrat]}
-            onChangeText={(text) => setPassword(text)}
-          >
-          </TextInput>
+          <View style={style.passwordContainer}>
+                    <TextInput
+                        placeholder="Senha"
+                        secureTextEntry={!showPassword}
+                        value={password}
+                        style={[style.inputText, Estilo.corLight, style.passwordInput]}
+                        onChangeText={(text) => setPassword(text)}
+                    />
+                    <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}
+                        style={style.showPasswordButton}>
+                        <FontAwesome5
+                        name={showPassword ? 'eye-slash' : 'eye'}
+                        size={20}
+                        color="#0066FF"
+                        style={[{}]}
+                        />
+                    </TouchableOpacity>
+          </View>
 
           <TouchableOpacity onPress={() => fetchAlunoData()}
             style={[Estilo.corPrimaria, style.botao, Estilo.sombra, Estilo.botao]}>

@@ -74,7 +74,7 @@ export default ({ navigation, route }) => {
           >
             <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>
               {console.log(data)}
-              Avaliação {1}
+              {1} - Avaliação e ficha 
             </Text>
           </TouchableOpacity>
         </View>
@@ -88,7 +88,7 @@ export default ({ navigation, route }) => {
               >
                 <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>
                   {console.log(data)}
-                  Avaliação {i  + 1}
+                  {i  + 1} - Avaliação e ficha 
                 </Text>
               </TouchableOpacity>
             </View>

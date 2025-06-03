@@ -22,7 +22,9 @@ export default ({ navigation, route }) => {
 
   const [conexao, setConexao] = useState(true)
   const [detalhamento, setDetalhamento] = useState({})
-
+  const detalhamentoInicial = {
+    Exercicios: Array(ficha.Exercicios.length).fill({})
+  };
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -64,7 +66,7 @@ export default ({ navigation, route }) => {
       console.log('Aa')
       for (let i = 0; i < ficha.Exercicios.length; i++) {
         detalhamento.Exercicios[i] = {}
-        navigation.navigate('Diario', { diario: diario, ficha, aluno, detalhamento });
+        navigation.navigate('Diario', { detalhamento: detalhamentoInicial, diario: diario, ficha, aluno, detalhamento });
       }
     }
   }

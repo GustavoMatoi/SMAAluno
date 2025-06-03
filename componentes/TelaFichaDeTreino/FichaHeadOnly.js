@@ -3,6 +3,7 @@ import { Text, View, SafeAreaView, StyleSheet, ScrollView, Alert } from 'react-n
 import estilo from "../estilo"
 import FichaDeTreino from "../Ficha/FichaDeTreino"
 import Caixinha from "./Caixinha"
+import FichaDeTreinoTabs from "../Ficha/FichaDeTreinoTabs";
 
 export default ({ route }) => {
     
@@ -21,8 +22,7 @@ export default ({ route }) => {
                     <Caixinha responsavel={ficha.responsavel} dataFim={ficha.dataFim} dataInicio={ficha.dataInicio} objetivoDoTreino={ficha.objetivoDoTreino} />
                 </View>
                 <View style={[style.areaDaFicha]}>
-                    <FichaDeTreino exercicios={ficha.Exercicios}></FichaDeTreino>
-
+                    <FichaDeTreinoTabs exercicios={ficha.Exercicios} />
                 </View>
 
 

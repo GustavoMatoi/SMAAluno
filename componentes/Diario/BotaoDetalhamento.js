@@ -4,27 +4,25 @@ import estilo from "../estilo"
 import { Entypo } from '@expo/vector-icons'; 
 import FichaDeTreino from "../Ficha/FichaDeTreino";
 
-export default ({onPress}) => {
-    const [clicado, setClicado] = useState(false);
-    
-    const handleClick = () => {
-      onPress();
-      setClicado(true);
-    };
-  
-    return (
-      <View style={style.container}>
-        <Text style={[estilo.textoSmall12px, {marginTop: '-22%'}]}>Detalhes do exercício</Text>
-        <TouchableOpacity 
-          style={clicado ? [estilo.corSuccess, style.botao] : [estilo.corPrimaria, style.botao]} 
-          onPress={handleClick}
-          disabled={clicado? true : false}
-        >
-          <Entypo name="list" size={60} color="white" />
-        </TouchableOpacity>
-      </View>
-    );
+export default ({ onPress,jaDetalhado }) => {
+  const [clicado, setClicado] = useState(jaDetalhado);
+  const handleClick = () => {
+    onPress();
+    setClicado(true);
   };
+  return (
+    <View style={style.container}>
+      <Text style={[estilo.textoSmall12px, { marginTop: '-22%' }]}>Detalhes do exercício</Text>
+      <TouchableOpacity
+        style={clicado ? [estilo.corSuccess, style.botao] : [estilo.corPrimaria, style.botao]}
+        onPress={handleClick}
+      >
+        <Entypo name="list" size={60} color="white" />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 
 
 const style = StyleSheet.create({

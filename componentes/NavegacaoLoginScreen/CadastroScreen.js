@@ -30,7 +30,7 @@ const clearAllData = async () => {
     await AsyncStorage.clear();
     console.log('Todos os dados foram apagados!');
     const keys = await AsyncStorage.getAllKeys();
-    console.log("isso tudo aqui de chave",keys)
+    console.log("isso tudo aqui de chave", keys)
   } catch (error) {
     console.error('Erro ao limpar dados:', error);
   }
@@ -318,41 +318,41 @@ export default ({ navigation }) => {
   }
 
 
-const debounceTimeout = React.useRef(null);
+  const debounceTimeout = React.useRef(null);
 
-const validaEmail = async (text) => {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-  console.log("chegou aqui func");
-  setEmail(text);
-  if (!emailRegex.test(text)) {
-    setEmailInvalido(true);
-    setEmailInvalidoRegex(true);
-    setEmailInvalidoBanco(false); 
-    return;
-  } else {
-    setEmailInvalidoRegex(false);
-  }
-  try {
-    console.log("chegou aquitry", emailInvalidoRegex)
-    const methods = await firebase.auth().fetchSignInMethodsForEmail(text);
-    if (methods.length > 0) {
+  const validaEmail = async (text) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    console.log("chegou aqui func");
+    setEmail(text);
+    if (!emailRegex.test(text)) {
+      setEmailInvalido(true);
+      setEmailInvalidoRegex(true);
+      setEmailInvalidoBanco(false);
+      return;
+    } else {
+      setEmailInvalidoRegex(false);
+    }
+    try {
+      console.log("chegou aquitry", emailInvalidoRegex)
+      const methods = await firebase.auth().fetchSignInMethodsForEmail(text);
+      if (methods.length > 0) {
+        setEmailInvalido(true);
+        setEmailInvalidoBanco(true);
+        Alert.alert("Email em uso", "Este email já está sendo usado por outra conta");
+      } else {
+        setEmailInvalidoBanco(false);
+      }
+      console.log("chegou aquitry banco", emailInvalidoBanco)
+    } catch (error) {
+      console.error("Erro ao verificar email:", error);
       setEmailInvalido(true);
       setEmailInvalidoBanco(true);
-      Alert.alert("Email em uso", "Este email já está sendo usado por outra conta");
-    } else {
-      setEmailInvalidoBanco(false);
     }
-    console.log("chegou aquitry banco", emailInvalidoBanco)
-  } catch (error) {
-    console.error("Erro ao verificar email:", error);
-    setEmailInvalido(true);
-    setEmailInvalidoBanco(true);
-  }
-  if(emailInvalidoBanco==false && emailInvalidoRegex==false){
-    setEmailInvalido(false);
-  }
+    if (emailInvalidoBanco == false && emailInvalidoRegex == false) {
+      setEmailInvalido(false);
+    }
 
-}
+  }
 
   const validaSenha = (text) => {
     if (text.length >= 6) {
@@ -362,78 +362,78 @@ const validaEmail = async (text) => {
     }
     setSenha(text);
   };
-const handleCadastrar = async () => {
-  console.log("regex",emailInvalidoRegex)
-            console.log("no banco",emailInvalidoBanco)
-            console.log("normal",emailInvalido)
-            if (nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' || cepEndereco == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == '' || !academiaValida || !professorValido) {
-              Alert.alert("Campos não preenchidos", `Há campos não preenchidos ou que foram preenchidos de maneira incorreta. Preencha-os e tente novamente.`)
-              
-              if (nome == '') {
-                setNomeInvalido(true)
-              }
-              if (cpf == '') {
-                setCpfInvalido(true)
-              }
-              if (numero == '') {
-                setNumeroInvalido(true)
-              }
-              if (complemento == '') {
-                setComplementoInvalido(true)
-              }
-              if (telefone == '') {
-                setTelefoneValido(false)
-              }
-              if (profissao == '') {
-                setProfissaoInvalida(true)
-              }
-              if (cepEndereco == '') {
-                setCepInvalido(true)
-              }
-              if (estado == '') {
-                setEstadoInvalido(true)
-              }
-              if (cidade == '') {
-                setCidadeInvalida(true)
-              }
-              if (bairro == '') {
-                setBairroInvalido(true)
-              }
-              if (rua == '') {
-                setRuaInvalida(true)
-              }
-              if (email == '') {
-                setEmailInvalido(true)
-              }
-              if (senha == '') {
-                setSenhaInvalida(true)
-              }
-              if (!academiaValida) {
-                Alert.alert("Academia inválida.", "Selecione alguma academia para concluir seu cadastro.")
-              }
-              if (!professorValido) {
-                Alert.alert("Professor inválido.", "Selecione algum professor para concluir seu cadastro.")
-              }
-              if (emailInvalidoRegex == true || emailInvalidoBanco == true) {
-                Alert.alert("Problema com o e-mail",emailInvalidoRegex? "Formato de e-mail inválido.": "Este e-mail já está cadastrado.");
-              }
-            } else {
-              try {
-                await createUserWithEmailAndPassword(auth, email, senha);
-                clearAllData();
-                handleNavegacao();
-              } catch (error) {
-                if (error.code === 'auth/email-already-in-use') {
-                  Alert.alert("Email em uso", "Este email já está cadastrado.");
-                } else if (error.code === 'auth/invalid-email') {
-                  Alert.alert("Email inválido", "Formato de email incorreto.");
-                } else {
-                  console.error(error);
-                  Alert.alert("Erro", "Não foi possível cadastrar. Tente novamente mais tarde.");
-                }
-              }
-            }
-};
+  const handleCadastrar = async () => {
+    console.log("regex", emailInvalidoRegex)
+    console.log("no banco", emailInvalidoBanco)
+    console.log("normal", emailInvalido)
+    if (nome == '' || cpf == '' || diaNascimento == '' || mesNascimento == '' || anoNascimento == '' || telefone == '' || profissao == '' || cepEndereco == '' || estado == '' || cidade == '' || bairro == '' || rua == '' || numero == '' || email == '' || senha == '' || !academiaValida || !professorValido) {
+      Alert.alert("Campos não preenchidos", `Há campos não preenchidos ou que foram preenchidos de maneira incorreta. Preencha-os e tente novamente.`)
+
+      if (nome == '') {
+        setNomeInvalido(true)
+      }
+      if (cpf == '') {
+        setCpfInvalido(true)
+      }
+      if (numero == '') {
+        setNumeroInvalido(true)
+      }
+      if (complemento == '') {
+        setComplementoInvalido(true)
+      }
+      if (telefone == '') {
+        setTelefoneValido(false)
+      }
+      if (profissao == '') {
+        setProfissaoInvalida(true)
+      }
+      if (cepEndereco == '') {
+        setCepInvalido(true)
+      }
+      if (estado == '') {
+        setEstadoInvalido(true)
+      }
+      if (cidade == '') {
+        setCidadeInvalida(true)
+      }
+      if (bairro == '') {
+        setBairroInvalido(true)
+      }
+      if (rua == '') {
+        setRuaInvalida(true)
+      }
+      if (email == '') {
+        setEmailInvalido(true)
+      }
+      if (senha == '') {
+        setSenhaInvalida(true)
+      }
+      if (!academiaValida) {
+        Alert.alert("Academia inválida.", "Selecione alguma academia para concluir seu cadastro.")
+      }
+      if (!professorValido) {
+        Alert.alert("Professor inválido.", "Selecione algum professor para concluir seu cadastro.")
+      }
+      if (emailInvalidoRegex == true || emailInvalidoBanco == true) {
+        Alert.alert("Problema com o e-mail", emailInvalidoRegex ? "Formato de e-mail inválido." : "Este e-mail já está cadastrado.");
+      }
+    } else {
+      try {
+        await createUserWithEmailAndPassword(auth, email, senha);
+        clearAllData();
+        handleNavegacao();
+      } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+          Alert.alert("Email em uso", "Este email já está cadastrado.");
+        } else if (error.code === 'auth/invalid-email') {
+          Alert.alert("Email inválido", "Formato de email incorreto.");
+        } else {
+          console.error(error);
+          Alert.alert("Erro", "Não foi possível cadastrar. Tente novamente mais tarde.");
+        }
+      }
+    }
+  };
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setConexao(state.type === 'wifi' || state.type === 'cellular')
@@ -465,16 +465,16 @@ const handleCadastrar = async () => {
     }
   };
   const buscarCidadesPorEstado = async (estado) => {
-    try{
-    const response = await axios.get(
-      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado}/municipios`
+    try {
+      const response = await axios.get(
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado}/municipios`
       );
       const listaCidades = response.data.map((municipio) => municipio.nome);
       setCidades(listaCidades);
     } catch (error) {
       Alert.alert('Erro', 'Erro ao buscar as cidades.');
       setCidades([]);
-      }
+    }
   };
 
   useEffect(() => {
@@ -532,13 +532,13 @@ const handleCadastrar = async () => {
         const academiasRef = collection(db, "Academias");
         const academiaQuery = query(academiasRef, where("nome", "==", selectedOption));
         const academiaSnapshot = await getDocs(academiaQuery);
-    
+
         if (!academiaSnapshot.empty) {
           const academiaDoc = academiaSnapshot.docs[0];
           const professoresRef = collection(academiaDoc.ref, "Professores");
           const querySnapshot = await getDocs(professoresRef);
           const professores = [];
-    
+
           querySnapshot.forEach((doc) => {
             const data = doc.data();
             if (data && data.nome && data.status !== "Pendente") {
@@ -546,11 +546,11 @@ const handleCadastrar = async () => {
               console.log(data.nome);
             }
           });
-    
+
           const turmasRef = collection(academiaDoc.ref, "Turmas");
           const turmas = [];
           const turmasSnapshot = await getDocs(turmasRef);
-    
+
           turmasSnapshot.forEach((doc) => {
             const data = doc.data();
             if (data && data.nome) {
@@ -558,7 +558,7 @@ const handleCadastrar = async () => {
               console.log(data.nome);
             }
           });
-    
+
           setProfessoresDaAcademia(professores);
           setTurmas(turmas);
           setCarregouProf(true);
@@ -567,11 +567,11 @@ const handleCadastrar = async () => {
         console.log(error);
       }
     };
-  
+
     carregarAcademias();
     carregarProfessores();
-    }, [selectedOption]);
-    
+  }, [selectedOption]);
+
   return (
     <ScrollView alwaysBounceVertical={true} style={estilo.corLightMenos1}>
       <SafeAreaView style={style.container}>
@@ -676,7 +676,7 @@ const handleCadastrar = async () => {
               estilo.corLight,
               profissaoInvalida ? { borderColor: '#FF6262', borderWidth: 1 } : {}
             ]}
-            placeholder="ex: Professor"
+            placeholder="ex: Servidor, Discente, Comunidade Externa "
             value={profissao}
             onChangeText={(text) => validaProfissao(text)}
           ></TextInput>
@@ -737,69 +737,69 @@ const handleCadastrar = async () => {
             onChangeText={(text) => setCepEndereco(text)}
             keyboardType="numeric"
           />
-          <TouchableOpacity style={[estilo.corPrimaria, estilo.sombra,style.botao, estilo.botao, {left: '-5%'}]} onPress={() => encontrarEndereco()} >
+          <TouchableOpacity style={[estilo.corPrimaria, estilo.sombra, style.botao, estilo.botao, { left: '-5%' }]} onPress={() => encontrarEndereco()} >
             <Text style={[estilo.tituloH523px, estilo.textoCorLight]}>Buscar</Text>
           </TouchableOpacity>
         </View>
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
             ESTADO:
-            </Text>
-            {estado ?  <BotaoSelect
-                      options={estadosBrasileiros.map((e) => e.label)}
-                      onChange={(value) => {
-                        const estadoSelecionado = estadosBrasileiros.find((e) => e.label === value);
-                        setEstado(estadoSelecionado.value);
-                      }}
-                      titulo="Selecione o estado"
-                      max={1}
-                      selecionado={estado}
-                      select={estado}
-                    />: 
-                      <BotaoSelect
-                      options={estadosBrasileiros.map((e) => e.label)}
-                      onChange={(value) => {
-                        const estadoSelecionado = estadosBrasileiros.find((e) => e.label === value);
-                        setEstado(estadoSelecionado.value);
-                      }}
-                      titulo="Selecione o estado"
-                      max={1}
-                      selecionado={!!estado}
-                      select={estado}
-                    />}
-          
+          </Text>
+          {estado ? <BotaoSelect
+            options={estadosBrasileiros.map((e) => e.label)}
+            onChange={(value) => {
+              const estadoSelecionado = estadosBrasileiros.find((e) => e.label === value);
+              setEstado(estadoSelecionado.value);
+            }}
+            titulo="Selecione o estado"
+            max={1}
+            selecionado={estado}
+            select={estado}
+          /> :
+            <BotaoSelect
+              options={estadosBrasileiros.map((e) => e.label)}
+              onChange={(value) => {
+                const estadoSelecionado = estadosBrasileiros.find((e) => e.label === value);
+                setEstado(estadoSelecionado.value);
+              }}
+              titulo="Selecione o estado"
+              max={1}
+              selecionado={!!estado}
+              select={estado}
+            />}
+
         </View>
 
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
-            CIDADE: 
-            </Text>
-            {cidade ?<BotaoSelect
-                        options={cidades}
-                        onChange={setCidade}
-                        titulo="Selecione a cidade"
-                        max={1}
-                        selecionado={cidade}
-                        select={cidade}
-                      /> : 
-                        <BotaoSelect
-                        options={cidades}
-                        onChange={setCidade}
-                        titulo="Selecione a cidade"
-                        max={1}
-                        selecionado={!!cidade}
-                      />}
+            CIDADE:
+          </Text>
+          {cidade ? <BotaoSelect
+            options={cidades}
+            onChange={setCidade}
+            titulo="Selecione a cidade"
+            max={1}
+            selecionado={cidade}
+            select={cidade}
+          /> :
+            <BotaoSelect
+              options={cidades}
+              onChange={setCidade}
+              titulo="Selecione a cidade"
+              max={1}
+              selecionado={!!cidade}
+            />}
         </View>
         <View style={style.inputArea}>
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
             BAIRRO:
           </Text>
-          {bairro?<TextInput
+          {bairro ? <TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe seu bairro"
-            value= {bairro}
+            value={bairro}
             onChangeText={(text) => setBairro(text)}
-          />:<TextInput
+          /> : <TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe seu bairro"
             onChangeText={(text) => setBairro(text)}
@@ -809,17 +809,17 @@ const handleCadastrar = async () => {
           <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]}>
             RUA:
           </Text>
-          {rua ?<TextInput
+          {rua ? <TextInput
             style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
             placeholder="Informe sua rua"
-            value ={rua}
+            value={rua}
             onChangeText={(text) => setRua(text)}
           />
-          :<TextInput
-            style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
-            placeholder="Informe sua rua"
-            onChangeText={(text) => setRua(text)}
-          />}
+            : <TextInput
+              style={[style.inputText, estilo.sombra, estilo.corLight, numeroInvalido ? { borderWidth: 1, borderColor: 'red' } : {}]}
+              placeholder="Informe sua rua"
+              onChangeText={(text) => setRua(text)}
+            />}
         </View>
 
 
@@ -866,65 +866,65 @@ const handleCadastrar = async () => {
         </View>
 
         <View style={style.inputArea}>
-                    <Text style={[estilo.textoSmall12px,style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>SENHA:</Text>
-                    <View style={style.passwordContainer}>
-                        <TextInput 
-                            secureTextEntry={!showPassword}
-                            style={[
-                                style.inputText, 
-                                estilo.sombra, 
-                                estilo.corLight,
-                                senhaInvalida ? { borderColor: 'red', borderWidth: 1 } : {}
-                            ]}
-                            placeholder="Informe sua senha"
-                            value={senha}
-                            onChangeText={(text) => validaSenha(text)}
-                        />
-                        <TouchableOpacity
-                            onPress={() => setShowPassword(!showPassword)}
-                            style={style.showPasswordButton}>
-                            <FontAwesome5
-                                name={showPassword ? 'eye-slash' : 'eye'}
-                                size={20}
-                                color="#0066FF"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={style.inputArea}>
-                    <Text style={[estilo.textoSmall12px,style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>CONFIRMAR SENHA:</Text>
-                    <View style={style.passwordContainer}>
-                        <TextInput 
-                            secureTextEntry={!showPassword}
-                            style={[
-                                style.inputText, 
-                                estilo.sombra, 
-                                estilo.corLight,
-                                senhasNaoConferem ? { borderColor: 'red', borderWidth: 1 } : {}
-                            ]}
-                            placeholder="Confirme sua senha"
-                            value={confirmarSenha}
-                            onChangeText={(text) => {
-                                setConfirmarSenha(text);
-                                setSenhasNaoConferem(text !== senha);
-                            }}
-                        />
-                        <TouchableOpacity
-                            onPress={() => setShowPassword(!showPassword)}
-                            style={style.showPasswordButton}>
-                            <FontAwesome5
-                                name={showPassword ? 'eye-slash' : 'eye'}
-                                size={20}
-                                color="#0066FF"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                    {senhasNaoConferem && (
-                        <Text style={[estilo.textoSmall12px, {color: 'red', marginTop: 5}]}>
-                            As senhas não coincidem!
-                        </Text>
-                    )}
-                </View>
+          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>SENHA:</Text>
+          <View style={style.passwordContainer}>
+            <TextInput
+              secureTextEntry={!showPassword}
+              style={[
+                style.inputText,
+                estilo.sombra,
+                estilo.corLight,
+                senhaInvalida ? { borderColor: 'red', borderWidth: 1 } : {}
+              ]}
+              placeholder="Informe sua senha"
+              value={senha}
+              onChangeText={(text) => validaSenha(text)}
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={style.showPasswordButton}>
+              <FontAwesome5
+                name={showPassword ? 'eye-slash' : 'eye'}
+                size={20}
+                color="#0066FF"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={style.inputArea}>
+          <Text style={[estilo.textoSmall12px, style.Montserrat, estilo.textoCorSecundaria]} numberOfLines={1}>CONFIRMAR SENHA:</Text>
+          <View style={style.passwordContainer}>
+            <TextInput
+              secureTextEntry={!showPassword}
+              style={[
+                style.inputText,
+                estilo.sombra,
+                estilo.corLight,
+                senhasNaoConferem ? { borderColor: 'red', borderWidth: 1 } : {}
+              ]}
+              placeholder="Confirme sua senha"
+              value={confirmarSenha}
+              onChangeText={(text) => {
+                setConfirmarSenha(text);
+                setSenhasNaoConferem(text !== senha);
+              }}
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={style.showPasswordButton}>
+              <FontAwesome5
+                name={showPassword ? 'eye-slash' : 'eye'}
+                size={20}
+                color="#0066FF"
+              />
+            </TouchableOpacity>
+          </View>
+          {senhasNaoConferem && (
+            <Text style={[estilo.textoSmall12px, { color: 'red', marginTop: 5 }]}>
+              As senhas não coincidem!
+            </Text>
+          )}
+        </View>
         <TouchableOpacity onPress={handleCadastrar}
           style={[estilo.corPrimaria, style.botao, estilo.sombra, estilo.botao]}>
           <Text
@@ -995,20 +995,20 @@ const style = StyleSheet.create({
     borderColor: '#bdc3c7',
     borderRadius: 10,
   }, passwordContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginVertical: 0,
-      paddingHorizontal: 0,
-      paddingBottom: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 0,
+    paddingHorizontal: 0,
+    paddingBottom: 0,
   },
   showPasswordButton: {
-      position: 'absolute',
-      right: 50,
-      top: '50%',
-      transform: [{ translateY: -20 }],
-      zIndex: 1,
+    position: 'absolute',
+    right: 50,
+    top: '50%',
+    transform: [{ translateY: -20 }],
+    zIndex: 1,
   },
   passwordInput: {
-      flex: 1,
+    flex: 1,
   }
 })

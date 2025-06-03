@@ -7,8 +7,6 @@ import "firebase/compat/auth";
 import {collection, getDocs} from "firebase/firestore"
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -16,14 +14,14 @@ import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDn-gqy3mkFKxj6Hp-4u8YNhG4bTbgBKxU",
-  authDomain: "smabancoteste-b9487.firebaseapp.com",
-  projectId: "smabancoteste-b9487",
-  storageBucket: "smabancoteste-b9487.firebasestorage.app",
-  messagingSenderId: "288917385888",
-  appId: "1:288917385888:web:5eeb9876882d093d80cfc5"
+  apiKey: "AIzaSyAhk9dtkJh6c2dLp24Q5nrO6bLdKaYZuBU",
+  authDomain: "smabdteste.firebaseapp.com",
+  projectId: "smabdteste",
+  storageBucket: "smabdteste.firebasestorage.app",
+  messagingSenderId: "375397560478",
+  appId: "1:375397560478:web:979b667d38e8131af78b8f",
+  measurementId: "G-LFTCM11WZ3"
 };
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
@@ -32,9 +30,6 @@ const firebaseBD = getFirestore(app)
 
 firebase.initializeApp(firebaseConfig);
 
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-});
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });

@@ -6,8 +6,6 @@ import ExerciciosCardio from "./ExerciciosCardio"
 import ExerciciosForça from "./ExerciciosForça"
 
 export default ({ exercicios }) => {
-  const [fichaValida, setFichaValida] = useState(false)
-  const [verificando, setVerificando] = useState(true)
   console.log('exercicios', exercicios)
   console.log('typeof exercicios', exercicios)
 

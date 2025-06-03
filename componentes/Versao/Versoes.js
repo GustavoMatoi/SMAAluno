@@ -32,7 +32,7 @@ export default ({ versao }) => {
             >
                 <View style={style.modalContainer}>
                     <View style={style.modalContent}>
-                        <Text style={[style.modalTitle, style.montserrat]}>Detalhes da Versão 1.0.0</Text>
+                        <Text style={[style.modalTitle, style.montserrat]}>Detalhes da Versão 2.0.0</Text>
                         <ScrollView style={style.scrollView}>
                             <Text style={[style.modalText, style.montserrat]}>
                                 Versão inicial do aplicativo

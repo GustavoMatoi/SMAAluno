@@ -3,7 +3,7 @@ import {Text, View, StyleSheet} from 'react-native'
 import Estilo from "./estilo"
 import Globais from "../classes/Globais"
 export default props => {
-    const variavelGlobal = new Globais('1.0.0');
+    const variavelGlobal = new Globais('2.0.0');
     
     if (props.tamanho == 'grande'){
         return (
@@ -15,7 +15,7 @@ export default props => {
                 <View style={[Estilo.corPrimariaMais1, style.logoAluno]}>
                         <Text style={[Estilo.tituloH333px, Estilo.textoCorLight]}>ALUNO</Text>
                 </View>
-                <Text style={[Estilo.textoP16px, Estilo.textoCorDark, style.version ]}>Versão 1.0.0(Teste)</Text>
+                <Text style={[Estilo.textoP16px, Estilo.textoCorDark, style.version ]}>Versão 2.0.0</Text>
             </View>
         )
     } else {
@@ -28,7 +28,7 @@ export default props => {
                 <View style={[Estilo.corPrimariaMais1, style.logoAlunoSmall]}>
                         <Text style={[{fontSize:15, fontWeight: 'bold'}, Estilo.textoCorLight]}>ALUNO</Text>
                 </View>
-                <Text style={[Estilo.textoSmall12px, Estilo.textoCorDark, style.version ]}>Versão 1.0.0</Text>
+                <Text style={[Estilo.textoSmall12px, Estilo.textoCorDark, style.version ]}>Versão 2.0.0</Text>
 
             </View>            
         )

@@ -1,598 +1,947 @@
-import React, { useState, useEffect } from "react"
-import { Text, BackHandler, View, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Dimensions, ScrollView } from 'react-native'
-import estilo from "../estilo"
-import { useFonts } from 'expo-font'
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React, { useState, useEffect } from "react";
+import {
+  Text,
+  BackHandler,
+  View,
+  SafeAreaView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
+} from "react-native";
+import estilo from "../estilo";
+import { useFonts } from "expo-font";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import { firebaseBD } from "../configuracoes/firebaseconfig/config"
-import { DetalhamentoExercicioAerobico, DetalhamentoExercicioForca, DetalhamentoExercicioAlongamento } from "../../classes/DetalhamentoDoExercicio";
-import { alunoLogado } from "../Home";
+import {
+  DetalhamentoExercicioAerobico,
+  DetalhamentoExercicioForca,
+  DetalhamentoExercicioAlongamento,
+} from "../../classes/DetalhamentoDoExercicio";
 
-
-
-let detalhamentoAerobicoDia = new DetalhamentoExercicioAerobico('')
-let detalhamentoForcaDia = new DetalhamentoExercicioForca('')
-let detalhamentoAlongamentoDia = new DetalhamentoExercicioAlongamento('')
-let contadorPSE = 0
-const windowHeight = Dimensions.get('window').height;
+const windowHeight = Dimensions.get("window").height;
 
 export default ({ route, navigation }) => {
-    const { numeroDeSeries, tipoExercicio, nomeExercicio, series, diario, index, detalhamento } = route.params
+  // Parâmetros vindos da navegação
+  const {
+    numeroDeSeries,   // pode vir como 0, null ou "-"
+    tipoExercicio,    // "força", "alongamento" ou "cardio"
+    nomeExercicio,
+    diario,
+    index,            // índice no array de detalhamento
+    detalhamento,     // objeto de Detalhamento contendo Exercicios[]
+  } = route.params;
 
-    const { repeticoes } = route.params
-    const [fontsLoaded] = useFonts({
-        'Montserrat': require('../../assets/Montserrat-Light.ttf'),
-    })
+  // Carregando fonte Montserrat (caso seja necessário)
+  const [fontsLoaded] = useFonts({
+    Montserrat: require("../../assets/Montserrat-Light.ttf"),
+  });
 
-    const indexo = index
-    console.log("detalhamento no Detalhamento ", detalhamento)
-    const nome = nomeExercicio
+  const nome = nomeExercicio || "";
 
-    console.log('index ', index)
-    const [duracao, setDuracao] = useState([])
-    const [descanso, setDescanso] = useState([])
-    const [pesoLevantado, setPesoLevantado] = useState([]);
-    const [numeroRepeticoes, setNumeroRepeticoes] = useState([]);
-    const [desabilitado, setDesabilitado] = useState(true)
-    const [intensidadeDoRepouso, setIntensidadeDoRepouso] = useState([])
-    const [desabilitarPSES, setDesabilitarPSES] = useState(true)
+  // Detecta se é "Cardio sem séries" (numeroDeSeries <= 0 ou "-")
+  const isCardioSemSeries =
+    tipoExercicio === "cardio" &&
+    (!numeroDeSeries || numeroDeSeries === 0 || numeroDeSeries === "-");
 
-    const [contadorPse, setContadorPse] = useState(0)
-    const [contadorPse2, setContadorPse2] = useState(1)
+  // Estados de array de séries: [1,2,...] ou [1] se cardio sem séries
+  const [numSeries, setNumSeries] = useState([]);
 
-    useEffect(() => {
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-        return () => backHandler.remove();
-    }, []);
+  // Estados para valores digitados (strings), ajustados conforme numSeries
+  const [pesoLevantado, setPesoLevantado] = useState([]); // Força ou Intensidade (cardio)
+  const [numeroRepeticoes, setNumeroRepeticoes] = useState([]); // Reps (força) ou Duração (cardio)
+  const [descanso, setDescanso] = useState([]); // Descanso (força) ou (cardio c/ séries)
+  const [intensidadeDoRepouso, setIntensidadeDoRepouso] = useState([]); // só para cardio c/ séries
 
-    function handleBackPress() {
-        return true;
+  // Mapas para exibir valor no TextInput
+  const [inputValuesPeso, setInputValuesPeso] = useState({});
+  const [inputValuesRepeticoes, setInputValuesRepeticoes] = useState({});
+  const [inputValuesDescanso, setInputValuesDescanso] = useState({});
+  const [inputValuesIntensidadeDoRepouso, setInputValuesIntensidadeDoRepouso] =
+    useState({});
+
+  // Estados para controle do PSE (quantos já respondidos)
+  const [contadorPse, setContadorPse] = useState(0);
+  const [contadorPse2, setContadorPse2] = useState(0);
+
+  // Botão PSE habilitado ou não
+  const [desabilitarPSES, setDesabilitarPSES] = useState(true);
+
+  // 1) Monta o array de séries conforme tipoExercicio e numeroDeSeries :contentReference[oaicite:2]{index=2}
+  useEffect(() => {
+    let arr = [];
+    if (tipoExercicio === "cardio") {
+      // Se cardio sem séries → pelo menos 1 slot genérico
+      if (isCardioSemSeries) {
+        arr = [1];
+      } else {
+        // Cardio com séries definidas (>0)
+        for (let i = 0; i < numeroDeSeries; i++) {
+          arr[i] = i + 1;
+        }
+      }
+    } else {
+      // Força / Alongamento → segue numeroDeSeries (0 → [])
+      if (numeroDeSeries && numeroDeSeries > 0) {
+        for (let i = 0; i < numeroDeSeries; i++) {
+          arr[i] = i + 1;
+        }
+      }
     }
+    setNumSeries(arr);
+  }, [numeroDeSeries, tipoExercicio]);
 
+  // 2) Toda vez que numSeries mudar, reajusta o tamanho dos arrays de valores
+  useEffect(() => {
+    const tamanho = numSeries.length;
+    setPesoLevantado(Array(tamanho).fill(""));
+    setNumeroRepeticoes(Array(tamanho).fill(""));
+    setDescanso(Array(tamanho).fill(""));
+    setIntensidadeDoRepouso(Array(tamanho).fill(""));
+  }, [numSeries]);
 
-    let i = 0;
-
-
-    const data = new Date()
-    let dia = data.getDate()
-    let mes = data.getMonth() + 1
-    const ano = data.getFullYear()
-    const hora = data.getHours()
-    if (dia < 10) {
-        dia = `0${dia}`
+  // Funções para atualizar cada campo (permite somente dígitos) :contentReference[oaicite:3]{index=3}
+  const handleChangeTextPesoLevantado = (value, idx) => {
+    if (/^\d*$/.test(value)) {
+      const copia = [...pesoLevantado];
+      copia[idx] = value;
+      setPesoLevantado(copia);
+      setInputValuesPeso({ ...inputValuesPeso, [idx]: value });
     }
-    if (mes < 10) {
-        mes = `0${mes}`
+  };
+  const handleChangeTextRepeticoes = (value, idx) => {
+    if (/^\d*$/.test(value)) {
+      const copia = [...numeroRepeticoes];
+      copia[idx] = value;
+      setNumeroRepeticoes(copia);
+      setInputValuesRepeticoes({ ...inputValuesRepeticoes, [idx]: value });
     }
-
-    const handlePesoLevantado = (index, value) => {
-        const newInputValues = [...pesoLevantado];
-        newInputValues[index] = parseInt(value);
-        setPesoLevantado(newInputValues);
-
+  };
+  const handleChangeTextDescanso = (value, idx) => {
+    if (/^\d*$/.test(value)) {
+      const copia = [...descanso];
+      copia[idx] = value;
+      setDescanso(copia);
+      setInputValuesDescanso({ ...inputValuesDescanso, [idx]: value });
     }
-
-    const handleRepeticoes = (index, value) => {
-        const newInputValues = [...numeroRepeticoes];
-        newInputValues[index] = parseInt(value);
-
-        setNumeroRepeticoes(newInputValues);
-
-
+  };
+  const handleChangeTextIntensidadeDoRepouso = (value, idx) => {
+    if (/^\d*$/.test(value)) {
+      const copia = [...intensidadeDoRepouso];
+      copia[idx] = value;
+      setIntensidadeDoRepouso(copia);
+      setInputValuesIntensidadeDoRepouso({
+        ...inputValuesIntensidadeDoRepouso,
+        [idx]: value,
+      });
     }
-    const handleDuracao = (index, value) => {
-        const newInputValues = [...duracao];
-        newInputValues[index] = parseInt(value);
-        setDuracao(newInputValues);
-    }
+  };
 
-    const handleDescanso = (index, value) => {
-        const newInputValues = [...descanso];
-        newInputValues[index] = parseInt(value);
-        setDescanso(newInputValues);
-
-    }
-    const handleIntensidadeDoRepouso = (index, value) => {
-        const newInputValues = [...descanso];
-        newInputValues[index] = parseInt(value);
-        setIntensidadeDoRepouso(newInputValues);
-
-    }
-
-    let numSeries = Array()
-    while (numeroDeSeries > i) {
-        numSeries[i] = i + 1;
-        i++
-    }
-
-    for (let i = 0; i < numeroDeSeries; i++) {
-        numSeries[i] = i + 1;
-    }
-
-    let numRepeticoes = Array()
-
-    for (let i = 0; i < series; i++) {
-        numRepeticoes[i] = i + 1;
-    }
-
-
-    const updateDocumento = () => {
-        if (tipoExercicio == 'força') {
-            atualizaOsValores()
-        } else if (tipoExercicio == 'alongamento') {
-            atualizaOsValores()
+  // 3) Habilita/desabilita botão de PSE conforme preenchimento :contentReference[oaicite:4]{index=4}
+  useEffect(() => {
+    if (tipoExercicio === "força") {
+      if (
+        pesoLevantado.filter((v) => v !== "").length === numSeries.length &&
+        numeroRepeticoes.filter((v) => v !== "").length === numSeries.length &&
+        descanso.filter((v) => v !== "").length === numSeries.length
+      ) {
+        setDesabilitarPSES(false);
+      } else {
+        setDesabilitarPSES(true);
+      }
+    } else if (tipoExercicio === "alongamento") {
+      if (
+        pesoLevantado.filter((v) => v !== "").length === numSeries.length &&
+        numeroRepeticoes.filter((v) => v !== "").length === numSeries.length
+      ) {
+        setDesabilitarPSES(false);
+      } else {
+        setDesabilitarPSES(true);
+      }
+    } else if (tipoExercicio === "cardio") {
+      if (isCardioSemSeries) {
+        // Cardio sem séries: basta duração (numeroRepeticoes[0])
+        if (numeroRepeticoes[0] && numeroRepeticoes[0] !== "") {
+          setDesabilitarPSES(false);
         } else {
-            atualizaOsValores()
+          setDesabilitarPSES(true);
         }
+      } else {
+        // Cardio com séries: exige todos os quatro campos preenchidos
+        if (
+          pesoLevantado.filter((v) => v !== "").length === numSeries.length &&
+          numeroRepeticoes.filter((v) => v !== "").length === numSeries.length &&
+          descanso.filter((v) => v !== "").length === numSeries.length &&
+          intensidadeDoRepouso.filter((v) => v !== "").length ===
+            numSeries.length
+        ) {
+          setDesabilitarPSES(false);
+        } else {
+          setDesabilitarPSES(true);
+        }
+      }
     }
+  }, [
+    pesoLevantado,
+    numeroRepeticoes,
+    descanso,
+    intensidadeDoRepouso,
+    numSeries,
+    isCardioSemSeries,
+  ]);
 
-    const verificaCampos = (tipoExercicio, i) => {
-        if (desabilitado == true) {
-        }
+  // 4) Atualiza o objeto detalhamento ao clicar em “ENVIAR”
+  const updateDocumento = () => {
+    if (!detalhamento || !detalhamento.Exercicios) return;
+    const det = detalhamento.Exercicios[index - 1] || {};
+
+    if (tipoExercicio === "alongamento") {
+      det.Nome = nome;
+      det.duracao = pesoLevantado.map((v) => parseInt(v) || 0);
+      det.descanso = numeroRepeticoes.map((v) => parseInt(v) || 0);
+    } else if (tipoExercicio === "força") {
+      det.Nome = nome;
+      det.pesoLevantado = pesoLevantado.map((v) => parseInt(v) || 0);
+      det.repeticoes = numeroRepeticoes.map((v) => parseInt(v) || 0);
+      det.descanso = descanso.map((v) => parseInt(v) || 0);
+    } else if (tipoExercicio === "cardio") {
+      det.Nome = nome;
+      det.intensidade = pesoLevantado.map((v) => parseInt(v) || 0);
+      det.duracao = numeroRepeticoes.map((v) => parseInt(v) || 0);
+      det.descanso = descanso.map((v) => parseInt(v) || 0);
+      det.intensidadeDoRepouso = intensidadeDoRepouso.map((v) =>
+        parseInt(v) || 0
+      );
     }
+  };
 
-    useEffect(() => {
+  // 5) Salvar ao pressionar hardware back (Android)  
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        updateDocumento();
+        navigation.goBack();
+        return true;
+      }
+    );
+    return () => backHandler.remove();
+  }, []);
 
-        if (tipoExercicio == 'força') {
-            if (numSeries.length === pesoLevantado.length && numeroRepeticoes.length === numSeries.length && numSeries.length == descanso.length) {
-                setDesabilitarPSES(false)
-            }
-        }
-        if (tipoExercicio == 'alongamento') {
+  // Header com botão de voltar
+  const Header = () => (
+    <View style={style.header}>
+      <TouchableOpacity
+        onPress={() => {
+          updateDocumento();
+          navigation.goBack();
+        }}
+        style={style.backButton}
+      >
+        <MaterialCommunityIcons
+          name="arrow-left"
+          size={28}
+          color={estilo.corPrimaria.color}
+        />
+      </TouchableOpacity>
+      <Text style={[estilo.tituloH427px, style.headerTitle]}>
+        Detalhes do exercício
+      </Text>
+    </View>
+  );
 
-            if (numRepeticoes.length === pesoLevantado.length && numRepeticoes.length === numeroRepeticoes.length) {
-                setDesabilitarPSES(false)
-            }
+  return (
+    <ScrollView>
+      <SafeAreaView
+        style={[
+          estilo.textoCorLightMenos1,
+          style.container,
+          estilo.corLightMenos1,
+        ]}
+      >
+        <Header />
 
-        } if (tipoExercicio == 'cardio') {
-            if (numSeries.length === pesoLevantado.length && numSeries.length === numeroRepeticoes.length && numSeries.length === descanso.length && numSeries.length == intensidadeDoRepouso.length) {
-                setDesabilitarPSES(false)
+        <SafeAreaView style={style.conteudo}>
+          {/* ---------- Nome do Exercício ---------- */}
+          <Text style={[estilo.tituloH523px]}>{nomeExercicio}</Text>
 
-            }
-        }
-
-    }, [pesoLevantado, numeroRepeticoes, descanso, intensidadeDoRepouso, contadorPse2])
-    const [inputValuesPeso, setInputValuesPeso] = useState({});
-
-    const handleChangeTextPesoLevantado = (value, index) => {
-        if (/^\d*$/.test(value)) {
-            setInputValuesPeso({ ...inputValuesPeso, [index]: value });
-            handlePesoLevantado(index, value);
-        }
-        if (tipoExercicio === 'alongamento') {
-
-        }
-    };
-    const [inputValuesRepeticoes, setInputValuesRepeticoes] = useState({});
-
-    const handleChangeTextRepeticoes = (value, index) => {
-        if (/^\d*$/.test(value)) {
-            setInputValuesRepeticoes({ ...inputValuesRepeticoes, [index]: value });
-            handleRepeticoes(index, value);
-
-        }
-    };
-    const [inputValuesDescanso, setInputValuesDescanso] = useState({});
-
-    const handleChangeTextDescanso = (value, index) => {
-        if (/^\d*$/.test(value)) {
-            setInputValuesDescanso({ ...inputValuesDescanso, [index]: value });
-            handleDescanso(index, value);
-
-        }
-    };
-    const [inputValuesIntensidadeDoRepouso, setInputValuesIntensidadeDoRepouso] = useState({});
-
-    const handleInputValuesIntensidadeDoRepouso = (value, index) => {
-        if (/^\d*$/.test(value)) {
-            setIntensidadeDoRepouso({ ...inputValuesDescanso, [index]: value });
-            handleIntensidadeDoRepouso(index, value);
-        }
-    };
-
-
-    const atualizaOsValores = () => {
-        if (tipoExercicio === 'alongamento') {
-
-            console.log("CONSOLE 1 ")
-            if (!detalhamento.Exercicios[index - 1].Nome) detalhamento.Exercicios[index - 1].Nome = ''
-            if (!detalhamento.Exercicios[index - 1].duracao) detalhamento.Exercicios[index - 1].duracao = []
-            if (!detalhamento.Exercicios[index - 1].descanso) detalhamento.Exercicios[index - 1].descanso = []
-
-
-            detalhamento.Exercicios[index - 1].Nome = nomeExercicio
-            detalhamento.Exercicios[index - 1].duracao = pesoLevantado
-            detalhamento.Exercicios[index - 1].descanso = numeroRepeticoes
-
-            console.log("CONSOLE 2 ")
-
-
-            console.log("CONSOLE 3")
-            console.log('Updated values:', pesoLevantado, numeroRepeticoes, detalhamento);
-        }
-
-        /*
-peso levantado : pesoLevantado
-repeticoes: numeroRepeticoes
-descanso: descanso
- 
-*/
-        if (tipoExercicio === 'força') {
-
-            console.log("CONSOLE 1 ")
-            if (!detalhamento.Exercicios[index - 1].Nome) detalhamento.Exercicios[index - 1].Nome = ''
-            if (!detalhamento.Exercicios[index - 1].descanso) detalhamento.Exercicios[index - 1].descanso = []
-            if (!detalhamento.Exercicios[index - 1].pesoLevantado) detalhamento.Exercicios[index - 1].pesoLevantado = []
-
-
-            detalhamento.Exercicios[index - 1].Nome = nomeExercicio
-            detalhamento.Exercicios[index - 1].descanso = descanso
-            detalhamento.Exercicios[index - 1].pesoLevantado = pesoLevantado
-            detalhamento.Exercicios[index - 1].repeticoes = numeroRepeticoes
-
-
-
-        } 
-        if(tipoExercicio == 'cardio'){
-            if (!detalhamento.Exercicios[index - 1].Nome) detalhamento.Exercicios[index - 1].Nome = ''
-            if (!detalhamento.Exercicios[index - 1].intensidade) detalhamento.Exercicios[index - 1].intensidade = []
-            if (!detalhamento.Exercicios[index - 1].duracao) detalhamento.Exercicios[index - 1].duracao = []
-            if (!detalhamento.Exercicios[index - 1].descanso) detalhamento.Exercicios[index - 1].descanso = []
-            if (!detalhamento.Exercicios[index - 1].intensidadeDoRepouso) detalhamento.Exercicios[index - 1].intensidadeDoRepouso = []
-
-
-            detalhamento.Exercicios[index - 1].Nome = nomeExercicio
-            detalhamento.Exercicios[index - 1].intensidade = pesoLevantado
-            detalhamento.Exercicios[index - 1].duracao = numeroRepeticoes
-            detalhamento.Exercicios[index - 1].descanso = descanso
-            detalhamento.Exercicios[index - 1].intensidadeDoRepouso = intensidadeDoRepouso
-
-        }
-                    /*
-            Nome: nomeExercicio,
-            itensidade: pesoLevantado
-            duracao: numeroRepeticoes,
-            descaso: descanso,
-            intensidadeDoRepouso: intensidadeDoRepouso
-            */
-
-    }
-    useEffect(() => {
-        const backHandler = BackHandler.addEventListener(
-            'hardwareBackPress', 
-            () => {
-                navigation.goBack()
-                return true
-            }
-        )
-        return () => backHandler.remove()
-    }, [])
-
-    const Header = () => (
-        <View style={style.header}>
-            <TouchableOpacity 
-                onPress={() => navigation.goBack()}
-                style={style.backButton}
+          {/* ---------- Rótulo “Série” (se aplicável) ---------- */}
+          {(tipoExercicio === "força" ||
+            tipoExercicio === "alongamento" ||
+            (tipoExercicio === "cardio" && !isCardioSemSeries)) && (
+            <Text
+              style={[
+                estilo.textoP16px,
+                estilo.textoCorSecundaria,
+                style.Montserrat,
+              ]}
             >
-                <MaterialCommunityIcons 
-                    name="arrow-left" 
-                    size={28} 
-                    color={estilo.corPrimaria.color} 
-                />
-            </TouchableOpacity>
-            <Text style={[estilo.tituloH427px, style.headerTitle]}>
-                Detalhes do exercício
+              Série
+              {tipoExercicio === "alongamento" ? " (número inteiro)" : ""}
             </Text>
-        </View>
-    )
-    return (
-<ScrollView>
-            <SafeAreaView style={[estilo.textoCorLightMenos1, style.container, estilo.corLightMenos1]}>
-                <Header /> 
-                
-                <SafeAreaView style={style.conteudo}>
+          )}
 
-                    <Text style={[estilo.tituloH523px]}>{nomeExercicio}</Text>
-                    {tipoExercicio == 'força' || tipoExercicio == 'cardio' ?
-
-                        <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Série</Text> :
-                        tipoExercicio == 'alongamento' ?
-                            <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Série (número inteiro)</Text> :
-                            null
-                    }
-                    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                        <View style={style.camposColuna}>
-                            {numSeries.length == 0 ?
-                                numRepeticoes.map((i) =>
-                                    <View key={`keySerie${i}`}  >
-                                        <View style={[style.quadrado, estilo.corLightMais1]} >
-                                            <Text style={[estilo.textoP16px, style.Montserrat]}>{i}</Text>
-                                        </View>
-                                    </View>
-                                )
-                                : numSeries.map((i) =>
-                                    <View key={`keySerie${i}`}  >
-                                        <View style={[style.quadrado, estilo.corLightMais1]} >
-                                            <Text style={[estilo.textoP16px, style.Montserrat]}>{i}</Text>
-                                        </View>
-                                    </View>
-                                )}
-                        </View>
-                    </ScrollView>
-                    {tipoExercicio == 'força' ?
-                        <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Peso levantado (kg)</Text> :
-                        tipoExercicio == 'alongamento' ?
-                            <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Duração</Text> :
-                            tipoExercicio == 'cardio' ?
-                                <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Intensidade (km/h)</Text> :
-                                null
-                    }
-                    <Text style={[estilo.textoSmall12px, estilo.textoCorSecundaria, style.Montserrat]}>Preencha os campos abaixo</Text>
-                    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                        <View style={style.camposColuna}>
-                            {numSeries.length > 0 ? numSeries.map((i) =>
-                                <View key={tipoExercicio == 'força' ? `keyPesoSerie${i - 1}` :
-                                    tipoExercicio == 'cardio' ? `keyVelocidadeSerie${i - 1}` : null}>
-                                    <TextInput
-                                        keyboardType="numeric"
-                                        placeholder={
-                                            tipoExercicio == 'força'
-                                                ? `Peso serie${i}`
-                                                : tipoExercicio == 'cardio'
-                                                    ? `Vel. Serie${i}`
-                                                    : tipoExercicio == 'alongamento'
-                                                        ? `Dur. serie${i}`
-                                                        : null
-                                        }
-                                        style={[style.quadrado, { textAlign: 'center' }]}
-                                        key={i - 1}
-                                        value={inputValuesPeso[i - 1] || ''}
-                                        onChangeText={(value) => { console.log(value); handleChangeTextPesoLevantado(value, i - 1) }}
-                                    />
-                                </View>
-                            ) :
-                                numRepeticoes.map((i) =>
-                                    <View key={`keyDuracaoSerie${i}`}>
-                                        <TextInput
-                                            keyboardType="numeric"
-                                            placeholder={
-                                                tipoExercicio == 'força'
-                                                    ? `Peso serie${i}`
-                                                    : tipoExercicio == 'cardio'
-                                                        ? `Vel. Serie${i}`
-                                                        : tipoExercicio == 'alongamento'
-                                                            ? `Dur. serie${i}`
-                                                            : null
-                                            }
-                                            style={[style.quadrado, { textAlign: 'center' }]}
-                                            key={i - 1}
-                                            value={inputValuesPeso[i - 1] || ''}
-                                            onChangeText={(value) => { console.log(value); handleChangeTextPesoLevantado(value, i - 1) }}
-                                        />
-                                    </View>
-                                )
-                            }
-                        </View>
-                    </ScrollView>
-
-
-                    {tipoExercicio == 'força' ?
-                        <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Repetições (número inteiro)</Text> :
-                        tipoExercicio == 'alongamento' ?
-                            <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Descanso (segundos)</Text> :
-                            tipoExercicio == 'cardio' ?
-                                <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Duração (minutos)</Text> :
-                                null
-                    }
-                    <Text style={[estilo.textoSmall12px, estilo.textoCorSecundaria, style.Montserrat]}>Preencha os campos abaixo</Text>
-
-                    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                        <View style={style.camposColuna}>
-                            {numSeries.length > 0 ?
-                                numSeries.map((i) =>
-                                    <View key={tipoExercicio == 'força' ? `keyRepsSerie${i}` :
-                                        tipoExercicio == 'cardio' ? `keyDuracao${i}` : null} >
-                                        <TextInput
-                                            keyboardType="numeric"
-                                            placeholder={
-                                                tipoExercicio == 'força'
-                                                    ? `Reps serie${i}`
-                                                    : tipoExercicio == 'cardio'
-                                                        ? `Dur. Serie${i}`
-                                                        : tipoExercicio == 'alongamento'
-                                                            ? `Desc. serie${i}`
-                                                            : null
-                                            }
-                                            style={[style.quadrado, { textAlign: 'center' }]}
-                                            key={i - 1}
-                                            value={inputValuesRepeticoes[i - 1] || ''}
-                                            onChangeText={(value) => { console.log(value); handleChangeTextRepeticoes(value, i - 1) }}
-                                        />
-                                    </View>
-                                ) :
-                                numRepeticoes.map((i) =>
-                                    <View key={`keyDescSerie${i}`} >
-                                        <TextInput
-                                            keyboardType="numeric"
-                                            placeholder={
-                                                tipoExercicio == 'força'
-                                                    ? `Peso serie${i}`
-                                                    : tipoExercicio == 'cardio'
-                                                        ? `Vel. Serie${i}`
-                                                        : tipoExercicio == 'alongamento'
-                                                            ? `Desc. serie${i}`
-                                                            : null
-                                            }
-                                            style={[style.quadrado, { textAlign: 'center' }]}
-                                            key={i - 1}
-                                            value={inputValuesRepeticoes[i - 1] || ''}
-                                            onChangeText={(value) => { console.log(value); handleChangeTextRepeticoes(value, i - 1) }}
-                                        />
-                                    </View>
-                                )}
-                        </View>
-                    </ScrollView>
-
-                    {tipoExercicio == 'cardio' || tipoExercicio == 'força' ?
-                        <>
-                            <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Descanso (segundos)</Text>
-                            <Text style={[estilo.textoSmall12px, estilo.textoCorSecundaria, style.Montserrat]}>Preencha os campos abaixo</Text>
-
-                            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                                <View style={style.camposColuna}>
-                                    {numSeries.map((i) =>
-                                        <View key={`keyDescansoSerie${i}`}>
-                                            <TextInput
-                                                keyboardType="numeric"
-                                                placeholder={`Desc. Serie${i}`
-                                                }
-                                                style={[style.quadrado, { textAlign: 'center' }]}
-                                                key={i - 1}
-                                                value={inputValuesDescanso[i - 1] || ''}
-                                                onChangeText={(value) => { console.log(value); handleChangeTextDescanso(value, i - 1) }}
-                                            />
-                                        </View>
-                                    )}
-                                </View>
-                            </ScrollView>
-                        </> : null}
-                    {tipoExercicio == 'cardio' ?
-                        <>
-                            <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>Intensidade do repouso (km/h)</Text>
-                            <Text style={[estilo.textoSmall12px, estilo.textoCorSecundaria, style.Montserrat]}>Preencha os campos abaixo</Text>
-
-                            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                                <View style={style.camposColuna}>
-                                    {numSeries.map((i) =>
-                                        <View key={`keyDescansoSerie${i}`}>
-                                            <TextInput
-                                                keyboardType="numeric"
-                                                placeholder={`IdR. Serie${i}`
-                                                }
-                                                style={[style.quadrado, { textAlign: 'center' }]}
-                                                key={i - 1}
-                                                onChangeText={(value) => { console.log(value); handleInputValuesIntensidadeDoRepouso(value, i - 1) }}
-                                            />
-                                        </View>
-                                    )}
-                                </View>
-                            </ScrollView>
-                        </> : null}
-                    <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, style.Montserrat]}>PSE do exercício</Text>
-                    <Text style={[estilo.textoSmall12px, estilo.textoCorSecundaria, style.Montserrat]}>Responda em ordem os formulários abaixo</Text>
-                    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                        <View style={style.camposColuna}>
-                            {tipoExercicio == 'força' ? numSeries.map((i) =>
-                                <View key={`keyPSEdoExercicioForca${i}`}>
-                                    <TouchableOpacity
-                                        style={desabilitarPSES ? [style.quadrado, estilo.corDisabled, { borderRadius: 15 }] : contadorPse >= i ? [style.quadrado, estilo.corSuccess, { borderRadius: 15 }] : [style.quadrado, estilo.corPrimaria, { borderRadius: 15 }]}
-                                        disabled={desabilitarPSES}
-                                        onPress={() => { setContadorPse(i++); setContadorPse2(contadorPse); navigation.navigate('PSE Omni', { omeExercicio: nome, repeticao: i - 1, diario: diario, index: index - 1, detalhamento }); verificaCampos(tipoExercicio, i - 1) }}>
-                                        <MaterialCommunityIcons name="checkbox-multiple-marked-outline" size={60} color="white" />
-                                        <Text style={[estilo.textoSmall12px, { marginBottom: 3 }, style.Montserrat, estilo.textoCorLight]}>PSE Série{i}</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            ) : tipoExercicio == 'cardio' ? numSeries.map((i) =>
-                                <View key={`keyPSEDoExercicioAerobico${i}`}>
-                                    <TouchableOpacity
-                                        disabled={desabilitarPSES}
-                                        style={desabilitarPSES ? [style.quadrado, estilo.corDisabled, { borderRadius: 15 }] : contadorPse >= i ? [style.quadrado, estilo.corSuccess, { borderRadius: 15 }] : [style.quadrado, estilo.corPrimaria, { borderRadius: 15 }]}
-                                        onPress={() => { setContadorPse(i++); setContadorPse2(contadorPse); console.log("iiiii" + i + " " + "contadorPSE: " + contadorPse2); navigation.navigate('PSE Borg', { omeExercicio: nome, repeticao: i - 1, diario: diario, index: index - 1, detalhamento }); verificaCampos(tipoExercicio, i - 1) }}>
-                                        <MaterialCommunityIcons name="checkbox-multiple-marked-outline" size={60} color="white" />
-                                        <Text style={[estilo.textoSmall12px, { marginBottom: 3 }, style.Montserrat, estilo.textoCorLight]}>PSE Série{i}</Text>
-                                    </TouchableOpacity>
-                                </View>) :
-                                tipoExercicio == 'alongamento' ?
-                                    numRepeticoes.map((i) =>
-                                        <View key={`keyPSEExercicioAlongamento${i}`}>
-                                            <TouchableOpacity
-                                                disabled={desabilitarPSES}
-                                                style={desabilitarPSES ? [style.quadrado, estilo.corDisabled, { borderRadius: 15 }] : contadorPse >= i ? [style.quadrado, estilo.corSuccess, { borderRadius: 15 }] : [style.quadrado, estilo.corPrimaria, { borderRadius: 15 }]}
-                                                onPress={() => { setContadorPse2(contadorPse); setContadorPse(i++); navigation.navigate('Perflex', { nomeExercicio: nome, repeticao: i - 1, diario: diario, index: index - 1, detalhamento }); verificaCampos(tipoExercicio, i - 1) }}>
-                                                <MaterialCommunityIcons name="checkbox-multiple-marked-outline" size={60} color="white" />
-                                                <Text style={[estilo.textoSmall12px, { marginBottom: 3 }, style.Montserrat, estilo.textoCorLight]}>PSE Repet.{i}</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    ) : null
-                            }
-                        </View>
-                    </ScrollView>
-                    <View style={style.botaoResponder}>
-                    <TouchableOpacity
-                            disabled={
-                                (numSeries.length !== 2 || numRepeticoes.length !== 2)
-                                    ? (contadorPse2 !== numSeries.length - 1 && contadorPse2 !== numRepeticoes.length - 1)
-                                    : (contadorPse2 !== numSeries.length - 2 && contadorPse2 !== numRepeticoes.length - 2)
-                            }
-                            style={[style.botaoResponderPSE, estilo.botao, estilo.corPrimaria]}
-                            onPress={() => { 
-                                updateDocumento(); 
-                                navigation.goBack() 
-                            }}>
-                            <Text style={[estilo.textoCorLight, estilo.tituloH523px]}>ENVIAR</Text>
-                        </TouchableOpacity>
+          {/* ---------- Quadradinhos numerados de “Série” ---------- */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={style.camposColuna}>
+              {(tipoExercicio === "força" ||
+                tipoExercicio === "alongamento" ||
+                (tipoExercicio === "cardio" && !isCardioSemSeries)) &&
+                numSeries.map((s) => (
+                  <View key={`keySerie${s}`}>
+                    <View style={[style.quadrado, estilo.corLightMais1]}>
+                      <Text style={[estilo.textoP16px, style.Montserrat]}>
+                        {s}
+                      </Text>
                     </View>
-                </SafeAreaView>
-            </SafeAreaView>
-        </ScrollView>
-    )
-}
+                  </View>
+                ))}
+            </View>
+          </ScrollView>
 
+          {/* ======== BLOCOS DE INPUT ======== */}
+
+          {/* 1) Primeiro bloco: 
+              - Força → “Peso levantado (kg)”
+              - Alongamento → “Duração (segundos)”
+              - Cardio sem séries → “Intensidade (km/h)”
+              - Cardio c/ séries → “Intensidade (km/h) Série n”
+          */}
+          {tipoExercicio === "força" && (
+            <>
+              <Text
+                style={[
+                  estilo.textoP16px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Peso levantado (kg)
+              </Text>
+              <Text
+                style={[
+                  estilo.textoSmall12px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Preencha os campos abaixo
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={style.camposColuna}>
+                  {numSeries.map((s, idx) => (
+                    <View key={`keyPesoSerie${idx}`}>
+                      <TextInput
+                        keyboardType="numeric"
+                        placeholder={`Peso Série ${s}`}
+                        style={[style.quadrado, { textAlign: "center" }]}
+                        value={inputValuesPeso[idx] || ""}
+                        onChangeText={(value) =>
+                          handleChangeTextPesoLevantado(value, idx)
+                        }
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          )}
+
+          {tipoExercicio === "alongamento" && (
+            <>
+              <Text
+                style={[
+                  estilo.textoP16px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Duração (segundos)
+              </Text>
+              <Text
+                style={[
+                  estilo.textoSmall12px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Preencha os campos abaixo
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={style.camposColuna}>
+                  {numSeries.map((s, idx) => (
+                    <View key={`keyDuracaoSerie${idx}`}>
+                      <TextInput
+                        keyboardType="numeric"
+                        placeholder={`Dur. Série ${s}`}
+                        style={[style.quadrado, { textAlign: "center" }]}
+                        value={inputValuesPeso[idx] || ""}
+                        onChangeText={(value) =>
+                          handleChangeTextDuracao && // (reaproveitado do handleChangeTextRepeticoes)
+                          handleChangeTextRepeticoes(value, idx)
+                        }
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          )}
+
+          {/* 1a) Cardio sem séries (Ex.: esteira sem campo “séries”, “descanso” ou “velocidade” na ficha) */}
+          {isCardioSemSeries && (
+            <>
+              <Text
+                style={[
+                  estilo.textoP16px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Intensidade (km/h)
+              </Text>
+              <Text
+                style={[
+                  estilo.textoSmall12px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Preencha o campo abaixo
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={style.camposColuna}>
+                  <View key="keyCardioSemSerie_Vel">
+                    <TextInput
+                      keyboardType="numeric"
+                      placeholder="Velocidade"
+                      style={[style.quadrado, { textAlign: "center" }]}
+                      value={inputValuesPeso[0] || ""}
+                      onChangeText={(value) =>
+                        handleChangeTextPesoLevantado(value, 0)
+                      }
+                    />
+                  </View>
+                </View>
+              </ScrollView>
+
+              <Text
+                style={[
+                  estilo.textoP16px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Duração (minutos)
+              </Text>
+              <Text
+                style={[
+                  estilo.textoSmall12px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Preencha o campo abaixo
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={style.camposColuna}>
+                  <View key="keyCardioSemSerie_Dur">
+                    <TextInput
+                      keyboardType="numeric"
+                      placeholder="Dur. Exercício"
+                      style={[style.quadrado, { textAlign: "center" }]}
+                      value={inputValuesRepeticoes[0] || ""}
+                      onChangeText={(value) =>
+                        handleChangeTextRepeticoes(value, 0)
+                      }
+                    />
+                  </View>
+                </View>
+              </ScrollView>
+            </>
+          )}
+
+          {/** 2) Segundo bloco:
+                  - Força → “Repetições (número inteiro)”
+                  - Alongamento → “Descanso (segundos)”
+                  - Cardio com séries → “Duração (minutos) Série n”
+              **/}
+          {tipoExercicio === "força" && (
+            <>
+              <Text
+                style={[
+                  estilo.textoP16px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Repetições (número inteiro)
+              </Text>
+              <Text
+                style={[
+                  estilo.textoSmall12px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Preencha os campos abaixo
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={style.camposColuna}>
+                  {numSeries.map((s, idx) => (
+                    <View key={`keyRepsSerie${idx}`}>
+                      <TextInput
+                        keyboardType="numeric"
+                        placeholder={`Reps Série ${s}`}
+                        style={[style.quadrado, { textAlign: "center" }]}
+                        value={inputValuesRepeticoes[idx] || ""}
+                        onChangeText={(value) =>
+                          handleChangeTextRepeticoes(value, idx)
+                        }
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          )}
+
+          {tipoExercicio === "alongamento" && (
+            <>
+              <Text
+                style={[
+                  estilo.textoP16px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Descanso (segundos)
+              </Text>
+              <Text
+                style={[
+                  estilo.textoSmall12px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Preencha os campos abaixo
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={style.camposColuna}>
+                  {numSeries.map((s, idx) => (
+                    <View key={`keyDescSerie${idx}`}>
+                      <TextInput
+                        keyboardType="numeric"
+                        placeholder={`Desc. Série ${s}`}
+                        style={[style.quadrado, { textAlign: "center" }]}
+                        value={inputValuesRepeticoes[idx] || ""}
+                        onChangeText={(value) =>
+                          handleChangeTextRepeticoes(value, idx)
+                        }
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          )}
+
+          {isCardioSemSeries === false && tipoExercicio === "cardio" && (
+            <>
+              <Text
+                style={[
+                  estilo.textoP16px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Duração (minutos)
+              </Text>
+              <Text
+                style={[
+                  estilo.textoSmall12px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Preencha os campos abaixo
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={style.camposColuna}>
+                  {numSeries.map((s, idx) => (
+                    <View key={`keyDuracaoSerie${idx}`}>
+                      <TextInput
+                        keyboardType="numeric"
+                        placeholder={`Dur. Série ${s}`}
+                        style={[style.quadrado, { textAlign: "center" }]}
+                        value={inputValuesRepeticoes[idx] || ""}
+                        onChangeText={(value) =>
+                          handleChangeTextRepeticoes(value, idx)
+                        }
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          )}
+
+          {/* 3) Terceiro bloco:
+                - Força → “Descanso (segundos)”
+                - Cardio c/ séries → “Descanso (segundos) Série n”
+            */}
+          {tipoExercicio === "força" && (
+            <>
+              <Text
+                style={[
+                  estilo.textoP16px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Descanso (segundos)
+              </Text>
+              <Text
+                style={[
+                  estilo.textoSmall12px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Preencha os campos abaixo
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={style.camposColuna}>
+                  {numSeries.map((s, idx) => (
+                    <View key={`keyDescForca${idx}`}>
+                      <TextInput
+                        keyboardType="numeric"
+                        placeholder={`Desc. Série ${s}`}
+                        style={[style.quadrado, { textAlign: "center" }]}
+                        value={inputValuesDescanso[idx] || ""}
+                        onChangeText={(value) =>
+                          handleChangeTextDescanso(value, idx)
+                        }
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          )}
+
+          {isCardioSemSeries === false && tipoExercicio === "cardio" && (
+            <>
+              <Text
+                style={[
+                  estilo.textoP16px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Descanso (segundos)
+              </Text>
+              <Text
+                style={[
+                  estilo.textoSmall12px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Preencha os campos abaixo
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={style.camposColuna}>
+                  {numSeries.map((s, idx) => (
+                    <View key={`keyDescCardio${idx}`}>
+                      <TextInput
+                        keyboardType="numeric"
+                        placeholder={`Desc. Série ${s}`}
+                        style={[style.quadrado, { textAlign: "center" }]}
+                        value={inputValuesDescanso[idx] || ""}
+                        onChangeText={(value) =>
+                          handleChangeTextDescanso(value, idx)
+                        }
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          )}
+
+          {/* 4) Quarto bloco: Intensidade do repouso (só para cardio c/ séries) */}
+          {isCardioSemSeries === false && tipoExercicio === "cardio" && (
+            <>
+              <Text
+                style={[
+                  estilo.textoP16px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Intensidade do repouso (km/h)
+              </Text>
+              <Text
+                style={[
+                  estilo.textoSmall12px,
+                  estilo.textoCorSecundaria,
+                  style.Montserrat,
+                ]}
+              >
+                Preencha os campos abaixo
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={style.camposColuna}>
+                  {numSeries.map((s, idx) => (
+                    <View key={`keyIDR${idx}`}>
+                      <TextInput
+                        keyboardType="numeric"
+                        placeholder={`IdR. Série ${s}`}
+                        style={[style.quadrado, { textAlign: "center" }]}
+                        value={inputValuesIntensidadeDoRepouso[idx] || ""}
+                        onChangeText={(value) =>
+                          handleChangeTextIntensidadeDoRepouso(value, idx)
+                        }
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          )}
+
+          {/* 5) PSE do exercício */}
+          <Text
+            style={[
+              estilo.textoP16px,
+              estilo.textoCorSecundaria,
+              style.Montserrat,
+            ]}
+          >
+            PSE do exercício
+          </Text>
+          <Text
+            style={[
+              estilo.textoSmall12px,
+              estilo.textoCorSecundaria,
+              style.Montserrat,
+            ]}
+          >
+            Responda em ordem os formulários abaixo
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={style.camposColuna}>
+              {/* PSE força */}
+              {tipoExercicio === "força" &&
+                numSeries.map((s, idx) => (
+                  <View key={`keyPSEForca${idx}`}>
+                    <TouchableOpacity
+                      disabled={desabilitarPSES}
+                      style={
+                        desabilitarPSES
+                          ? [style.quadrado, estilo.corDisabled, { borderRadius: 15 }]
+                          : contadorPse >= s
+                          ? [style.quadrado, estilo.corSuccess, { borderRadius: 15 }]
+                          : [style.quadrado, estilo.corPrimaria, { borderRadius: 15 }]
+                      }
+                      onPress={() => {
+                        setContadorPse(s);
+                        setContadorPse2(idx);
+                        navigation.navigate("PSE Omni", {
+                          omeExercicio: nome,
+                          repeticao: idx,
+                          diario,
+                          index: index - 1,
+                          detalhamento,
+                        });
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        name="checkbox-multiple-marked-outline"
+                        size={60}
+                        color="white"
+                      />
+                      <Text
+                        style={[
+                          estilo.textoSmall12px,
+                          { marginBottom: 3 },
+                          style.Montserrat,
+                          estilo.textoCorLight,
+                        ]}
+                      >
+                        PSE Série {s}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+
+              {/* PSE cardio */}
+              {tipoExercicio === "cardio" &&
+                numSeries.map((s, idx) => (
+                  <View key={`keyPSECardio${idx}`}>
+                    <TouchableOpacity
+                      disabled={desabilitarPSES}
+                      style={
+                        desabilitarPSES
+                          ? [style.quadrado, estilo.corDisabled, { borderRadius: 15 }]
+                          : contadorPse >= s
+                          ? [style.quadrado, estilo.corSuccess, { borderRadius: 15 }]
+                          : [style.quadrado, estilo.corPrimaria, { borderRadius: 15 }]
+                      }
+                      onPress={() => {
+                        setContadorPse(s);
+                        setContadorPse2(idx);
+                        navigation.navigate("PSE Borg", {
+                          omeExercicio: nome,
+                          repeticao: idx,
+                          diario,
+                          index: index - 1,
+                          detalhamento,
+                        });
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        name="checkbox-multiple-marked-outline"
+                        size={60}
+                        color="white"
+                      />
+                      <Text
+                        style={[
+                          estilo.textoSmall12px,
+                          { marginBottom: 3 },
+                          style.Montserrat,
+                          estilo.textoCorLight,
+                        ]}
+                      >
+                        {isCardioSemSeries ? "PSE Único" : `PSE Série ${s}`}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+
+              {/* PSE alongamento */}
+              {tipoExercicio === "alongamento" &&
+                numSeries.map((s, idx) => (
+                  <View key={`keyPSEAlong${idx}`}>
+                    <TouchableOpacity
+                      disabled={desabilitarPSES}
+                      style={
+                        desabilitarPSES
+                          ? [style.quadrado, estilo.corDisabled, { borderRadius: 15 }]
+                          : contadorPse >= s
+                          ? [style.quadrado, estilo.corSuccess, { borderRadius: 15 }]
+                          : [style.quadrado, estilo.corPrimaria, { borderRadius: 15 }]
+                      }
+                      onPress={() => {
+                        setContadorPse(s);
+                        setContadorPse2(idx);
+                        navigation.navigate("Perflex", {
+                          nomeExercicio: nome,
+                          repeticao: idx,
+                          diario,
+                          index: index - 1,
+                          detalhamento,
+                        });
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        name="checkbox-multiple-marked-outline"
+                        size={60}
+                        color="white"
+                      />
+                      <Text
+                        style={[
+                          estilo.textoSmall12px,
+                          { marginBottom: 3 },
+                          style.Montserrat,
+                          estilo.textoCorLight,
+                        ]}
+                      >
+                        PSE Repet. {s}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+            </View>
+          </ScrollView>
+
+          {/* Botão “ENVIAR” */}
+          <View style={style.botaoResponder}>
+            <TouchableOpacity
+              disabled={desabilitarPSES}
+              style={[style.botaoResponderPSE, estilo.botao, estilo.corPrimaria]}
+              onPress={() => {
+                updateDocumento();
+                navigation.goBack();
+              }}
+            >
+              <Text style={[estilo.textoCorLight, estilo.tituloH523px]}>
+                ENVIAR
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </SafeAreaView>
+    </ScrollView>
+  );
+};
+
+// ---------- Estilos ----------
 const style = StyleSheet.create({
-    container: {
-        height: windowHeight + 250,
-        width: '100%',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 15,
-        backgroundColor: estilo.corLightMenos1.backgroundColor,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee'
-    },
-    backButton: {
-        marginRight: 15,
-        padding: 5
-    },
-    headerTitle: {
-        flex: 1,
-        color: estilo.corPrimaria.color,
-        fontSize: 20
-    },
-    conteudo: {
-        width: '95%',
-        marginLeft: '5%',
-        marginTop: 15
-    },
-    camposColuna: {
-        flexDirection: 'row',
-        padding: 15
-    },
-    camposInput: {
-        justifyContent: 'space-around',
-        marginTop: 20
-    },
-    quadrado: {
-        width: 75,
-        height: 75,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'white',
-        elevation: 5,
-        marginRight: 15
-    },
-    Montserrat: {
-        fontFamily: 'Montserrat'
-    },
-    botaoResponder: {
-        marginTop: '10%'
-    },
-    botaoResponderPSE: {
-        paddingVertical: 10,
-        alignItems: 'center',
-        borderRadius: 15,
-        width: '60%',
-        marginTop: '20%'
-    }
-})
+  container: {
+    height: windowHeight + 250,
+    width: "100%",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 15,
+    backgroundColor: estilo.corLightMenos1.backgroundColor,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  backButton: {
+    marginRight: 15,
+    padding: 5,
+  },
+  headerTitle: {
+    flex: 1,
+    color: estilo.corPrimaria.color,
+    fontSize: 20,
+  },
+  conteudo: {
+    width: "95%",
+    marginLeft: "5%",
+    marginTop: 15,
+  },
+  camposColuna: {
+    flexDirection: "row",
+    padding: 15,
+  },
+  quadrado: {
+    width: 75,
+    height: 75,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
+    elevation: 5,
+    marginRight: 15,
+  },
+  Montserrat: {
+    fontFamily: "Montserrat",
+  },
+  botaoResponder: {
+    marginTop: "10%",
+    alignItems: "center",
+  },
+  botaoResponderPSE: {
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: 15,
+    width: "60%",
+    marginTop: "20%",
+    marginBottom: "20%",
+  },
+});

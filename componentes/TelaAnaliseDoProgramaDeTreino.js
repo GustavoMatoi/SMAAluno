@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native'
+import { Text, StyleSheet, SafeAreaView, ScrollView,View } from 'react-native'
 import estilo from "./estilo"
 import TabelaResultados from "./TabelaResultados"
 import FichaDeTreinoAnalise from "./Ficha/FichaDeTreinoAnalise";
@@ -10,7 +10,7 @@ import ResistenciaAbdominal from "./TabelasDeClassificacao/ResistenciaAbdominal"
 import IMC from "./TabelasDeClassificacao/IMC";
 import FrequenciaCardiacaDeRepouso from "./TabelasDeClassificacao/FrequenciaCardiacaDeRepouso";
 import PressaoArterial from "./TabelasDeClassificacao/PressaoArterial";
-
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const getPressaoArterial = (pressaoSistolica, pressaoDiastolica) => {
     if (pressaoSistolica, pressaoDiastolica != 0) {
@@ -57,7 +57,7 @@ export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
 
     if (posicaoDoArray == 0) {
         return (
-            <SafeAreaView style={[estilo.corLightMenos1, style.container]}>
+            <SafeAreaView style={[estilo.corLightMenos1, styles.container]}>
 
                 <ScrollView>
 
@@ -139,11 +139,25 @@ export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
                     </TabelaResultados>
 
                     <Text style={[estilo.textoCorSecundaria, estilo.tituloH427px, estilo.centralizado, { marginVertical: '5%' }]}>Programa de Treino</Text>
+                    <View style={[styles.detalhesContainer, { marginLeft: 10 }]}>
+                        <View style={styles.iconeTexto}>
+                            <Text style={[styles.detalhesFicha, {marginBottom:10}]}>Professor responsável: {ficha?.responsavel ?? "—"}</Text>
+                        </View>
+                        <View style={styles.iconeTexto}>
+                            <MaterialIcons name="calendar-today" size={16} color="#6c757d" />
+                            <Text style={styles.detalhesFicha}>Data de inicio: {ficha?.dataInicio ?? "—"}</Text>
+                        </View>
+                        <View style={styles.iconeTexto}>
+                            <MaterialIcons name="event-available" size={16} color="#6c757d" />
+                            <Text style={styles.detalhesFicha}> Data de Término{ficha?.dataFim ?? "—"}</Text>
+                        </View>
+                    </View>
                     {typeof ficha == 'undefined' ?
                         <Text style={[{ marginHorizontal: 15, textAlign: 'justify' }, estilo.textoP16px, estilo.textoCorSecundaria]}>
                             A última ficha ainda não foi lançada. Solicite ao professor responsável para lançá-la e tente novamente mais tarde.
                         </Text>
                         :
+                        
                         <FichaDeTreinoAnalise posicaoDoArray={posicaoDoArray} exercicios={ficha.Exercicios} ></FichaDeTreinoAnalise>
 
                     }
@@ -168,7 +182,7 @@ export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
         )
     } else {
         return (
-            <SafeAreaView style={[estilo.corLightMenos1, style.container]}>
+            <SafeAreaView style={[estilo.corLightMenos1, styles.container]}>
                 <ScrollView>
 
                 <Text style={[estilo.textoP16px, estilo.textoCorSecundaria, { margin: '2%' }]}>Obs: Caso fique confuso em relação as medidas, consulte as tabelas de classificação que estão disponíveis abaixo do Programa de Treino</Text>
@@ -364,11 +378,26 @@ export default function TelaAnaliseDoProgramaDeTreino({ route, navigation }) {
     }
 }
 
-
-
-
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         width: '100%',
+    },iconeTexto: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginVertical: 4,
+},detalhesContainer: {
+        borderRadius: 8,
+        padding: 12,
+        marginHorizontal: 15,
+        marginVertical: 10,
+        alignItems: 'center'
+    },
+    detalhesFicha: {
+        ...estilo.textoP16px,
+        ...estilo.textoCorSecundaria,
+        fontWeight: '500',
+        lineHeight: 24,
+        textAlign: 'center',
     }
 })
