@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Text, SafeAreaView, StyleSheet, View, Dimensions, TouchableOpacity, TextInput, Alert } from 'react-native'
+import { Text, SafeAreaView, StyleSheet,ScrollView, View, Dimensions, TouchableOpacity, TextInput, Alert } from 'react-native'
 import Estilo from "../estilo"
 import Botao from '../Botao'
 import InputTexto from '../InputTexto'
@@ -40,7 +40,14 @@ export default ({ navigation }) => {
   const [alunoData, setAlunoData] = useState()
   const [showPassword, setShowPassword] = useState(false);
 
+useEffect(() => {
+  const unsubscribe = navigation.addListener('focus', () => {
+    setEmail('');
+    setPassword('');
+  });
 
+  return unsubscribe;
+}, [navigation]);
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setConexao(state.type === 'wifi' || state.type === 'cellular')
@@ -70,8 +77,10 @@ export default ({ navigation }) => {
     } catch (error) {
       const errorMessages = {
         'auth/invalid-email': 'Email inválido',
-        'auth/wrong-password': 'Senha incorreta',
-        'auth/user-not-found': 'Usuário não encontrado'
+      'auth/wrong-password': 'Senha incorreta',
+      'auth/user-not-found': 'Usuário não encontrado',
+      'auth/too-many-requests': 'Muitas tentativas. Tente novamente mais tarde.',
+      'auth/network-request-failed': 'Falha na conexão. Verifique sua internet.',
       };
   
       Alert.alert('Erro', errorMessages[error.code] || 'Erro desconhecido');
@@ -377,8 +386,7 @@ const fetchAlunoData = async () => {
       const alunoData = alunoDoc.data();
   
       if (alunoData.senha !== password) throw new Error('Senha incorreta');
-  
-      // Atualiza estados com os dados do primeiro registro
+
       const endereco = alunoData.endereco;
       enderecoAluno.setBairro(endereco.bairro);
       enderecoAluno.setCep(endereco.cep);
@@ -386,6 +394,8 @@ const fetchAlunoData = async () => {
       enderecoAluno.setEstado(endereco.estado);
       enderecoAluno.setRua(endereco.rua);
       enderecoAluno.setNumero(endereco.numero);
+      console.log("enderecoAluno", enderecoAluno)
+      console.log("bairro",enderecoAluno.getBairro())
   
       alunoLogado.setNome(alunoData.nome);
       alunoLogado.setEmail(alunoData.email);
@@ -438,6 +448,7 @@ const fetchAlunoData = async () => {
 
   return (
     <SafeAreaView style={[Estilo.corLightMenos1]}>
+      <ScrollView>
       <View style={style.container}>
         <View style={style.areaLogo}>
           <Logo tamanho="grande" style={[Estilo.tituloH619px]}></Logo>
@@ -527,7 +538,7 @@ const fetchAlunoData = async () => {
           </View>
         </View>
       </View>
-
+     </ScrollView>
     </SafeAreaView>
   )
 }

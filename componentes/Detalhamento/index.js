@@ -23,91 +23,103 @@ import {
 const windowHeight = Dimensions.get("window").height;
 
 export default ({ route, navigation }) => {
-  // Parâmetros vindos da navegação
   const {
-    numeroDeSeries,   // pode vir como 0, null ou "-"
-    tipoExercicio,    // "força", "alongamento" ou "cardio"
+    numeroDeSeries,   
+    tipoExercicio,   
     nomeExercicio,
     diario,
-    index,            // índice no array de detalhamento
-    detalhamento,     // objeto de Detalhamento contendo Exercicios[]
+    index,           
+    detalhamento,   
   } = route.params;
 
-  // Carregando fonte Montserrat (caso seja necessário)
   const [fontsLoaded] = useFonts({
     Montserrat: require("../../assets/Montserrat-Light.ttf"),
   });
 
   const nome = nomeExercicio || "";
 
-  // Detecta se é "Cardio sem séries" (numeroDeSeries <= 0 ou "-")
   const isCardioSemSeries =
     tipoExercicio === "cardio" &&
     (!numeroDeSeries || numeroDeSeries === 0 || numeroDeSeries === "-");
 
-  // Estados de array de séries: [1,2,...] ou [1] se cardio sem séries
   const [numSeries, setNumSeries] = useState([]);
 
-  // Estados para valores digitados (strings), ajustados conforme numSeries
-  const [pesoLevantado, setPesoLevantado] = useState([]); // Força ou Intensidade (cardio)
-  const [numeroRepeticoes, setNumeroRepeticoes] = useState([]); // Reps (força) ou Duração (cardio)
-  const [descanso, setDescanso] = useState([]); // Descanso (força) ou (cardio c/ séries)
-  const [intensidadeDoRepouso, setIntensidadeDoRepouso] = useState([]); // só para cardio c/ séries
-
-  // Mapas para exibir valor no TextInput
+  const [pesoLevantado, setPesoLevantado] = useState([]); 
+  const [numeroRepeticoes, setNumeroRepeticoes] = useState([]);
+  const [descanso, setDescanso] = useState([]); 
+  const [intensidadeDoRepouso, setIntensidadeDoRepouso] = useState([]); 
   const [inputValuesPeso, setInputValuesPeso] = useState({});
   const [inputValuesRepeticoes, setInputValuesRepeticoes] = useState({});
   const [inputValuesDescanso, setInputValuesDescanso] = useState({});
   const [inputValuesIntensidadeDoRepouso, setInputValuesIntensidadeDoRepouso] =
     useState({});
-
-  // Estados para controle do PSE (quantos já respondidos)
   const [contadorPse, setContadorPse] = useState(0);
   const [contadorPse2, setContadorPse2] = useState(0);
 
-  // Botão PSE habilitado ou não
   const [desabilitarPSES, setDesabilitarPSES] = useState(true);
 
-  // 1) Monta o array de séries conforme tipoExercicio e numeroDeSeries :contentReference[oaicite:2]{index=2}
   useEffect(() => {
+  console.log("PARAMS RECEBIDOS:", {
+    numeroDeSeries,
+    tipoExercicio,
+    nomeExercicio,
+    diario,
+    index,
+    detalhamento,
+  });
+}, []);
+
+  useEffect(() => {
+    console.log("numero de series",numeroDeSeries)
     let arr = [];
     if (tipoExercicio === "cardio") {
-      // Se cardio sem séries → pelo menos 1 slot genérico
       if (isCardioSemSeries) {
         arr = [1];
       } else {
-        // Cardio com séries definidas (>0)
         for (let i = 0; i < numeroDeSeries; i++) {
           arr[i] = i + 1;
         }
       }
     } else {
-      // Força / Alongamento → segue numeroDeSeries (0 → [])
       if (numeroDeSeries && numeroDeSeries > 0) {
         for (let i = 0; i < numeroDeSeries; i++) {
           arr[i] = i + 1;
         }
       }
     }
+    console.log("→ ARRAY numSeries gerado:", arr);
     setNumSeries(arr);
   }, [numeroDeSeries, tipoExercicio]);
 
-  // 2) Toda vez que numSeries mudar, reajusta o tamanho dos arrays de valores
   useEffect(() => {
     const tamanho = numSeries.length;
-    setPesoLevantado(Array(tamanho).fill(""));
-    setNumeroRepeticoes(Array(tamanho).fill(""));
-    setDescanso(Array(tamanho).fill(""));
-    setIntensidadeDoRepouso(Array(tamanho).fill(""));
+    const newPeso = Array(tamanho).fill("");
+    const newReps = Array(tamanho).fill("");
+    const newDescanso = Array(tamanho).fill("");
+    const newIntRep = Array(tamanho).fill("");
+
+    setPesoLevantado(newPeso);
+    setNumeroRepeticoes(newReps);
+    setDescanso(newDescanso);
+    setIntensidadeDoRepouso(newIntRep);
+
+    console.log("→ Estados reiniciados para tamanho", tamanho, {
+      pesoLevantado: newPeso,
+      numeroRepeticoes: newReps,
+      descanso: newDescanso,
+      intensidadeDoRepouso: newIntRep,
+    });
   }, [numSeries]);
 
-  // Funções para atualizar cada campo (permite somente dígitos) :contentReference[oaicite:3]{index=3}
   const handleChangeTextPesoLevantado = (value, idx) => {
-    if (/^\d*$/.test(value)) {
+      if (/^\d*$/.test(value)) {
       const copia = [...pesoLevantado];
       copia[idx] = value;
       setPesoLevantado(copia);
       setInputValuesPeso({ ...inputValuesPeso, [idx]: value });
+      console.log(`Peso Série ${idx} atualizado para:`, value, "| pesoLevantado:", copia);
+    } else {
+      console.log("Entrada inválida em Peso:", value);
     }
   };
   const handleChangeTextRepeticoes = (value, idx) => {
@@ -138,8 +150,26 @@ export default ({ route, navigation }) => {
     }
   };
 
-  // 3) Habilita/desabilita botão de PSE conforme preenchimento :contentReference[oaicite:4]{index=4}
   useEffect(() => {
+      const totalPreenchidos = {
+      peso: pesoLevantado.filter((v) => v !== "").length,
+      reps: numeroRepeticoes.filter((v) => v !== "").length,
+      desc: descanso.filter((v) => v !== "").length,
+      intRepouso: intensidadeDoRepouso.filter((v) => v !== "").length,
+    };
+
+    console.log(">> CHECAGEM PSE:", {
+      tipoExercicio,
+      numSeriesLength: numSeries.length,
+      estados: {
+        pesoLevantado,
+        numeroRepeticoes,
+        descanso,
+        intensidadeDoRepouso,
+      },
+      totalPreenchidos,
+      isCardioSemSeries,
+    });
     if (tipoExercicio === "força") {
       if (
         pesoLevantado.filter((v) => v !== "").length === numSeries.length &&
@@ -161,16 +191,13 @@ export default ({ route, navigation }) => {
       }
     } else if (tipoExercicio === "cardio") {
       if (isCardioSemSeries) {
-        // Cardio sem séries: basta duração (numeroRepeticoes[0])
         if (numeroRepeticoes[0] && numeroRepeticoes[0] !== "") {
           setDesabilitarPSES(false);
         } else {
           setDesabilitarPSES(true);
         }
       } else {
-        // Cardio com séries: exige todos os quatro campos preenchidos
         if (
-          pesoLevantado.filter((v) => v !== "").length === numSeries.length &&
           numeroRepeticoes.filter((v) => v !== "").length === numSeries.length &&
           descanso.filter((v) => v !== "").length === numSeries.length &&
           intensidadeDoRepouso.filter((v) => v !== "").length ===
@@ -178,10 +205,30 @@ export default ({ route, navigation }) => {
         ) {
           setDesabilitarPSES(false);
         } else {
+          console.log("Desabilitando PSEs",pesoLevantado, numeroRepeticoes, descanso, intensidadeDoRepouso);
+          console.log("Filtros:", {
+            reps: numeroRepeticoes.filter((v) => v !== "").length,
+            desc: descanso.filter((v) => v !== "").length,
+            intRepouso: intensidadeDoRepouso.filter((v) => v !== "").length,
+          });
           setDesabilitarPSES(true);
         }
       }
     }
+    console.log("ESTADOS PARA PSE:", {
+      tipoExercicio,
+      numSeriesLength: numSeries.length,
+      pesoLevantado,
+      numeroRepeticoes,
+      descanso,
+      intensidadeDoRepouso,
+      isCardioSemSeries,
+      filtroPeso: pesoLevantado.filter(v => v !== "").length,
+      filtroReps: numeroRepeticoes.filter(v => v !== "").length,
+      filtroDesc: descanso.filter(v => v !== "").length,
+      filtroIntRepouso: intensidadeDoRepouso.filter(v => v !== "").length,
+    });
+
   }, [
     pesoLevantado,
     numeroRepeticoes,
@@ -191,7 +238,6 @@ export default ({ route, navigation }) => {
     isCardioSemSeries,
   ]);
 
-  // 4) Atualiza o objeto detalhamento ao clicar em “ENVIAR”
   const updateDocumento = () => {
     if (!detalhamento || !detalhamento.Exercicios) return;
     const det = detalhamento.Exercicios[index - 1] || {};
@@ -215,8 +261,6 @@ export default ({ route, navigation }) => {
       );
     }
   };
-
-  // 5) Salvar ao pressionar hardware back (Android)  
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -228,8 +272,6 @@ export default ({ route, navigation }) => {
     );
     return () => backHandler.remove();
   }, []);
-
-  // Header com botão de voltar
   const Header = () => (
     <View style={style.header}>
       <TouchableOpacity
@@ -263,10 +305,7 @@ export default ({ route, navigation }) => {
         <Header />
 
         <SafeAreaView style={style.conteudo}>
-          {/* ---------- Nome do Exercício ---------- */}
           <Text style={[estilo.tituloH523px]}>{nomeExercicio}</Text>
-
-          {/* ---------- Rótulo “Série” (se aplicável) ---------- */}
           {(tipoExercicio === "força" ||
             tipoExercicio === "alongamento" ||
             (tipoExercicio === "cardio" && !isCardioSemSeries)) && (
@@ -281,8 +320,6 @@ export default ({ route, navigation }) => {
               {tipoExercicio === "alongamento" ? " (número inteiro)" : ""}
             </Text>
           )}
-
-          {/* ---------- Quadradinhos numerados de “Série” ---------- */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={style.camposColuna}>
               {(tipoExercicio === "força" ||
@@ -299,15 +336,6 @@ export default ({ route, navigation }) => {
                 ))}
             </View>
           </ScrollView>
-
-          {/* ======== BLOCOS DE INPUT ======== */}
-
-          {/* 1) Primeiro bloco: 
-              - Força → “Peso levantado (kg)”
-              - Alongamento → “Duração (segundos)”
-              - Cardio sem séries → “Intensidade (km/h)”
-              - Cardio c/ séries → “Intensidade (km/h) Série n”
-          */}
           {tipoExercicio === "força" && (
             <>
               <Text
@@ -378,7 +406,6 @@ export default ({ route, navigation }) => {
                         style={[style.quadrado, { textAlign: "center" }]}
                         value={inputValuesPeso[idx] || ""}
                         onChangeText={(value) =>
-                          handleChangeTextDuracao && // (reaproveitado do handleChangeTextRepeticoes)
                           handleChangeTextRepeticoes(value, idx)
                         }
                       />
@@ -388,8 +415,6 @@ export default ({ route, navigation }) => {
               </ScrollView>
             </>
           )}
-
-          {/* 1a) Cardio sem séries (Ex.: esteira sem campo “séries”, “descanso” ou “velocidade” na ficha) */}
           {isCardioSemSeries && (
             <>
               <Text
@@ -462,11 +487,6 @@ export default ({ route, navigation }) => {
             </>
           )}
 
-          {/** 2) Segundo bloco:
-                  - Força → “Repetições (número inteiro)”
-                  - Alongamento → “Descanso (segundos)”
-                  - Cardio com séries → “Duração (minutos) Série n”
-              **/}
           {tipoExercicio === "força" && (
             <>
               <Text
@@ -587,10 +607,6 @@ export default ({ route, navigation }) => {
             </>
           )}
 
-          {/* 3) Terceiro bloco:
-                - Força → “Descanso (segundos)”
-                - Cardio c/ séries → “Descanso (segundos) Série n”
-            */}
           {tipoExercicio === "força" && (
             <>
               <Text
@@ -671,7 +687,6 @@ export default ({ route, navigation }) => {
             </>
           )}
 
-          {/* 4) Quarto bloco: Intensidade do repouso (só para cardio c/ séries) */}
           {isCardioSemSeries === false && tipoExercicio === "cardio" && (
             <>
               <Text
@@ -712,7 +727,6 @@ export default ({ route, navigation }) => {
             </>
           )}
 
-          {/* 5) PSE do exercício */}
           <Text
             style={[
               estilo.textoP16px,
@@ -733,9 +747,11 @@ export default ({ route, navigation }) => {
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={style.camposColuna}>
-              {/* PSE força */}
               {tipoExercicio === "força" &&
                 numSeries.map((s, idx) => (
+                  console.log(`keyPSEForca${idx}`),
+                  console.log(`contadorPse: ${contadorPse}, s: ${s}`),
+                  
                   <View key={`keyPSEForca${idx}`}>
                     <TouchableOpacity
                       disabled={desabilitarPSES}
@@ -776,8 +792,6 @@ export default ({ route, navigation }) => {
                     </TouchableOpacity>
                   </View>
                 ))}
-
-              {/* PSE cardio */}
               {tipoExercicio === "cardio" &&
                 numSeries.map((s, idx) => (
                   <View key={`keyPSECardio${idx}`}>
@@ -820,8 +834,6 @@ export default ({ route, navigation }) => {
                     </TouchableOpacity>
                   </View>
                 ))}
-
-              {/* PSE alongamento */}
               {tipoExercicio === "alongamento" &&
                 numSeries.map((s, idx) => (
                   <View key={`keyPSEAlong${idx}`}>
@@ -866,8 +878,6 @@ export default ({ route, navigation }) => {
                 ))}
             </View>
           </ScrollView>
-
-          {/* Botão “ENVIAR” */}
           <View style={style.botaoResponder}>
             <TouchableOpacity
               disabled={desabilitarPSES}
@@ -888,7 +898,6 @@ export default ({ route, navigation }) => {
   );
 };
 
-// ---------- Estilos ----------
 const style = StyleSheet.create({
   container: {
     height: windowHeight + 250,

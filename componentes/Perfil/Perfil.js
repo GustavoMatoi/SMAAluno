@@ -18,12 +18,12 @@ export default ({ navigation, route }) => {
     'Montserrat': require('../../assets/Montserrat-Light.ttf'),
   })
   const [conexao, setConexao] = useState(true)
-
+  console.log("endereço",enderecoAluno)
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setConexao(state.type === 'wifi' || state.type === 'cellular')
     })
-
+    console.log("endereço",enderecoAluno)
     return () => {
       unsubscribe()
     }
@@ -68,18 +68,15 @@ export default ({ navigation, route }) => {
 const handleLogout = async () => {
     const auth = getAuth();
     try {
-    await signOut(auth);
-    console.log("Usuário deslogado com sucesso!");
-    alert("Desconectado com sucesso!");
+      await signOut(auth);
+      console.log("Usuário deslogado com sucesso!");
+      alert("Desconectado com sucesso!");
+      
+      await AsyncStorage.multiRemove(['email', 'senha', 'alunoLocal']);
 
-    await AsyncStorage.removeItem('email');
-    await AsyncStorage.removeItem('senha');
-    await AsyncStorage.removeItem('alunoLocal');
-
-    alunoLogado.setEmail('');
-    alunoLogado.setSenha('');
-
-    navigation.navigate('Login');
+      navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],});;
     } catch (error) {
     console.error("Erro ao deslogar: ", error.message);
     }
@@ -162,9 +159,9 @@ const handleLogout = async () => {
           <Text style={[estilo.textoP16px, estilo.textoCorSecundaria]}>{enderecoAluno.rua}, {enderecoAluno.numero} {enderecoAluno.bairro}, {enderecoAluno.cidade}, {enderecoAluno.estado}, {enderecoAluno.cep}</Text>
 
         </View>
-        <TouchableOpacity style={[conexao ? estilo.corPrimaria : estilo.corDisabled, estilo.botao, { marginTop: '5%', marginBottom: '5%' }, estilo.sombra]} disabled={!conexao} onPress={() => navigation.navigate('Editar perfil', { aluno })}>
+        {/*<TouchableOpacity style={[conexao ? estilo.corPrimaria : estilo.corDisabled, estilo.botao, { marginTop: '5%', marginBottom: '5%' }, estilo.sombra]} disabled={!conexao} onPress={() => navigation.navigate('Editar perfil', { aluno })}>
           <Text style={[estilo.textoSmall12px, estilo.textoCorLight, estilo.tituloH523px]}>ALTERAR FOTO</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
         {/*<TouchableOpacity style={[estilo.botao, estilo.corDanger, estilo.sombra, {marginTop: '5%'}]} onPress={() =>
                       Alert.alert(
                         "Confirmação",

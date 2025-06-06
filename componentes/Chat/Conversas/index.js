@@ -12,8 +12,8 @@ export default ({professor, navigation, backgroundColor, aluno}) => {
 
         </View>
         <View style={[style.informacoes]}>
-            <Text style={[estilo.textoCorSecundaria, estilo.tituloH619px]}>Professor {professor.professor.nome}</Text>
-            <Text style={[estilo.textoCorSecundariaMenos1, estilo.textoSmall12px]}>{professor.professor.email} | {professor.professor.cpf}</Text>
+            <Text style={[estilo.textoCorSecundaria, estilo.tituloH619px]}>{professor.professor.nome}</Text>
+            <Text style={[estilo.textoCorSecundariaMenos1, estilo.textoSmall12px]}>{professor.professor.email} </Text>
         </View>
 
         </TouchableOpacity>

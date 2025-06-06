@@ -176,19 +176,22 @@ export default function Routes({ route, navigation }) {
       setCarregando(false)
     }
   };
-  const handleLogout = () => {
-    const auth = getAuth()
-    signOut(auth)
-      .then(() => {
-        console.log("Usuário deslogado com sucesso!");
-        alert("Desconectado com sucesso!")
-        navigation.navigate('Login')
-        AsyncStorage.clear()
-      })
-      .catch((error) => {
-        console.error(error.message);
-      });
-  };
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      console.log("Usuário deslogado com sucesso!");
+      alert("Desconectado com sucesso!");
+      
+      await AsyncStorage.multiRemove(['email', 'senha', 'alunoLocal']);
+
+      navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],});;
+    } catch (error) {
+    console.error("Erro ao deslogar: ", error.message);
+    }
+};
   const fetchAlunosSemNet = async () => {
     const fichasAux = []
     const avaliacoesAux = []

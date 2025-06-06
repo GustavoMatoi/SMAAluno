@@ -24,7 +24,7 @@ export default props => {
 
   return (
     <>
-      <View style={[styles.container, { marginTop: 12 }]}>
+      <View style={[styles.container]}>
         <View style={[styles.left, estilo.corLightMais1]}>
           {imagem ? (
                       <Image source={{ uri: imagem }} style={styles.image} />
@@ -120,18 +120,21 @@ export default props => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'flex-start',flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
     backgroundColor: estilo.corLightMais1,
     borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 10
+    paddingHorizontal: 4,
+    paddingVertical: 0,
+    marginTop: 12,
+    minHeight: 70
   },
   left: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'nowrap',
-    width: '100%',minHeight: 70,
+    width: '100%',minHeight: 80,
   },
   name: {
     flex: 1,
@@ -152,7 +155,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 6,
     paddingVertical: 17,
-    marginLeft: 0
+    marginLeft: 0,
+    minHeight: 80
   },
   paramLabel: {
     fontSize: 10,

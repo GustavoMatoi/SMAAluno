@@ -145,7 +145,7 @@ export default ({ navigation, route }) => {
       contador++
       confereDetalhamento()
 
-      navigation.navigate('Detalhamento', {index: contador, series: exercicioNaFicha.series, tipoExercicio: 'alongamento', nomeExercicio: exercicioNaFicha.Nome, duracao: exercicioNaFicha.duracao, diario: diario, index: contador, detalhamento});
+      navigation.navigate('Detalhamento', {index: contador, numeroDeSeries: exercicioNaFicha.series, tipoExercicio: 'alongamento', nomeExercicio: exercicioNaFicha.Nome, duracao: exercicioNaFicha.duracao, diario: diario, index: contador, detalhamento});
   }
   const handleNavegacaoPse = () => {
   const todosDetalhados = exerciciosDetalhados.every(valor => valor === true);

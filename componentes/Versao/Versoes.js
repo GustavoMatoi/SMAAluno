@@ -7,7 +7,8 @@ export default ({ versao }) => {
     const [fontsLoaded] = useFonts({
         'Montserrat': require('../../assets/Montserrat-Light.ttf'),
     });
-    const [modalVisible, setModalVisible] = useState(false);
+    const [modalVisible1, setModalVisible1] = useState(false);
+    const [modalVisible2, setModalVisible2] = useState(false);
 
     if (!fontsLoaded) {
         return null; 
@@ -15,7 +16,36 @@ export default ({ versao }) => {
 
     return (
         <SafeAreaView style={style.safeArea}>
-            <TouchableOpacity style={style.container} onPress={() => setModalVisible(true)}>
+            <TouchableOpacity style={style.container} onPress={() => setModalVisible1(true)}>
+                <Text style={[style.alinhamentoTitulo, estilo.textoP16px, estilo.textoCorSecundaria, style.montserrat]}>
+                    Versão: 1.0.0
+                </Text>
+                <Text style={[style.detalhesTexto, estilo.textoP12px, estilo.textoCorSecundaria, style.montserrat]}>
+                    Clique para mais detalhes
+                </Text>
+            </TouchableOpacity>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible1}
+                onRequestClose={() => setModalVisible1(false)}
+            >
+                <View style={style.modalContainer}>
+                    <View style={style.modalContent}>
+                        <Text style={[style.modalTitle, style.montserrat]}>Detalhes da Versão 1.0.0</Text>
+                        <ScrollView style={style.scrollView}>
+                            <Text style={[style.modalText, style.montserrat]}>
+                                Versão inicial do aplicativo
+                            </Text>
+                        </ScrollView>
+                        <TouchableOpacity style={style.closeButton} onPress={() => setModalVisible1(false)}>
+                            <Text style={[style.closeButtonText, style.montserrat]}>Fechar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+             <TouchableOpacity style={style.container} onPress={() => setModalVisible2(true)}>
                 <Text style={[style.alinhamentoTitulo, estilo.textoP16px, estilo.textoCorSecundaria, style.montserrat]}>
                     Versão: {versao}
                 </Text>
@@ -27,18 +57,22 @@ export default ({ versao }) => {
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
+                visible={modalVisible2}
+                onRequestClose={() => setModalVisible2(false)}
             >
                 <View style={style.modalContainer}>
                     <View style={style.modalContent}>
                         <Text style={[style.modalTitle, style.montserrat]}>Detalhes da Versão 2.0.0</Text>
                         <ScrollView style={style.scrollView}>
                             <Text style={[style.modalText, style.montserrat]}>
-                                Versão inicial do aplicativo
+                                - botao de informações gerais do exercicio, menu suspenso das fichas na tela de avaliação.
+                                {'\n'}
+                                - correção de bugs.
+                                {'\n'}
+                                - melhorias na interface do usuário.
                             </Text>
                         </ScrollView>
-                        <TouchableOpacity style={style.closeButton} onPress={() => setModalVisible(false)}>
+                        <TouchableOpacity style={style.closeButton} onPress={() => setModalVisible2(false)}>
                             <Text style={[style.closeButtonText, style.montserrat]}>Fechar</Text>
                         </TouchableOpacity>
                     </View>

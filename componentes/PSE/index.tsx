@@ -17,6 +17,16 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
   const [inicioTreino, setInicioTreino] = useState('');
 
   const [conexao, setConexao] = useState<boolean>(true);
+
+  const formatarHora = (text: string) => {
+    let digits = text.replace(/\D/g, '');
+    digits = digits.substring(0, 4);
+    if (digits.length > 2) {
+      return `${digits.substring(0, 2)}:${digits.substring(2)}`;
+    }
+    return digits;
+  };
+
   const saveData = async () => {
     try {
       await AsyncStorage.multiSet([
@@ -257,13 +267,15 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
             </Text>
             <TextInput
               onChangeText={text => {
-                setInicioTreino(text);
-                AsyncStorage.setItem('@pse_inicioTreino', text);
+                const formatted = formatarHora(text);
+                setInicioTreino(formatted);
+                AsyncStorage.setItem('@pse_inicioTreino', formatted);
               }}
-              placeholder="Formato HH:MM (ex: 8:50)"
+              placeholder="Formato HH:MM (ex: 08:50)"
               keyboardType="numbers-and-punctuation"
               style={[estilo.corLight, style.botaoInput]}
               value={inicioTreino}
+              maxLength={5} 
             />
 
             <View style={{ paddingTop: 20 }}>

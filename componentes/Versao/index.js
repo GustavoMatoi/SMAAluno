@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, SafeAreaView, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { Text,Linking,View , SafeAreaView, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import Versao from "./Versoes";
 import estilo from "../estilo";
 import NetInfo from '@react-native-community/netinfo';
@@ -14,6 +14,7 @@ export default ({ navigation,route }) => {
     const [atVersao, setAtVersao] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [conexao, setConexao] = useState(true);
+    const DRIVE_DOWNLOAD_LINK = "https://drive.google.com/drive/folders/1gvIHTPxzwYtxOrfBrTKD0fG-PmfTOFso?usp=sharing";
 
     useEffect(() => {
         async function getVersoes() {
@@ -39,18 +40,21 @@ export default ({ navigation,route }) => {
         getVersoes();
     }, []);
     
-    const handleLogout = () => {
-        const auth = getAuth()
-        signOut(auth)
-          .then(() => {
-            console.log("Usuário deslogado com sucesso!");
-            alert("Desconectado com sucesso!")
-            navigation.navigate('Login')
-            AsyncStorage.clear()
-          })
-          .catch((error) => {
-            console.error(error.message);
-          });
+    const handleLogout = async () => {
+        const auth = getAuth();
+        try {
+        await signOut(auth);
+        console.log("Usuário deslogado com sucesso!");
+        alert("Desconectado com sucesso!");
+        
+        await AsyncStorage.multiRemove(['email', 'senha', 'alunoLocal']);
+
+        navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],});;
+        } catch (error) {
+        console.error("Erro ao deslogar: ", error.message);
+        }
     };
     
     useEffect(() => {
@@ -92,16 +96,31 @@ export default ({ navigation,route }) => {
                     (variavelGlobal.versao === atVersao) ? (
                         <Versao versao={variavelGlobal.versao} />
                     ) : (
-                        <TouchableOpacity onPress={() => {
-                            Alert.alert(
-                                "Aplicativo desatualizado",
-                                "Por favor, atualize a versão do seu aplicativo."
-                            );
-                        }}
-                        style={[estilo.centralizado, { marginTop: '10%', justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }]}>
-                            <Text style={[estilo.textoP16px, estilo.textoCorDisabled]}>VERSÃO INCORRETA - </Text>
-                            <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
-                        </TouchableOpacity>
+                        <View style={[estilo.centralizado, { marginTop: '10%', padding: 20 }]}>
+                            <View
+                            style={[estilo.centralizado, { marginTop: '10%', justifyContent: 'center', alignItems: 'center', flexDirection: 'row',marginBottom: '10%' }]}>
+                                <Text style={[estilo.textoP16px, estilo.textoCorDisabled]}>VERSÃO INCORRETA - </Text>
+                                <AntDesign name="infocirlce" size={20} color="#CFCDCD" />
+                            </View>
+                            <Text style={[estilo.textoP16px, { marginVertical: 10, textAlign: 'center' }]}>
+                                Por favor, atualize para a versão mais recente:
+                            </Text>
+                            
+                            <TouchableOpacity 
+                                onPress={() => Linking.openURL(DRIVE_DOWNLOAD_LINK)}
+                                style={[estilo.botao, estilo.corPrimaria, { padding: 15, marginTop: 20 }]}
+                            >
+                                <Text style={[estilo.textoCorLight, estilo.tituloH619px]}>
+                                BAIXAR ATUALIZAÇÃO
+                                </Text>
+                            </TouchableOpacity>
+                            
+                            <Text style={[estilo.textoSmall12px, { marginTop: 20, color: '#666', textAlign: 'center' }]}>
+                                Versão atual: {variavelGlobal.versao}
+                                {"\n"}
+                                Versão requerida: {atVersao}
+                            </Text>
+                            </View>
                     )
                 ) : (
                     <TouchableOpacity onPress={() => {
