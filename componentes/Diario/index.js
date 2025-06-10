@@ -156,9 +156,9 @@ export default ({ navigation, route }) => {
   
   console.log("Todos detalhados?", todosDetalhados)
   
-
+  console.log("Ficha", ficha);
   //if (todosDetalhados) {
-    navigation.navigate('PSE', { diario, aluno, detalhamento });
+    navigation.navigate('PSE', { diario, aluno, detalhamento,ficha });
   {/*} else {
     Alert.alert(
       "Detalhamento Incompleto",

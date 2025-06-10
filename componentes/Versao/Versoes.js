@@ -47,7 +47,7 @@ export default ({ versao }) => {
             </Modal>
              <TouchableOpacity style={style.container} onPress={() => setModalVisible2(true)}>
                 <Text style={[style.alinhamentoTitulo, estilo.textoP16px, estilo.textoCorSecundaria, style.montserrat]}>
-                    Versão: {versao}
+                    Versão: 2.0.0
                 </Text>
                 <Text style={[style.detalhesTexto, estilo.textoP12px, estilo.textoCorSecundaria, style.montserrat]}>
                     Clique para mais detalhes

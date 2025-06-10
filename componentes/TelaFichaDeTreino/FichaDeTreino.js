@@ -36,7 +36,11 @@ export default ({ navigation, route }) => {
 
     }, [])
     const onPressHandler = () => {
-        navigation.navigate('PSE', { diario, aluno });
+        const detalhamento = {
+        aviso: "Ficha de treino sem detalhamento individual de exercícios.",
+        Exercicios: [] 
+    };
+        navigation.navigate('PSE', { diario, aluno,detalhamento,ficha });
         console.log("DIARIO ANTES DE NAVEGAR PRO PSE", diario);
     };
 

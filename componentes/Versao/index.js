@@ -10,7 +10,7 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import { getAuth, signOut } from "firebase/auth";
 
 export default ({ navigation,route }) => {
-    const variavelGlobal = new Globais('2.0.0'); 
+    const variavelGlobal = new Globais('2.0.1'); 
     const [atVersao, setAtVersao] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [conexao, setConexao] = useState(true);

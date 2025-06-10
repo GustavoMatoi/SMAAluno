@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default ({ options = [], tipoPSE, navigation, route }) => {
-  const { diario, aluno, detalhamento } = route.params;
+  const { diario, aluno, detalhamento,ficha } = route.params;
   const [selected, setSelected] = useState(0);
   const [pseValue, setPSEValue] = useState(0);
   const [pseResposta, setPseResposta] = useState('0. Repouso');
@@ -121,9 +121,19 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
     const minuto: number | string = data.getMinutes();
     const fimDoTreino: string = `${hora}:${minuto}`;
 
-    let tipoTreino: string = 'Ficha de Treino';
-    if (typeof detalhamento !== 'undefined') {
-      tipoTreino = "Diario";
+    let fichaLetra = '';
+    if (ficha && ficha.Exercicios && ficha.Exercicios.length > 0) {
+      fichaLetra = ficha.Exercicios[0].ficha;
+      console.log("Ficha Letra: ", fichaLetra);
+      console.log("Ficha de exercícios: ", ficha.Exercicios[0].ficha);
+    } else if (ficha && ficha.ficha) {
+      fichaLetra = ficha.ficha;
+      console.log("Ficha Letra: ", ficha.ficha);
+    }
+
+    let tipoTreino: string = `Ficha de Treino - ${fichaLetra}`;
+    if (typeof ficha !== 'undefined') {
+      tipoTreino = `Diario - ${fichaLetra}`;
     }
 
     let inicioFinal = inicioTreino;
@@ -158,7 +168,9 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
         doc(firebaseBD, 'Academias', aluno.Academia, 'Alunos', `${aluno.email}`, `Diarios`, `Diario${ano}|${mes}|${dia}`),
         diarioSalvo
       );
-      if (typeof detalhamento !== 'undefined') {
+      console.log("Diário salvo com sucesso:", diarioSalvo);
+      console.log("Detalhamento:",detalhamento);
+      if (typeof detalhamento !== 'undefined' && detalhamento.Exercicios && detalhamento.Exercicios.length > 0) {
         detalhamento.Exercicios.forEach(element => {
           setDoc(
             doc(firebaseBD, 'Academias', aluno.Academia, 'Alunos', `${aluno.email}`, `Diarios`, `Diario${ano}|${mes}|${dia}`, 'Exercicio', element.Nome),
@@ -166,6 +178,13 @@ export default ({ options = [], tipoPSE, navigation, route }) => {
           );
         });
       }
+      if (!detalhamento || !detalhamento.Exercicios || detalhamento.Exercicios.length === 0) {
+        if (!(detalhamento && detalhamento.aviso && detalhamento.aviso.includes("sem detalhamento"))) {
+          Alert.alert("Detalhamento não preenchido", "Você não preencheu os exercícios detalhados do seu treino.");
+          return;
+        }
+      }
+
       Alert.alert('Resposta registrada com sucesso!', 'Seus dados de treino foram salvos com sucesso no banco de dados.');
       await AsyncStorage.multiRemove([
         '@pse_selected',

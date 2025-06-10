@@ -68,24 +68,30 @@ useEffect(() => {
   }
 
 
-  const handleLogin = async () => {
-    if (!conexao) return navigation.navigate('Modal sem conexão');
-  
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      await fetchAlunoData(); 
-    } catch (error) {
-      const errorMessages = {
-        'auth/invalid-email': 'Email inválido',
+const handleLogin = async () => {
+  if (!conexao) {
+    return navigation.navigate('Modal sem conexão');
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    await fetchAlunoData();
+  } catch (error) {
+    if (error.code === 'auth/network-request-failed') {
+      return navigation.navigate('Modal sem conexão');
+    }
+
+    const errorMessages = {
+      'auth/invalid-email': 'Email inválido',
       'auth/wrong-password': 'Senha incorreta',
       'auth/user-not-found': 'Usuário não encontrado',
       'auth/too-many-requests': 'Muitas tentativas. Tente novamente mais tarde.',
-      'auth/network-request-failed': 'Falha na conexão. Verifique sua internet.',
-      };
-  
-      Alert.alert('Erro', errorMessages[error.code] || 'Erro desconhecido');
-    }
-  };
+    };
+
+    Alert.alert('Erro', errorMessages[error.code] || 'Erro desconhecido');
+  }
+};
+
   const [emailRecuperacao, setEmailRecuperacao] = useState('')
 
   const mudarSenha = (email) => {
